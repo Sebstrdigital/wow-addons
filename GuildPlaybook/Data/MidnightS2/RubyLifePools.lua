@@ -1,0 +1,267 @@
+-- GENERATED FILE — do not edit by hand.
+-- Source: content/midnight-s2/ruby-life-pools.yaml   (regenerate with tools/generate.py)
+local _, ns = ...
+
+ns.RegisterDungeon({
+  ["dungeon"] = "Ruby Life Pools",
+  ["slug"] = "ruby-life-pools",
+  ["season"] = "midnight-s2",
+  ["patch"] = "12.1.0",
+  ["sourceVersion"] = "0.5",
+  ["instanceID"] = nil,
+  ["overview"] = {
+    ["interrupts"] = {
+      {
+        ["spell"] = "Ice Shield",
+        ["note"] = "Flashfrost Chillweaver — highest interrupt priority; kill the Chillweaver first.",
+      },
+      {
+        ["spell"] = "Tectonic Slam",
+        ["note"] = "Flashfrost Earthshaper — use a stun or other hard stop.",
+      },
+      {
+        ["spell"] = "Frigid Shard",
+        ["note"] = "Melidrussa Chillworn — kick as assigned.",
+      },
+      {
+        ["spell"] = "Cinderbolt",
+        ["note"] = "Primalist Cinderweaver — interrupt; purge or control Burning Ambition if casts become unsafe.",
+      },
+      {
+        ["spell"] = "Roaring Blaze",
+        ["note"] = "Kokia Blazehoof — kick; Firestorm add before Kokia.",
+      },
+      {
+        ["spell"] = "Shock Blast",
+        ["note"] = "Flame Channeler — interrupt first; do not overlap the assigned kick.",
+      },
+    },
+    ["killPriority"] = {
+      "Flashfrost Chillweaver — highest interrupt priority; kill the Chillweaver first among opening trash.",
+      "Whelps and Ice Bulwark before the boss (Melidrussa Chillworn).",
+      "Blazebound Firestorm add before Kokia.",
+      "Kyrakka whenever she is targetable; no routine boss kick on Erkhart.",
+    },
+    ["tank"] = {
+      ["damage"] = {
+        "Crushing Smash (Primal Juggernaut) — mitigate; face the mob away and sidestep Excavating Blast.",
+        "Steel Barrage (Defier Draghar) — use active mitigation for the full channel; bait Blazing Rush toward a wall.",
+        "Fire Maw (Flamegullet) — mitigate; face Flame Breath away and save resources for Molten Blood.",
+        "Thunder Jaw (Thunderhead) — mitigate and position so the knockback cannot throw you off.",
+        "Searing Blows (Kokia Blazehoof) — always cover; request an external or bleed removal if stacks become unsafe.",
+      },
+      ["pullWarnings"] = {
+        "Plan controlled pulls around eggs and patrols.",
+        "Face frontals away and preserve safe knockback lanes.",
+        "Do not combine several dangerous casts — call a hard stop for Tectonic Slam.",
+        "PTR route, count and final-trash package require live verification.",
+      },
+    },
+    ["healer"] = {
+      ["dispels"] = {
+        "Rolling Thunder (Thunderhead) — dispel one target early; heal the second before expiration. Stagger-dispel if retained on live.",
+      },
+      ["pressure"] = {
+        "Inferno (Blazebound Destroyer / Kokia Blazehoof) — prepare group healing for the hit and follow-up damage.",
+        "Molten Blood (Flamegullet) — prepare sustained group healing below 50%.",
+        "Lightning Storm (Tempest Channeler) — prepare group healing and encourage personals.",
+        "Frost Overload (Melidrussa Chillworn) — use a healing cooldown for Frost Overload or a dangerous Chillstorm overlap.",
+        "Inferno Spit (Kyrakka and Erkhart Stormvein) — top targets before expiration; prioritise marked players and anyone trapped by fire.",
+      },
+      ["pullWarnings"] = {
+        "Tank checks overlap group damage on Kokia.",
+        "Watch the tank and keep moving for Excavating Blast (Crushing Smash).",
+        "Help stop Tectonic Slam; prepare group healing if it completes.",
+        "PTR dispels and final-trash damage events require live verification.",
+      },
+    },
+    ["dps"] = {
+      ["purges"] = {
+        "Burning Ambition (Primalist Cinderweaver) — purge or control if casts become unsafe.",
+      },
+      ["defensives"] = {
+        "Use a personal for Chillstorm or Frost Overload (Melidrussa Chillworn).",
+        "Use a personal for Inferno, especially after a missed cast (Kokia Blazehoof).",
+        "Use a personal for Inferno Spit expiration or a bad overlap (Kyrakka and Erkhart Stormvein).",
+        "Use a personal for Rolling Thunder if needed (Thunderhead, trash).",
+      },
+    },
+    ["tip"] = "Version 0.5 Pre-Season Draft — confirm the live route, enemy forces, Dungeon Journal wording and launch hotfixes before relying on this guide. Live verification still needed: final timer, retained trash abilities, Frigid Shard and post-PTR tuning.",
+  },
+  ["bosses"] = {
+    {
+      ["name"] = "Melidrussa Chillworn",
+      ["encounterID"] = nil,
+      ["npcID"] = 188252,
+      ["displayID"] = 106891,
+      ["wipe"] = {
+        "Loose whelps or a blocked safe path during Chillstorm.",
+        "Players entering Chillstorm low, then colliding with Hailbombs.",
+        "Slow shield damage or Hailbombs spread across the arena.",
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          ["job"] = {
+            "Hold Melidrussa steady and preserve a clear Hailbomb lane.",
+            "Interrupt Frigid Shard on the current PTR.",
+          },
+          ["avoid"] = {
+            "Do not let Chillstorm pull you through Hailbombs.",
+            "Do not step on extra eggs before the encounter.",
+          },
+          ["defensive"] = {
+            "Cover whelp pickup and any missed Frigid Shard.",
+            "Keep mitigation rolling during shield phases.",
+          },
+          ["reminder"] = "Kick Frigid Shard. Gather whelps. Protect the floor.",
+        },
+        ["HEALER"] = {
+          ["job"] = {
+            "Prepare for Chillstorm, Hailburst and Frost Overload.",
+            "Keep the group stable before the two shield phases.",
+            "Top players before Chillstorm.",
+            "Recover the group quickly after Frost Overload.",
+          },
+          ["avoid"] = {
+            "Place Hailbomb with the group, then clear it.",
+            "Keep an escape route during Chillstorm.",
+          },
+          ["cooldowns"] = {
+            "Use a healing cooldown for Frost Overload or a dangerous Chillstorm overlap.",
+          },
+          ["reminder"] = "Top first. Never heal from beside an ice bomb.",
+        },
+        ["DPS"] = {
+          ["job"] = {
+            "Place Hailbombs together.",
+            "Swap to whelps and Ice Bulwark immediately.",
+            "Kick Frigid Shard as assigned.",
+            "Whelps and Ice Bulwark before the boss.",
+          },
+          ["avoid"] = {
+            "Do not cross Hailbombs to maintain uptime.",
+            "Move early with Chillstorm.",
+          },
+          ["defensive"] = {
+            "Use a personal for Chillstorm or Frost Overload.",
+          },
+          ["reminder"] = "Place ice together. Kick. Burn the shield.",
+        },
+      },
+    },
+    {
+      ["name"] = "Kokia Blazehoof",
+      ["encounterID"] = nil,
+      ["npcID"] = 189232,
+      ["displayID"] = 106851,
+      ["wipe"] = {
+        "Dying while the group swaps to the add or holding the boss in Burnout.",
+        "Falling behind on group and tank damage together.",
+        "Ignoring the add or detonating Boulder against nearby terrain.",
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          ["job"] = {
+            "Cover Searing Blows and its bleed.",
+            "Bring the Blazebound Firestorm close enough for safe cleave.",
+          },
+          ["avoid"] = {
+            "Sidestep Molten Boulder.",
+            "Leave the add before Burnout finishes.",
+          },
+          ["defensive"] = {
+            "Always cover Searing Blows.",
+            "Request an external or bleed removal if stacks become unsafe.",
+          },
+          ["reminder"] = "Defensive. Cleave. Move before Burnout.",
+        },
+        ["HEALER"] = {
+          ["job"] = {
+            "Prepare group healing for Inferno.",
+            "Track the tank during Searing Blows.",
+            "Stabilise the group after Inferno while the tank bleed continues.",
+          },
+          ["avoid"] = {
+            "Spawn circle, Molten Boulder, Burnout and Scorched Earth.",
+          },
+          ["cooldowns"] = {
+            "Use a healing cooldown if Inferno catches the group low.",
+          },
+          ["reminder"] = "Inferno is the check; Searing Blows is still happening.",
+        },
+        ["DPS"] = {
+          ["job"] = {
+            "Control Ritual of Blazebinding placement.",
+            "Swap instantly to the Blazebound Firestorm.",
+            "Kick Roaring Blaze.",
+            "Firestorm add before Kokia.",
+          },
+          ["avoid"] = {
+            "Leave before Burnout.",
+            "Do not stand in Boulder or permanent fire.",
+          },
+          ["defensive"] = {
+            "Use a personal for Inferno, especially after a missed cast.",
+          },
+          ["reminder"] = "Add first. Kick. Give Boulder a lane.",
+        },
+      },
+    },
+    {
+      ["name"] = "Kyrakka and Erkhart Stormvein",
+      ["encounterID"] = nil,
+      ["npcID"] = 190484,
+      ["displayID"] = 107137,
+      ["wipe"] = {
+        "Breath through the group or no safe route through fire.",
+        "Low players at expiration or standing in the strengthened breath.",
+        "Fire through the centre or greed inside breath.",
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          ["job"] = {
+            "Keep Kyrakka hittable whenever possible.",
+            "Face Roaring Firebreath away after she lands.",
+          },
+          ["avoid"] = {
+            "Do not let wind push you into fire or off the platform.",
+          },
+          ["defensive"] = {
+            "Cover heavy hits and dangerous Inferno Spit overlaps.",
+          },
+          ["reminder"] = "Protect the group from breath. Preserve the path.",
+        },
+        ["HEALER"] = {
+          ["job"] = {
+            "Top Inferno Spit targets before expiration.",
+            "Keep players healthy before winds and breath force movement.",
+            "Prioritise marked players and anyone trapped by fire.",
+          },
+          ["avoid"] = {
+            "Drop Inferno Spit away from safe paths.",
+            "Move early for Roaring Firebreath.",
+          },
+          ["cooldowns"] = {
+            "Cover overlapping expirations or restricted space.",
+          },
+          ["reminder"] = "Top marks. Spread fire safely. Move early.",
+        },
+        ["DPS"] = {
+          ["job"] = {
+            "Prioritise Kyrakka whenever she is targetable.",
+            "Place Inferno Spit at the edge without cutting off the group.",
+            "No routine boss kick; Kyrakka remains the damage priority.",
+          },
+          ["avoid"] = {
+            "Cancel the cast and move for Roaring Firebreath.",
+            "Adjust before Winds of Change moves fire.",
+          },
+          ["defensive"] = {
+            "Use a personal for Inferno Spit expiration or a bad overlap.",
+          },
+          ["reminder"] = "Kill Kyrakka. Edge the fire. Move.",
+        },
+      },
+    },
+  },
+})

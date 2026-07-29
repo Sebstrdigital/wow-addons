@@ -2,11 +2,19 @@
 ## Title: Guild Playbook
 ## Notes: Guild-curated Mythic+ tactics, filtered to your role.
 ## Author: Sebastian & guild
-## Version: 0.1.0
+## Version: 0.2.0
 ## SavedVariables: GuildPlaybookDB
 ## IconTexture: Interface\Icons\INV_Misc_Book_09
 ## AddonCompartmentFunc: GuildPlaybook_OnAddonCompartmentClick
 
 Core.lua
 Data\MidnightS1\MagistersTerrace.lua
+Data\MidnightS2\AltarOfFangs.lua
+Data\MidnightS2\DenOfNalorakk.lua
+Data\MidnightS2\KingsRest.lua
+Data\MidnightS2\MurderRow.lua
+Data\MidnightS2\RubyLifePools.lua
+Data\MidnightS2\TempleOfSethraliss.lua
+Data\MidnightS2\TheBlindingVale.lua
+Data\MidnightS2\VoidscarArena.lua
 UI.lua

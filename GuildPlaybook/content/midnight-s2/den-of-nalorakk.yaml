@@ -1,0 +1,168 @@
+# Guild Playbook content — Den of Nalorakk (Midnight Season 2)
+# Source: guild PDF playbooks (Tank/Healer/DPS, PTR Draft 0.9, patch 12.1 PTR — 27 July 2026)
+# Edit this file, then run tools/generate.py to regenerate the Lua data.
+
+dungeon: "Den of Nalorakk"
+slug: den-of-nalorakk
+season: midnight-s2
+patch: "12.1.0"
+sourceVersion: "0.9"
+instanceID: null   # fill via /gp ids
+
+overview:
+  interrupts:
+    - { spell: "Piercing Screech", note: "interrupt / stop" }
+  killPriority:
+    - "Piercing Screech"
+    - "Starvation Effigy"
+    - "The Winter Squall"
+    - "Volatile Totems"
+  tank:
+    damage:
+      - "Tank checks: empowered Hoardmonger, Frozen Tempest, Primal Echo and Overwhelming Onslaught."
+    pullWarnings:
+      - "Pull plan: do not combine unknown PTR packs or difficult patrols until live-tested."
+      - "Positioning: face large enemies away and preserve shelter during the winter gauntlet."
+      - "Control priority: Piercing Screech, Starvation Effigy and dangerous Heart of Rage packs."
+  healer:
+    dispels:
+      - "Dispel: Mother's Wrath is confirmed dispellable; current PTR removes all stacks."
+    pressure:
+      - "Healing checks: Hoardmonger roars, Frozen Tempest, Primal Echo and Fury of the War God."
+    pullWarnings:
+      - "Silence warning: Piercing Screech silences the party for 2 seconds."
+      - "Mana: avoid healing through Starvation Effigy; the group must kill it."
+  dps:
+    defensives:
+      - "Movement: dodge Poison Spear Volley and keep clean shelter routes in the winter gauntlet."
+      - "Personal defensives: boss roars, Frozen Tempest and difficult Fury sequences."
+  tip: "Mechanics beat uptime."
+
+bosses:
+  - name: "The Hoardmonger"
+    encounterID: null   # fill via /gp ids
+    npcID: 248710      # wowhead
+    displayID: 129344  # wowhead modelviewer
+    wipe:
+      - "Uncleared Rotten Mushrooms burst and apply Toxic Spores to the party."
+      - "Multiple spore stacks plus a roar can overwhelm the group."
+    roles:
+      TANK:
+        job:
+          - "Control which resource pile the boss reaches at 90%, 60% and 30%."
+          - "Face Earthshatter Slam and Bonespike Slam away."
+          - "Move early as mushrooms and spikes reduce space."
+        avoid:
+          - "Both frontal slams."
+          - "Bone spikes and unnecessary Toxic Spores stacks."
+        defensive:
+          - "Mitigate Colossal Roar."
+          - "Use stronger protection when Hearty Bellow is active."
+        reminder: "Control the pile → face slams away → keep the arena clear."
+      HEALER:
+        job:
+          - "Prepare for Colossal Roar."
+          - "Track Toxic Spores on mushroom-clearing players."
+          - "Keep the tank stable while the boss repositions."
+          - "Hearty Bellow adds an initial hit and follow-up group damage."
+          - "Stabilise one mushroom-clearing player at a time."
+        avoid:
+          - "Both frontals, bone spikes and clearing several mushrooms together."
+        cooldowns:
+          - "Use a healing cooldown when a later roar overlaps Toxic Spores or Hearty Bellow."
+        reminder: "Heal the roar → watch mushroom cleaners → limit spore stacks."
+      DPS:
+        job:
+          - "Destroy or safely trigger Rotten Mushrooms before they burst."
+          - "Maintain damage while the tank guides the boss to a resource pile."
+          - "Rotten Mushrooms are the priority mechanic; clear them before Putrid Burst."
+        avoid:
+          - "Earthshatter Slam, Bonespike Slam and bone spikes."
+          - "Running through multiple mushrooms."
+        defensive:
+          - "Use a personal for a roar overlapping Toxic Spores."
+        reminder: "Clear mushrooms safely → dodge slams → defensive the roar."
+
+  - name: "Sentinel of Winter"
+    encounterID: null   # fill via /gp ids
+    npcID: 261053      # wowhead
+    displayID: 129418  # wowhead modelviewer
+    wipe:
+      - "An unsoaked Rimeshatter causes party damage and a root."
+      - "Missing Rimeshatter or entering the storm low can collapse the party."
+    roles:
+      TANK:
+        job:
+          - "Keep the boss central so the party can reach the Frozen Tempest safe zone."
+          - "Group Fractured Shivercores and preserve useful Snowdrifts."
+        avoid:
+          - "Raging Squalls and Rimeshatter impact zones assigned to another player."
+        defensive:
+          - "Enter the 10-yard inner safe zone and mitigate Frozen Tempest."
+        reminder: "Centre the boss → preserve Snowdrifts → move inside."
+      HEALER:
+        job:
+          - "Pre-heal Frozen Tempest while moving into the safe zone."
+          - "Cover ramping Glacial Torment and Winter's Shroud pressure."
+          - "Stabilise players assigned to Rimeshatter."
+          - "Keep the party healthy before Frozen Tempest starts."
+        avoid:
+          - "Raging Squalls and becoming isolated before the storm."
+        cooldowns:
+          - "Use a healing cooldown during Frozen Tempest."
+        reminder: "Pre-heal → move inside → cover the Frost damage."
+      DPS:
+        job:
+          - "Swap to Fractured Shivercores."
+          - "Soak assigned Rimeshatter impacts."
+          - "Move inside the boss's 10-yard safe zone for Frozen Tempest."
+          - "Fractured Shivercores are the priority target; reduce Winter's Shroud pressure."
+        avoid:
+          - "Raging Squalls and unassigned Rimeshatter zones."
+        defensive:
+          - "Use a personal during Frozen Tempest or high Frost vulnerability."
+        reminder: "Kill cores → soak fragment → get inside."
+
+  - name: "Nalorakk"
+    encounterID: null   # fill via /gp ids
+    npcID: 258877      # wowhead
+    displayID: 125154  # wowhead modelviewer
+    wipe:
+      - "Echoes reaching Zul'jarra trigger group damage and a stacking damage-taken penalty."
+      - "Repeated failures to protect Zul'jarra create escalating party damage."
+      - "Poorly placed echoes repeat Echoing Maul and can make the arena unusable."
+    roles:
+      TANK:
+        job:
+          - "Stand in Zul'jarra's Defensive Stance coverage for Overwhelming Onslaught."
+          - "Keep Echoing Maul placements away from the centre."
+          - "Help assign separate echo-interception lanes during Fury of the War God."
+        avoid:
+          - "Stored Echoing Maul locations and unsafe Forceful Slam angles."
+        defensive:
+          - "Mitigate Overwhelming Onslaught and Forceful Slam."
+          - "Use a group defensive for difficult Fury sequences."
+        reminder: "Use Zul'jarra's cover → keep echoes outside → protect her."
+      HEALER:
+        job:
+          - "Keep echo interceptors healthy during Fury of the War God."
+          - "Prepare for Overwhelming Onslaught as a group mechanic."
+          - "Track the arena before each Echoing Maul."
+          - "Recover the party quickly if an echo reaches Zul'jarra."
+          - "Current PTR: Fury interceptors no longer receive Spectral Slash from the intercepted echo."
+        avoid:
+          - "Stored Echoing Maul locations and duplicate interceptions."
+        cooldowns:
+          - "Use a healing cooldown during Fury; save recovery for a failed interception."
+        reminder: "Heal interceptors → cover Fury → stay away from echoes."
+      DPS:
+        job:
+          - "Place Echoing Maul at an outside edge."
+          - "Intercept one assigned echo during Fury of the War God."
+          - "Return without crossing stored echoes."
+          - "No boss interrupt priority confirmed; mechanic execution is the priority."
+        avoid:
+          - "Overlapping Maul markers and standing near stored echoes when they repeat."
+        defensive:
+          - "Use a personal before a dangerous Fury or Onslaught sequence."
+        reminder: "Drop outside → intercept one lane → avoid stored echoes."

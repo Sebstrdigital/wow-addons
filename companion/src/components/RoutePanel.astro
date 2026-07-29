@@ -303,6 +303,13 @@ const { payload } = Astro.props;
       </table>`;
   }
 
+  function clearRender() {
+    view.innerHTML = "";
+    view.hidden = false;
+    tabsEl.hidden = true;
+    mapWrap.hidden = true;
+  }
+
   async function importString(str, { save } = { save: true }) {
     errorEl.textContent = "";
     if (!str.trim()) return;
@@ -312,17 +319,20 @@ const { payload } = Astro.props;
       if (isRegistry) {
         const hit = rawData.dungeons?.[route.dungeonIndex];
         if (!hit) {
+          clearRender();
           errorEl.textContent = `No map data for that dungeon yet (MDT dungeon index ${route.dungeonIndex}).`;
           return;
         }
         mdtData = hit;
       } else if (mdtData?.dungeonIndex && route.dungeonIndex && route.dungeonIndex !== mdtData.dungeonIndex) {
+        clearRender();
         errorEl.textContent = `That route is for another dungeon (MDT index ${route.dungeonIndex}, expected ${mdtData.dungeonIndex}).`;
         return;
       }
       showRoute(route);
       if (save) localStorage.setItem(storageKey, str.trim());
     } catch (err) {
+      clearRender();
       errorEl.textContent = `Could not decode: ${err.message}`;
     }
   }
@@ -331,11 +341,8 @@ const { payload } = Astro.props;
   document.getElementById("route-clear").addEventListener("click", () => {
     localStorage.removeItem(storageKey);
     input.value = "";
-    view.innerHTML = "";
-    view.hidden = false;
     errorEl.textContent = "";
-    tabsEl.hidden = true;
-    mapWrap.hidden = true;
+    clearRender();
   });
 
   const savedRoute = localStorage.getItem(storageKey);

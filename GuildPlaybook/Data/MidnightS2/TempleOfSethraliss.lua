@@ -1,0 +1,319 @@
+-- GENERATED FILE — do not edit by hand.
+-- Source: content/midnight-s2/temple-of-sethraliss.yaml   (regenerate with tools/generate.py)
+local _, ns = ...
+
+ns.RegisterDungeon({
+  ["dungeon"] = "Temple of Sethraliss",
+  ["slug"] = "temple-of-sethraliss",
+  ["season"] = "midnight-s2",
+  ["patch"] = "12.1.0",
+  ["sourceVersion"] = "1.6",
+  ["instanceID"] = nil,
+  ["overview"] = {
+    ["interrupts"] = {
+      {
+        ["spell"] = "Charged Dust Devil — Healing Surge",
+        ["note"] = "interrupt first",
+      },
+      {
+        ["spell"] = "Agitated Nimbus — Accumulate Charge",
+        ["note"] = "interrupt first; assign kicks, purge the buff if it lands",
+      },
+      {
+        ["spell"] = "Shrouded Fang — Cheap Shot",
+        ["note"] = "control the reworked ambush window",
+      },
+      {
+        ["spell"] = "Imbued Stormcaller — Shock",
+        ["note"] = "interrupt after Nimbus coverage",
+      },
+      {
+        ["spell"] = "Twisted Hexxer — Flame Shock",
+        ["note"] = "interrupt / priority",
+      },
+    },
+    ["killPriority"] = {
+      "Dangerous casters",
+      "dangerous support enemies",
+      "Merektha's Burrow adds",
+      "Essence Defilers",
+      "active Tormentors",
+    },
+    ["tank"] = {
+      ["damage"] = {
+        "Adderis/Aspix — Overload.",
+        "Merektha — Serpentstorm and add pressure.",
+        "Galvazzt — Galvanized vulnerability or Consume Charge.",
+        "Corrupted Guardian — Tainted Strike.",
+      },
+      ["pullWarnings"] = {
+        "Do not combine summon waves or charged Nimbuses without cooldowns.",
+        "Anchor the pack away from patrols and charge lines.",
+        "Do not combine multiple summon waves without mitigation.",
+        "Keep charge lines and frontals clear of the party.",
+        "Dutiful Tamer — Swarming Krolusks: group summons for cleave.",
+        "Barbed Krolusk — Serrated Charge: keep charge lines away from allies.",
+      },
+    },
+    ["healer"] = {
+      ["dispels"] = {
+        "Confirm Poison removals live.",
+        "Purge Agitated Nimbus — Accumulate Charge.",
+        "Confirm the final Season 2 Poison list after launch.",
+      },
+      ["pressure"] = {
+        "Gale Force > soak.",
+        "Serpentstorm.",
+        "Lightning Spires.",
+        "Corruption Burst.",
+        "Barbed Krolusk — Serrated Charge: stabilise the target's damage-over-time effect.",
+        "Dutiful Tamer — Swarming Krolusks: prepare for summon-wave damage.",
+      },
+      ["pullWarnings"] = {
+        "Do not enter a large caster pull without interrupts and a healing cooldown.",
+        "Prepare for Sandswept Hunter — Arrow Barrage and Stonefist tank pressure.",
+        "Keep movement-sensitive targets stable before dispelling.",
+      },
+    },
+    ["dps"] = {
+      ["purges"] = {
+        "Agitated Nimbus — Accumulate Charge: purge the buff if it lands.",
+        "Break A Knot of Snakes.",
+        "Protect the Eye carrier.",
+        "Dutiful Tamer — Swarming Krolusks: kill summons quickly.",
+        "Use stops to control overlapping summon waves.",
+      },
+      ["defensives"] = {
+        "Use a personal for Arrow Barrage.",
+        "Use a personal for Serpentstorm.",
+        "Use a personal for beams (Galvazzt).",
+        "Use a personal for Corruption Burst.",
+        "Barbed Krolusk — Serrated Charge: avoid the line.",
+      },
+    },
+    ["tip"] = "Tank: Set the fight location first; use short, predictable movement. Healer: Anchor cooldowns to mechanics, not falling health bars. DPS: One correct interrupt or soak is worth more than one extra global.",
+  },
+  ["bosses"] = {
+    {
+      ["name"] = "Adderis and Aspix",
+      ["encounterID"] = nil,
+      ["npcID"] = 133379,
+      ["displayID"] = 83550,
+      ["wipe"] = {
+        "Bad circle placement blocks Thunder and Lightning.",
+        "Silence zones block the soak.",
+        "A silenced healer or low soak target dies.",
+        "A silence zone stops recovery healing.",
+        "Bad circles wall off the soak.",
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          ["job"] = {
+            "Keep a clean Gale Force route to the soak.",
+            "Hold a clean push-to-soak route.",
+          },
+          ["avoid"] = {
+            "Tempest Winds silence zones.",
+          },
+          ["defensive"] = {
+            "Mitigate Overload; save mobility for the push.",
+          },
+          ["reminder"] = "Edge circles > same push > soak > move out.",
+        },
+        ["HEALER"] = {
+          ["job"] = {
+            "Top the group before Gale Force.",
+            "Cover the soak and its follow-up explosion.",
+          },
+          ["avoid"] = {
+            "Tempest Winds; it silences for 8 seconds.",
+          },
+          ["cooldowns"] = {
+            "Use one for the push-to-soak overlap.",
+          },
+          ["reminder"] = "Top > move together > heal soak > spread.",
+        },
+        ["DPS"] = {
+          ["job"] = {
+            "Attack the vulnerable boss; place circles at the edge.",
+            "No boss kick; movement and soak are priority.",
+          },
+          ["avoid"] = {
+            "Silence zones and over-spreading.",
+          },
+          ["defensive"] = {
+            "Use a personal for the push-to-soak sequence.",
+          },
+          ["reminder"] = "Edge circles > same push > soak > out.",
+        },
+      },
+    },
+    {
+      ["name"] = "Merektha",
+      ["encounterID"] = nil,
+      ["npcID"] = 133384,
+      ["displayID"] = 88585,
+      ["wipe"] = {
+        "Slow add kills extend Burrow.",
+        "Failed dodges plus prolonged Burrow overwhelm the group.",
+        "Prolonged Burrow overwhelms the group.",
+        "Missed casts or living adds extend Burrow.",
+        "Missed casts prolong Burrow.",
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          ["job"] = {
+            "Hold Merektha stable; gather Burrow adds tightly.",
+            "Stack Burrow adds away from her path.",
+          },
+          ["avoid"] = {
+            "Thunder Spit, Serpentstorm and the marked Burrow path.",
+          },
+          ["defensive"] = {
+            "Cover Serpentstorm and add pressure.",
+          },
+          ["reminder"] = "Stable boss > tight adds > fast Burrow.",
+        },
+        ["HEALER"] = {
+          ["job"] = {
+            "Top the group before Serpentstorm.",
+            "Stabilise Knot targets and Burrow add damage.",
+            "Move in Burrow.",
+          },
+          ["avoid"] = {
+            "Thunder Spit trails, swirlies and the Burrow path.",
+          },
+          ["cooldowns"] = {
+            "Use group healing for Serpentstorm.",
+          },
+          ["reminder"] = "Top > defensive > dodge > stabilise adds.",
+        },
+        ["DPS"] = {
+          ["job"] = {
+            "Stack Knot targets; break the Knot; burn Burrow adds.",
+            "Storm Serpent — Storm Catalyst (interrupt/priority).",
+          },
+          ["avoid"] = {
+            "Thunder Spit, swirlies and the Burrow path.",
+          },
+          ["defensive"] = {
+            "Use a personal for Serpentstorm.",
+          },
+          ["reminder"] = "Stack Knot > CC > defensive > adds.",
+        },
+      },
+    },
+    {
+      ["name"] = "Galvazzt",
+      ["encounterID"] = nil,
+      ["npcID"] = 133389,
+      ["displayID"] = 81654,
+      ["wipe"] = {
+        "An uncovered beam charges Galvazzt.",
+        "A soaker dies or leaves early.",
+        "A beam soaker dies or leaves early.",
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          ["job"] = {
+            "Start near the edge; preserve three beam lanes.",
+          },
+          ["avoid"] = {
+            "Induction and unplanned beam soaking.",
+          },
+          ["defensive"] = {
+            "Mitigate Galvanized vulnerability or Consume Charge.",
+            "Do not beam-soak without a cooldown.",
+          },
+          ["reminder"] = "Edge > short move > clear beams.",
+        },
+        ["HEALER"] = {
+          ["job"] = {
+            "Track all three Lightning Spire soakers.",
+            "Keep each soaker stable for the full channel.",
+          },
+          ["avoid"] = {
+            "Induction and unassigned beams.",
+          },
+          ["cooldowns"] = {
+            "Rotate across fast Spire waves.",
+          },
+          ["reminder"] = "Three beams, three healthy soakers.",
+        },
+        ["DPS"] = {
+          ["job"] = {
+            "Enter the assigned beam immediately and hold it.",
+            "Claim a beam and hold it to the end.",
+            "No boss kick; beam coverage is priority.",
+          },
+          ["avoid"] = {
+            "Induction and crossing another lane late.",
+          },
+          ["defensive"] = {
+            "Use a personal while soaking.",
+          },
+          ["reminder"] = "Your beam is more important than your cast.",
+        },
+      },
+    },
+    {
+      ["name"] = "Avatar of Sethraliss",
+      ["encounterID"] = nil,
+      ["npcID"] = 133392,
+      ["displayID"] = 83203,
+      ["wipe"] = {
+        "Defilers block healing; uncleansed Lifeforce bursts.",
+        "Uncleansed Lifeforce bursts repeatedly.",
+        "Shadowlash stacks or Defilers suppress healing.",
+        "Each remaining Lifeforce stack causes a Burst.",
+        "Each remaining orb stack causes a Burst.",
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          ["job"] = {
+            "Protect the Eye carrier; control knockbacks (Eyes gauntlet — live cast names require verification).",
+            "Pick up Guardians; control Tainted Strike stacks.",
+            "Essence Defiler — Defiling Taint (priority).",
+          },
+          ["avoid"] = {
+            "Agony impacts and moving Lifeforce away.",
+          },
+          ["defensive"] = {
+            "Use a major for stacked Guardian damage.",
+          },
+          ["reminder"] = "Protect the Eye carrier > pick up Guardians > control Tainted Strike > major for stacked Guardian damage.",
+        },
+        ["HEALER"] = {
+          ["job"] = {
+            "Keep the Eye carrier stable through projectiles (Eyes gauntlet — live cast names require verification).",
+            "Heal the Avatar only after Defilers die.",
+            "Use cleansed Lifeforce and Siphon the Weak to accelerate progress.",
+          },
+          ["avoid"] = {
+            "Tormentor fixates, Hex Muck and Agony.",
+          },
+          ["cooldowns"] = {
+            "Commit throughput only when Defiling Taint is gone.",
+          },
+          ["reminder"] = "Defilers dead > avoid Tormentors > heal Avatar.",
+        },
+        ["DPS"] = {
+          ["job"] = {
+            "Protect the carrier and stop Eye recovery (Eyes gauntlet — live cast names require verification).",
+            "Kill Defilers; push Tormentors below 50%.",
+            "Twisted Hexxer — Flame Shock (interrupt priority).",
+            "Cleanse Lifeforce only on assignment.",
+            "Control Conscripts and Orb Guardians.",
+          },
+          ["avoid"] = {
+            "Hex Muck, Agony and unassigned Lifeforce contact.",
+          },
+          ["defensive"] = {
+            "Use a personal for Corruption Burst.",
+          },
+          ["reminder"] = "Kick > Defilers > cleanse > Tormentors.",
+        },
+      },
+    },
+  },
+})

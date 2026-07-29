@@ -1,0 +1,223 @@
+# Guild Playbook content — Murder Row (Midnight Season 2)
+# Source: guild PDF playbooks (Tank/Healer/DPS, Draft 0.9, patch 12.1.0)
+# Edit this file, then run tools/generate.py to regenerate the Lua data.
+
+dungeon: "Murder Row"
+slug: murder-row
+season: midnight-s2
+patch: "12.1.0"
+sourceVersion: "0.9"
+instanceID: null   # capture with /gp ids
+
+overview:
+  interrupts:
+    - { spell: "Mirror Image — Felstorm", note: "two interrupts per image on Mythic/Mythic+" }
+    - { spell: "Lithiel Cinderfury — Chaos Bolt", note: "interrupt; adds before boss" }
+  killPriority:
+    - "Nibbles"
+    - "Mirror Images"
+    - "Lithiel's summoned demons"
+  tank:
+    damage:
+      - "Chaos Barrage"
+      - "Envenom"
+      - "Legion Strike"
+      - "Vilefiend pressure"
+      - "Felmaster Lucsei — Blade Dance: use mitigation and keep Lucsei stable."
+      - "Defiled Golem — Defiled Slam: mitigate the heavy hit."
+    pullWarnings:
+      - "Do not combine uncertain PTR casters without a stop plan."
+      - "Corrupted Warlock — Curse of Doom: hold the pack still for the live split-damage visual."
+      - "Corrupted Warlock — Dark Pact: keep control while the shield is removed."
+  healer:
+    dispels:
+      - "Corrupted Warlock — Dark Pact: call the shield; purge only if your spec can."
+    pressure:
+      - "Destabilized"
+      - "Killing Spree"
+      - "Demonic Rage"
+      - "post-gateway Fire damage"
+      - "Felmaster Lucsei — Blade Dance: pre-heal the group hit and damage-over-time effect."
+      - "Corrupted Warlock — Curse of Doom: prepare for split damage; follow the live stack visual."
+      - "Defiled Golem — Defiled Slam: prepare a direct tank heal."
+    pullWarnings:
+      - "Prepare a response for Felmaster Lucsei — Blade Dance."
+  dps:
+    purges:
+      - "Corrupted Warlock — Dark Pact: purge or break the shield; live-verify its dispel type."
+    defensives:
+      - "Felmaster Lucsei — Blade Dance: prioritise Lucsei and use a personal defensive."
+      - "Corrupted Warlock — Curse of Doom: follow the live split visual; do not guess the stack count."
+      - "Defiled Golem — Defiled Slam: stop if the live build allows it; otherwise defensive."
+      - "Use personals for Killing Spree, Demonic Rage and add-heavy overlaps."
+  tip: "Mechanic execution is worth more than boss uptime."
+
+bosses:
+  - name: "Kystia Manaheart"
+    encounterID: null   # fill via /gp ids
+    npcID: 252458      # wowhead
+    displayID: 124578  # wowhead modelviewer
+    wipe:
+      - "Free-casting Mirror Images overlap Destabilized."
+      - "Felstorm overlaps Destabilized."
+      - "Slow swaps allow several Felstorms together."
+    roles:
+      TANK:
+        job:
+          - "Tank Kystia away from Nibbles."
+          - "Push Nibbles below 20%."
+          - "Kick Mirror Image — Felstorm."
+        avoid:
+          - "Fel Nova and Nibbles' Fel Spray."
+        defensive:
+          - "Mitigate Chaos Barrage."
+        reminder: "Nibbles 20% → kick images twice → burst Kystia."
+      HEALER:
+        job:
+          - "Track Corroding Spittle."
+          - "Pre-heal Destabilized."
+          - "Help stop Mirror Image — Felstorm."
+          - "Heal repeated group damage during the 20-second Destabilized window."
+        avoid:
+          - "Fel Nova and Nibbles' Fel Spray."
+        cooldowns:
+          - "Use a healing cooldown if an image remains active."
+        reminder: "Pre-heal Destabilized; images cannot free-cast."
+      DPS:
+        job:
+          - "Push Nibbles below 20%, swap to images, then burst Kystia."
+          - "Mirror Image — Felstorm: two interrupts per image on Mythic/Mythic+."
+        avoid:
+          - "Fel Nova and Fel Spray."
+          - "Melee save mobility."
+          - "Ranged own far kicks."
+        defensive:
+          - "Personal during Destabilized if images remain."
+        reminder: "Nibbles 20% → kick images twice → burst boss."
+
+  - name: "Zaen Bladesorrow"
+    encounterID: null
+    npcID: 234649      # wowhead
+    displayID: 124592  # wowhead modelviewer
+    wipe:
+      - "No cover at 100 energy causes heavy shots and a long bleed."
+      - "Missing cover applies heavy damage and a long bleed."
+      - "Destroying all safe freight before 100 energy."
+    roles:
+      TANK:
+        job:
+          - "Keep Zaen near safe Forbidden Freight."
+          - "Call Envenom and Heartstop Poison."
+        avoid:
+          - "Hide for Murder in a Row at 100 energy."
+          - "Keep Fire Bomb away from planned cover."
+        defensive:
+          - "Major defensive for Envenom while maximum health is reduced."
+        reminder: "Preserve one box → defensive on Envenom → hide."
+      HEALER:
+        job:
+          - "Track Envenom and Heartstop Poison."
+          - "Reach cover early."
+          - "Protect the tank; stabilise the group after Killing Spree."
+        avoid:
+          - "Same-Day Delivery, Fire Bomb and exploding freight."
+        cooldowns:
+          - "Group cooldown for Killing Spree; external for Envenom."
+        reminder: "Cover first → heal Spree → protect tank."
+      DPS:
+        job:
+          - "Pre-position by cover and place Fire Bomb away from freight still needed."
+          - "No boss kick priority; execute cover and bomb placement."
+        avoid:
+          - "Hide for Murder in a Row."
+          - "Melee leave early."
+          - "Ranged place bombs wide."
+        defensive:
+          - "Personal for Killing Spree or a late cover move."
+        reminder: "Bomb away → hide at 100 → reconnect."
+
+  - name: "Xathuux the Annihilator"
+    encounterID: null
+    npcID: 234647      # wowhead
+    displayID: 140268  # wowhead modelviewer
+    wipe:
+      - "Legion Strike hits the group and applies 80% healing reduction."
+      - "Several players take Strike and become difficult to heal."
+      - "A Strike clip applies 80% healing reduction for 12 seconds."
+    roles:
+      TANK:
+        job:
+          - "Face Legion Strike away."
+          - "Edge-kite Demonic Rage."
+          - "Burning Steps last 120 seconds on PTR."
+        avoid:
+          - "Axe Toss, persistent axe zones and pointing Legion Strike at allies."
+        defensive:
+          - "Mitigate Legion Strike."
+          - "Major defensive for Rage's faster melees."
+        reminder: "Front away → edge-kite Rage → preserve room."
+      HEALER:
+        job:
+          - "Top the tank before Legion Strike."
+          - "Prepare for Demonic Rage."
+          - "Heal while moving around Burning Steps."
+        avoid:
+          - "Axe Toss, persistent axes and the boss front."
+        cooldowns:
+          - "External before Legion Strike."
+          - "Group cooldown for Rage."
+        reminder: "External before Strike → cooldown for Rage."
+      DPS:
+        job:
+          - "Stay behind, follow the edge-kite and burst during Rage's 30% damage-taken window."
+          - "No boss interrupt; prioritise safe Rage uptime."
+        avoid:
+          - "Axe Toss, Burning Steps and Legion Strike."
+        defensive:
+          - "Personal during Demonic Rage."
+        reminder: "Behind boss → dodge axe → burst Rage."
+
+  - name: "Lithiel Cinderfury"
+    encounterID: null
+    npcID: 234763      # wowhead
+    displayID: 124577  # wowhead modelviewer
+    wipe:
+      - "Missing the gateway; surviving demons gain 100% haste."
+      - "Missed gateway or empowered demons create lethal pressure."
+      - "Boss tunnelling leaves demons alive to gain 100% haste."
+    roles:
+      TANK:
+        job:
+          - "Pick up demons."
+          - "Help kick Chaos Bolt."
+          - "Kill adds before Malefic Wave."
+        avoid:
+          - "Spread 6+ yards for Fingers."
+          - "Use the gateway."
+          - "Keep Infernal aura away."
+        defensive:
+          - "Cover Vilefiend and stacked add pressure."
+        reminder: "Adds first → kick Bolt → click gateway."
+      HEALER:
+        job:
+          - "Pre-position by the gateway."
+          - "Track tank damage during add pressure."
+          - "Top before crossing; heal lingering Fire damage after."
+        avoid:
+          - "Spread 6+ yards."
+          - "Avoid Infernal aura."
+          - "Use the gateway."
+        cooldowns:
+          - "Cooldown if demons survive into Malefic Wave."
+        reminder: "Top → spread → gateway → recover."
+      DPS:
+        job:
+          - "Kill Imps, Vilefiend and Infernal before the wave."
+          - "Pre-position for gateway."
+          - "Lithiel Cinderfury — Chaos Bolt: interrupt. Adds before boss."
+        avoid:
+          - "Spread 6+ yards and use the gateway."
+          - "Melee avoid Infernal aura."
+        defensive:
+          - "Personal during add-heavy overlaps."
+        reminder: "Kick Bolt → kill demons → click gateway."
