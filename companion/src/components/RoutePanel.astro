@@ -83,9 +83,11 @@ const { payload } = Astro.props;
   // --- MDT route import ----------------------------------------------------
   import { decodeMdtString, presetToRoute } from "../lib/mdt-decode.js";
 
-  const mdtData = JSON.parse(document.getElementById("mdt-data").textContent || "null");
+  const rawData = JSON.parse(document.getElementById("mdt-data").textContent || "null");
+  const isRegistry = !!rawData?.registry;   // universal panel: resolve dungeon from the string
+  let mdtData = isRegistry ? null : rawData;
   const slug = location.pathname.replace(/\/+$/, "").split("/").pop();
-  const storageKey = `gp-route-${slug}`;
+  const storageKey = isRegistry ? "gp-route-universal" : `gp-route-${slug}`;
   const input = document.getElementById("route-input");
   const errorEl = document.getElementById("route-error");
   const view = document.getElementById("route-view");
@@ -294,7 +296,7 @@ const { payload } = Astro.props;
       </tr>`;
     });
     view.innerHTML = `
-      <div class="route-title">${route.name}</div>
+      <div class="route-title">${route.name}${mdtData?.name ? ` <span class="dim" style="font-weight:400">— ${mdtData.name}</span>` : ""}</div>
       <table class="pulls">
         <thead><tr><th>Pull</th><th>Enemies</th><th>Forces</th><th>Total</th></tr></thead>
         <tbody>${rows.join("")}</tbody>
@@ -307,7 +309,14 @@ const { payload } = Astro.props;
     try {
       const preset = await decodeMdtString(str);
       const route = presetToRoute(preset);
-      if (mdtData?.dungeonIndex && route.dungeonIndex && route.dungeonIndex !== mdtData.dungeonIndex) {
+      if (isRegistry) {
+        const hit = rawData.dungeons?.[route.dungeonIndex];
+        if (!hit) {
+          errorEl.textContent = `No map data for that dungeon yet (MDT dungeon index ${route.dungeonIndex}).`;
+          return;
+        }
+        mdtData = hit;
+      } else if (mdtData?.dungeonIndex && route.dungeonIndex && route.dungeonIndex !== mdtData.dungeonIndex) {
         errorEl.textContent = `That route is for another dungeon (MDT index ${route.dungeonIndex}, expected ${mdtData.dungeonIndex}).`;
         return;
       }
