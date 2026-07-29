@@ -23,10 +23,15 @@ local function jstr(s) return '"' .. tostring(s):gsub('\\', '\\\\'):gsub('"', '\
 local out = { '{ "totalCount": ' .. tostring(total.normal or 0) .. ', "enemies": [' }
 local rows = {}
 for i, e in ipairs(enemies) do
+  local clones = {}
+  for ci, c in ipairs(e.clones or {}) do
+    clones[#clones + 1] = string.format('{ "i": %d, "x": %.2f, "y": %.2f, "sublevel": %d }',
+      ci, c.x or 0, c.y or 0, c.sublevel or 1)
+  end
   rows[#rows + 1] = string.format(
-    '  { "index": %d, "id": %s, "name": %s, "count": %s, "isBoss": %s, "clones": %d }',
+    '  { "index": %d, "id": %s, "name": %s, "count": %s, "isBoss": %s, "scale": %s, "positions": [%s] }',
     i, tostring(e.id or 0), jstr(e.name or "?"), tostring(e.count or 0),
-    tostring(e.isBoss == true), #(e.clones or {}))
+    tostring(e.isBoss == true), tostring(e.scale or 1), table.concat(clones, ", "))
 end
 out[#out + 1] = table.concat(rows, ",\n")
 out[#out + 1] = '] }'
