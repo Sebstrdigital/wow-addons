@@ -2,7 +2,7 @@
 ## Title: Stand as One's Playbook
 ## Notes: Guild-curated Mythic+ tactics, filtered to your role.
 ## Author: Sebastian & guild
-## Version: 0.3.0
+## Version: 0.3.2
 ## SavedVariables: GuildPlaybookDB
 ## IconTexture: Interface\Icons\INV_Misc_Book_09
 ## AddonCompartmentFunc: GuildPlaybook_OnAddonCompartmentClick
