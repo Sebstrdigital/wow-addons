@@ -51,7 +51,10 @@ def validate(doc, path):
 
 
 def lua_str(s):
-    s = str(s).replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    # WoW's default fonts have no glyph for "→" (renders as a box) — keep
+    # arrows in the YAML for readability, ship ">" in-game.
+    s = str(s).replace("→", ">")
+    s = s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
     return f'"{s}"'
 
 

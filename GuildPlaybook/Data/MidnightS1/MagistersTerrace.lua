@@ -89,8 +89,8 @@ ns.RegisterDungeon({
     {
       ["name"] = "Arcanotron Custos",
       ["encounterID"] = nil,
-      ["npcID"] = nil,
-      ["displayID"] = nil,
+      ["npcID"] = 231861,
+      ["displayID"] = 131334,
       ["wipe"] = {
         "An Energy Orb reaching the boss damages the group and empowers it.",
         "Poor puddle placement can leave the group without safe space.",
@@ -114,7 +114,7 @@ ns.RegisterDungeon({
             "Use another defensive if Ethereal Shackles overlaps with group damage.",
             "Consider a defensive when soaking multiple Energy Orbs.",
           },
-          ["reminder"] = "Edge puddles → defensive for Slam → stop the orbs.",
+          ["reminder"] = "Edge puddles > defensive for Slam > stop the orbs.",
         },
         ["HEALER"] = {
           ["job"] = {
@@ -130,7 +130,7 @@ ns.RegisterDungeon({
             "Use a healing cooldown if Shackles overlaps Arcane Expulsion.",
             "Prepare extra healing during Refueling Protocol orb soaks.",
           },
-          ["reminder"] = "Dispel Shackles → top before Expulsion → watch orb stacks.",
+          ["reminder"] = "Dispel Shackles > top before Expulsion > watch orb stacks.",
         },
         ["DPS"] = {
           ["job"] = {
@@ -146,15 +146,15 @@ ns.RegisterDungeon({
             "Use a personal if Shackles overlaps Arcane Expulsion.",
             "Use a defensive when soaking multiple orbs.",
           },
-          ["reminder"] = "Edge puddles → soak Orbs → burn during Refueling.",
+          ["reminder"] = "Edge puddles > soak Orbs > burn during Refueling.",
         },
       },
     },
     {
       ["name"] = "Seranel Sunlash",
       ["encounterID"] = nil,
-      ["npcID"] = nil,
-      ["displayID"] = nil,
+      ["npcID"] = 231863,
+      ["displayID"] = 127739,
       ["wipe"] = {
         "Standing outside the Suppression Zone when the silence cast finishes causes heavy damage and an eight-second pacify.",
         "Clearing two Runic Marks together can stack group damage.",
@@ -177,7 +177,7 @@ ns.RegisterDungeon({
             "Use a major defensive if Hastening Ward is not purged.",
             "Use a defensive when clearing Runic Mark, especially if you clear second.",
           },
-          ["reminder"] = "Centre the zone → purge Ward → enter for Silence.",
+          ["reminder"] = "Centre the zone > purge Ward > enter for Silence.",
         },
         ["HEALER"] = {
           ["job"] = {
@@ -193,7 +193,7 @@ ns.RegisterDungeon({
             "Use externals or focused healing on the second mark target.",
             "Prepare a cooldown if Hastening Ward is not purged.",
           },
-          ["reminder"] = "Heal marks → stagger removals → enter the zone for Silence.",
+          ["reminder"] = "Heal marks > stagger removals > enter the zone for Silence.",
         },
         ["DPS"] = {
           ["job"] = {
@@ -208,15 +208,15 @@ ns.RegisterDungeon({
           ["defensive"] = {
             "Use a personal when clearing Runic Mark, especially if clearing second.",
           },
-          ["reminder"] = "Purge Ward → clear marks separately → enter for Silence.",
+          ["reminder"] = "Purge Ward > clear marks separately > enter for Silence.",
         },
       },
     },
     {
       ["name"] = "Gemellus",
       ["encounterID"] = nil,
-      ["npcID"] = nil,
-      ["displayID"] = nil,
+      ["npcID"] = 231864,
+      ["displayID"] = 131317,
       ["wipe"] = {
         "Reaching a copy during Astral Grasp causes extreme damage.",
         "Failing Neural Link leaves the boss protected and prolongs the encounter.",
@@ -239,7 +239,7 @@ ns.RegisterDungeon({
             "Use a defensive if movement tools are unavailable during Astral Grasp.",
             "Use a defensive if Cosmic Sting overlaps with another mechanic.",
           },
-          ["reminder"] = "Cleave copies → touch your linked copy → run from the pull.",
+          ["reminder"] = "Cleave copies > touch your linked copy > run from the pull.",
         },
         ["HEALER"] = {
           ["job"] = {
@@ -255,7 +255,7 @@ ns.RegisterDungeon({
             "Use spot healing on low-mobility players during Astral Grasp.",
             "Use a defensive if Cosmic Sting overlaps the pull.",
           },
-          ["reminder"] = "Heal Sting → keep escape lanes clear → run from the pull.",
+          ["reminder"] = "Heal Sting > keep escape lanes clear > run from the pull.",
         },
         ["DPS"] = {
           ["job"] = {
@@ -270,15 +270,15 @@ ns.RegisterDungeon({
           ["defensive"] = {
             "Use a personal if Cosmic Sting overlaps Astral Grasp.",
           },
-          ["reminder"] = "Cleave copies → resolve your link → run from Grasp.",
+          ["reminder"] = "Cleave copies > resolve your link > run from Grasp.",
         },
       },
     },
     {
       ["name"] = "Degentrius",
       ["encounterID"] = nil,
-      ["npcID"] = nil,
-      ["displayID"] = nil,
+      ["npcID"] = 231865,
+      ["displayID"] = 132031,
       ["wipe"] = {
         "Missing an Unstable Void Essence impact damages the whole group; repeated misses can wipe the party.",
         "Null Bomb must be triggered before it expires.",
@@ -304,7 +304,7 @@ ns.RegisterDungeon({
             "Use a defensive if assigned a long Devouring Entropy.",
             "Use a defensive if soaking while another damage effect is active.",
           },
-          ["reminder"] = "Frontal away → leave melee for dispel → catch the bouncing orb.",
+          ["reminder"] = "Frontal away > leave melee for dispel > catch the bouncing orb.",
         },
         ["HEALER"] = {
           ["job"] = {
@@ -320,7 +320,7 @@ ns.RegisterDungeon({
             "Plan major healing for Devouring Entropy plus Essence soaks.",
             "Use an external if the tank must hold Hulking Fragment damage during an overlap.",
           },
-          ["reminder"] = "Move tank out → dispel Splinters → heal Entropy and soaks.",
+          ["reminder"] = "Move tank out > dispel Splinters > heal Entropy and soaks.",
         },
         ["DPS"] = {
           ["job"] = {
@@ -335,7 +335,7 @@ ns.RegisterDungeon({
           ["defensive"] = {
             "Use a personal for a long Devouring Entropy or a soak overlap.",
           },
-          ["reminder"] = "Cover your section → avoid beams and Orbs → trigger Null Bomb.",
+          ["reminder"] = "Cover your section > avoid beams and Orbs > trigger Null Bomb.",
         },
       },
     },
