@@ -8,9 +8,10 @@
 # (attack-speed stacks) and Caustic Mist Totem (Destroy) recur between
 # every boss but have no dedicated trash section in this schema; the parts
 # that map onto overview fields are captured below (interrupts / tank
-# damage / tank pull warning). The rest (Ascendant Serpent / Ritual
-# Chieftain / Altar ascent pack — all explicitly "live verification
-# required") could not be transcribed into this structure.
+# damage / tank pull warning / dps pull warnings). The Healer-only variant
+# of the "Between Rav'i and The Writhing Coil" trash note (Ritual
+# Chieftain — live verification required) still has no home in this
+# structure and was not transcribed anywhere.
 
 dungeon: "Altar of Fangs"
 slug: altar-of-fangs
@@ -45,7 +46,15 @@ overview:
       - "Stop Evolve and Toxic Atrophy."
       - "Priority mechanics before uptime."
       - "Personal for roar, venom and movement overlaps."
-  tip: "Tank: Save movement for Vine Grip and keep frontals away from allies. Healer: Track Ritual Venom timers, not only player health. DPS: Assign beams on Zul'jan before the pull."
+    pullWarnings:
+      - "Ravenous Descendant — attack-speed stacks: Focus or control before the damage ramp becomes dangerous."
+      - "Caustic Mist Totem — Destroy: Complete the interaction; damage no longer interrupts it on PTR."
+      - "Ascendant Serpent — live verification required: Use spare stops only after Evolve is covered."
+      - "Altar ascent pack — live verification required: Confirm final kick, stop and kill order on live."
+  tip:
+    - "Tank: Save movement for Vine Grip and keep frontals away from allies."
+    - "Healer: Track Ritual Venom timers, not only player health."
+    - "DPS: Assign beams on Zul'jan before the pull."
 
 bosses:
   - name: "Rav'i"

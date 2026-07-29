@@ -49,8 +49,18 @@ ns.RegisterDungeon({
         "Priority mechanics before uptime.",
         "Personal for roar, venom and movement overlaps.",
       },
+      ["pullWarnings"] = {
+        "Ravenous Descendant — attack-speed stacks: Focus or control before the damage ramp becomes dangerous.",
+        "Caustic Mist Totem — Destroy: Complete the interaction; damage no longer interrupts it on PTR.",
+        "Ascendant Serpent — live verification required: Use spare stops only after Evolve is covered.",
+        "Altar ascent pack — live verification required: Confirm final kick, stop and kill order on live.",
+      },
     },
-    ["tip"] = "Tank: Save movement for Vine Grip and keep frontals away from allies. Healer: Track Ritual Venom timers, not only player health. DPS: Assign beams on Zul'jan before the pull.",
+    ["tip"] = {
+      "Tank: Save movement for Vine Grip and keep frontals away from allies.",
+      "Healer: Track Ritual Venom timers, not only player health.",
+      "DPS: Assign beams on Zul'jan before the pull.",
+    },
   },
   ["bosses"] = {
     {

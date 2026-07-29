@@ -36,6 +36,13 @@ overview:
   dps:
     defensives:
       - "Use personals for Sickening Roar, Cosmic Blast and dangerous overlaps."
+    pullWarnings:
+      - "Raj'kess the Spellstorm — Thundering Storm: Avoid targeted lightning strikes."
+      - "Agitated Voidscythe — Corrosive Essence: Separate from other targeted players."
+      - "Watchful Harrower — Live Verification: Commit priority damage to shorten the pull."
+      - "Position: Avoid adding nearby packs; the miniboss has true sight."
+      - "Devouring Brutalizer — Devour: Swap immediately and free the target."
+      - "Brutal Overseer — Brutal Slam: Use a personal if other damage overlaps."
   tip:
     - "Tank: Preserve movement for gravity pulls and knockbacks."
     - "Healer: Enter Watchful Harrower with mana and a cooldown ready."

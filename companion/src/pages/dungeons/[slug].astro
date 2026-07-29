@@ -32,8 +32,9 @@ function overviewSections(o, role) {
   } else if (role === "DPS" && o.dps) {
     s.push({ title: "Purge and control", cls: `role-${role}`, items: o.dps.purges ?? [] });
     s.push({ title: "Personal defensive warnings", cls: "wipe", items: o.dps.defensives ?? [] });
+    s.push({ title: "Pull warnings", cls: "wipe", items: o.dps.pullWarnings ?? [] });
   }
-  if (o.tip) s.push({ title: "Practical tip", cls: "gold", items: [o.tip] });
+  if (o.tip) s.push({ title: "Practical tip", cls: "gold", items: Array.isArray(o.tip) ? o.tip : [o.tip] });
   return s.filter((sec) => sec.items.length);
 }
 

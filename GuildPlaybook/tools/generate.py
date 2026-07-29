@@ -30,10 +30,40 @@ def fail(msg):
     sys.exit(f"error: {msg}")
 
 
+def validate_overview(o, path):
+    def want_str_list(val, name):
+        if val is None:
+            return
+        if not isinstance(val, list) or not all(isinstance(x, str) for x in val):
+            fail(f"{path}: overview.{name} must be a list of strings")
+    tip = o.get("tip")
+    if tip is not None and not isinstance(tip, str):
+        if not (isinstance(tip, list) and all(isinstance(x, str) for x in tip)):
+            fail(f"{path}: overview.tip must be a string or a list of strings")
+    ints = o.get("interrupts")
+    if ints is not None:
+        if not isinstance(ints, list) or not all(isinstance(x, dict) and isinstance(x.get("spell"), str) for x in ints):
+            fail(f"{path}: overview.interrupts must be a list of {{spell, note}} entries")
+    want_str_list(o.get("killPriority"), "killPriority")
+    for role, keys in (("tank", ("damage", "pullWarnings")),
+                       ("healer", ("dispels", "pressure", "pullWarnings")),
+                       ("dps", ("purges", "defensives", "pullWarnings"))):
+        block = o.get(role)
+        if block is None:
+            continue
+        if not isinstance(block, dict):
+            fail(f"{path}: overview.{role} must be a mapping")
+        for k in block:
+            if k not in keys:
+                fail(f"{path}: unknown key overview.{role}.{k}")
+            want_str_list(block[k], f"{role}.{k}")
+
+
 def validate(doc, path):
     for key in ("dungeon", "slug", "season", "overview", "bosses"):
         if key not in doc:
             fail(f"{path}: missing top-level key '{key}'")
+    validate_overview(doc.get("overview") or {}, path)
     for i, boss in enumerate(doc["bosses"] + doc.get("minibosses", []), 1):
         where = f"{path}: boss/miniboss #{i}"
         if "name" not in boss:

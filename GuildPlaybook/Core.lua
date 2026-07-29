@@ -13,9 +13,11 @@ function ns.RegisterDungeon(d)
     ns.dungeons[d.slug] = d
     if d.instanceID then ns.byInstanceID[d.instanceID] = d end
     if d.dungeon then ns.byName[d.dungeon] = d end
-    for _, boss in ipairs(d.bosses or {}) do
-        if boss.encounterID then
-            ns.byEncounterID[boss.encounterID] = { dungeon = d, boss = boss }
+    for _, list in ipairs({ d.bosses or {}, d.minibosses or {} }) do
+        for _, boss in ipairs(list) do
+            if boss.encounterID then
+                ns.byEncounterID[boss.encounterID] = { dungeon = d, boss = boss }
+            end
         end
     end
 end

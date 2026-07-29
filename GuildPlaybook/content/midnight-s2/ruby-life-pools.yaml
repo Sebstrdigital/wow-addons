@@ -56,6 +56,18 @@ overview:
       - "Use a personal for Inferno, especially after a missed cast (Kokia Blazehoof)."
       - "Use a personal for Inferno Spit expiration or a bad overlap (Kyrakka and Erkhart Stormvein)."
       - "Use a personal for Rolling Thunder if needed (Thunderhead, trash)."
+    pullWarnings:
+      - "Highest priorities: Ice Shield, Tectonic Slam, Roaring Blaze and Shock Blast."
+      - "Switch immediately to boss adds and shields."
+      - "Hard stops matter as much as interrupts."
+      - "PTR route and final-trash priority list require live verification."
+      - "Primal Juggernaut — Excavating Blast: Sidestep the impact and puddle."
+      - "Defier Draghar — Blazing Rush: Bait toward a wall, then dodge the charge."
+      - "Primalist Flamedancer — Flame Dance: Hard stop it; leave Blaze of Glory on death."
+      - "Blazebound Destroyer — Burnout: Run out before the death explosion."
+      - "Thunderhead — Storm Breath: Sidestep the frontal; use a personal for Rolling Thunder if needed."
+      - "High Channeler Ryvati — Tempest Stormshield: Break the shield quickly; PTR scaling was corrected."
+      - "Tempest Channeler — Lightning Storm: Use a personal and keep damage going while safe."
   tip: "Version 0.5 Pre-Season Draft — confirm the live route, enemy forces, Dungeon Journal wording and launch hotfixes before relying on this guide. Live verification still needed: final timer, retained trash abilities, Frigid Shard and post-PTR tuning."
 
 bosses:

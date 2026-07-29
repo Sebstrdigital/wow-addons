@@ -61,15 +61,27 @@ local function BuildOverviewText(d, role)
         heading(out, "Pull warnings", C.WIPE)
         bullets(o.healer.pullWarnings, out)
     elseif role == "DPS" and o.dps then
-        heading(out, "Purge and control", C.DPS)
-        bullets(o.dps.purges, out)
-        heading(out, "Personal defensive warnings", C.WIPE)
-        bullets(o.dps.defensives, out)
+        if o.dps.purges then
+            heading(out, "Purge and control", C.DPS)
+            bullets(o.dps.purges, out)
+        end
+        if o.dps.defensives then
+            heading(out, "Personal defensive warnings", C.WIPE)
+            bullets(o.dps.defensives, out)
+        end
+        if o.dps.pullWarnings then
+            heading(out, "Pull warnings", C.WIPE)
+            bullets(o.dps.pullWarnings, out)
+        end
     end
 
     if o.tip then
         heading(out, "Practical tip")
-        out[#out + 1] = C.BODY .. o.tip .. C.R
+        if type(o.tip) == "table" then
+            bullets(o.tip, out)
+        else
+            out[#out + 1] = C.BODY .. o.tip .. C.R
+        end
     end
 
     return table.concat(out, "\n")
@@ -311,6 +323,14 @@ local function UpdateSidecar()
     if not boss or not (boss.displayID or boss.npcID) then
         sidecar:Hide()
         return
+    end
+    -- flip to the left side when the default right-side anchor would go off-screen
+    local right = frame:GetRight()
+    sidecar:ClearAllPoints()
+    if right and (right + 300) > UIParent:GetWidth() then
+        sidecar:SetPoint("TOPRIGHT", frame, "TOPLEFT", 6, -30)
+    else
+        sidecar:SetPoint("TOPLEFT", frame, "TOPRIGHT", -6, -30)
     end
     modelTitle:SetText(boss.name)
     model:ClearModel()

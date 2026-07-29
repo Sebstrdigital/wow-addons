@@ -57,11 +57,19 @@ ns.RegisterDungeon({
         "Spineshield Beetle — Spiny Shield reflects attacks; stop attacking into the reflect and break the absorb.",
         "Kill first: Pollinating Lashers, roots, Potadpole eggs and boss shields.",
       },
+      ["pullWarnings"] = {
+        "Stop attacking into Spineshield Beetle — Spiny Shield.",
+        "Move: Thorny Saptor — Thornclaw Leap; Overgrown Hydra — Lightmaw Beams.",
+      },
       ["defensives"] = {
         "Save personals for scheduled party damage; do not spend them after the hit.",
       },
     },
-    ["tip"] = "TANK: Use the current left-path PTR route; keep death pools and frontals away from the party. HEALER: Pre-position for beam mechanics so movement does not interrupt recovery healing. DPS: Save personals for scheduled party damage; do not spend them after the hit.",
+    ["tip"] = {
+      "Tank: Use the current left-path PTR route; keep death pools and frontals away from the party.",
+      "Healer: Pre-position for beam mechanics so movement does not interrupt recovery healing.",
+      "DPS: Save personals for scheduled party damage; do not spend them after the hit.",
+    },
   },
   ["bosses"] = {
     {

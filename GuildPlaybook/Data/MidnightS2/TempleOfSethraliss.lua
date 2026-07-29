@@ -90,8 +90,15 @@ ns.RegisterDungeon({
         "Use a personal for Corruption Burst.",
         "Barbed Krolusk — Serrated Charge: avoid the line.",
       },
+      ["pullWarnings"] = {
+        "Do not overlap priority casts without an assigned kick plan.",
+      },
     },
-    ["tip"] = "Tank: Set the fight location first; use short, predictable movement. Healer: Anchor cooldowns to mechanics, not falling health bars. DPS: One correct interrupt or soak is worth more than one extra global.",
+    ["tip"] = {
+      "Tank: Set the fight location first; use short, predictable movement.",
+      "Healer: Anchor cooldowns to mechanics, not falling health bars.",
+      "DPS: One correct interrupt or soak is worth more than one extra global.",
+    },
   },
   ["bosses"] = {
     {

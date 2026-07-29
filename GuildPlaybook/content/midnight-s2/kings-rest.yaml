@@ -48,6 +48,13 @@ overview:
       - "Personal for Drain Fluids or Awakening Slam."
       - "Personal for Severing Axe or a bad overlap."
       - "Personal for Gilded Destruction and its DoT."
+    pullWarnings:
+      - "Animated Guardian — Suppression Slam: Dodge the aimed frontal and stun."
+      - "Guard Captain Atu — Axe Barrage: Stop the channel."
+      - "King Timalji — Bladestorm: Run out; do not drag it through allies."
+      - "Purification Construct — Purification Beam: Follow the rotating beam."
+      - "Honored Raptor — Hunting Leap: Leave the landing cleave."
+      - "Shadow of Zul — Pool of Darkness: Use the assigned soak plan."
   tip: "Assign interrupts, gold placement and the first Pool of Darkness before starting."
 
 bosses:

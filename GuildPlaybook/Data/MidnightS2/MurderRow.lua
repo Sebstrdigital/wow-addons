@@ -67,8 +67,15 @@ ns.RegisterDungeon({
         "Defiled Golem — Defiled Slam: stop if the live build allows it; otherwise defensive.",
         "Use personals for Killing Spree, Demonic Rage and add-heavy overlaps.",
       },
+      ["pullWarnings"] = {
+        "Exact trash kick and stop ranking needs live verification.",
+      },
     },
-    ["tip"] = "Mechanic execution is worth more than boss uptime.",
+    ["tip"] = {
+      "Tank: Plan Zaen cover and Xathuux movement space before each fight.",
+      "Healer: Keep movement tools available so mechanics do not stop healing.",
+      "DPS: Mechanic execution is worth more than boss uptime.",
+    },
   },
   ["bosses"] = {
     {
