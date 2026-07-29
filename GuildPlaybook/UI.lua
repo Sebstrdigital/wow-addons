@@ -259,6 +259,15 @@ local scroll = CreateFrame("ScrollFrame", "GuildPlaybookScroll", frame, "UIPanel
 scroll:SetPoint("TOPLEFT", nav, "TOPRIGHT", 10, 0)
 scroll:SetPoint("BOTTOMRIGHT", -32, 14)
 
+-- Only show the scrollbar when the content actually overflows.
+local scrollBar = scroll.ScrollBar or GuildPlaybookScrollScrollBar
+if scrollBar then
+    scroll:HookScript("OnScrollRangeChanged", function(_, _, yrange)
+        scrollBar:SetShown(yrange and yrange > 1)
+    end)
+    scrollBar:Hide()
+end
+
 local content = CreateFrame("Frame", nil, scroll)
 content:SetSize(PANEL_W - NAV_W - 60, 1)
 scroll:SetScrollChild(content)
