@@ -1,0 +1,70 @@
+name: Release addon
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build addon zip
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          cp LICENSE GuildPlaybook/LICENSE.txt
+          zip -qr "GuildPlaybook-${VERSION}.zip" GuildPlaybook \
+            -x "GuildPlaybook/content/*" "GuildPlaybook/tools/*" "*.DS_Store"
+          unzip -l "GuildPlaybook-${VERSION}.zip"
+
+      - name: Attach to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: GuildPlaybook-${{ github.ref_name }}.zip
+          generate_release_notes: true
+
+      - name: Upload to CurseForge
+        if: ${{ vars.CF_PROJECT_ID != '' }}
+        env:
+          CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          CF_PROJECT_ID: ${{ vars.CF_PROJECT_ID }}
+        run: |
+          set -euo pipefail
+          # Resolve CurseForge game-version IDs for the interface versions in the TOC
+          VERSIONS_JSON=$(curl -sf -H "X-Api-Token: ${CF_API_KEY}" \
+            "https://wow.curseforge.com/api/game/versions")
+          # TOC "## Interface: 120007, 120100" -> patch strings "12.0.7" "12.1.0"
+          IDS=$(python3 - "$VERSIONS_JSON" <<'PY'
+          import json, re, sys
+          versions = json.loads(sys.argv[1])
+          toc = open("GuildPlaybook/GuildPlaybook.toc", encoding="utf-8").read()
+          nums = re.search(r"## Interface:\s*([0-9, ]+)", toc).group(1)
+          wanted = set()
+          for n in [x.strip() for x in nums.split(",") if x.strip()]:
+              n = n.zfill(6)
+              wanted.add(f"{int(n[:-4])}.{int(n[-4:-2])}.{int(n[-2:])}")
+          ids = [v["id"] for v in versions if v.get("name") in wanted]
+          print(json.dumps(ids))
+          PY
+          )
+          echo "Game version IDs: ${IDS}"
+          METADATA=$(python3 - "$IDS" <<'PY'
+          import json, os, sys
+          print(json.dumps({
+              "changelog": f"See https://github.com/${{ github.repository }}/releases/tag/{os.environ['GITHUB_REF_NAME']}",
+              "changelogType": "markdown",
+              "displayName": f"GuildPlaybook {os.environ['GITHUB_REF_NAME']}",
+              "gameVersions": json.loads(sys.argv[1]),
+              "releaseType": "release",
+          }))
+          PY
+          )
+          curl -sf -H "X-Api-Token: ${CF_API_KEY}" \
+            -F "metadata=${METADATA}" \
+            -F "file=@GuildPlaybook-${GITHUB_REF_NAME}.zip" \
+            "https://wow.curseforge.com/api/projects/${CF_PROJECT_ID}/upload-files"
+          echo "Uploaded to CurseForge project ${CF_PROJECT_ID}"

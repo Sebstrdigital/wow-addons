@@ -1,4 +1,4 @@
-# Guild Playbook
+# Stand as One's Playbook (GuildPlaybook)
 
 Guild-curated Mythic+ tactics, shown in-game and filtered to your role. Content comes from the guild's playbook PDFs, converted to YAML and compiled into the addon as static Lua data — fully compatible with the Midnight addon restrictions, since it only reads non-secret signals (zone, encounter start/end, your own role).
 

@@ -1,5 +1,5 @@
 ## Interface: 120007, 120100
-## Title: Guild Playbook
+## Title: Stand as One's Playbook
 ## Notes: Guild-curated Mythic+ tactics, filtered to your role.
 ## Author: Sebastian & guild
 ## Version: 0.3.0
