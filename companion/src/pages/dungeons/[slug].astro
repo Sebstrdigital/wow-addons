@@ -1,0 +1,235 @@
+---
+import Base from "../../layouts/Base.astro";
+import { loadDungeons, loadMdtData } from "../../lib/content.js";
+
+export function getStaticPaths() {
+  return loadDungeons().map((d) => ({ params: { slug: d.slug }, props: { dungeon: d } }));
+}
+
+const { dungeon: d } = Astro.props;
+const mdt = loadMdtData(d.slug);
+const ROLES = ["TANK", "HEALER", "DPS"];
+const ROLE_LABEL = { TANK: "Tank", HEALER: "Healer", DPS: "DPS" };
+
+function overviewSections(o, role) {
+  const s = [];
+  s.push({
+    title: "Interrupt first", cls: "gold",
+    items: (o.interrupts ?? []).map((it, i) => `${i + 1}. ${it.spell}${it.note ? ` — ${it.note}` : ""}`),
+  });
+  if (role !== "HEALER") {
+    s.push({ title: "Kill first", cls: "gold", items: (o.killPriority ?? []).map((n, i) => `${i + 1}. ${n}`) });
+  }
+  if (role === "TANK" && o.tank) {
+    s.push({ title: "Dangerous tank damage", cls: `role-${role}`, items: o.tank.damage ?? [] });
+    s.push({ title: "Pull warnings", cls: "wipe", items: o.tank.pullWarnings ?? [] });
+  } else if (role === "HEALER" && o.healer) {
+    s.push({ title: "Dispel first", cls: `role-${role}`, items: o.healer.dispels ?? [] });
+    s.push({ title: "Biggest healing pressure", cls: `role-${role}`, items: o.healer.pressure ?? [] });
+    s.push({ title: "Pull warnings", cls: "wipe", items: o.healer.pullWarnings ?? [] });
+  } else if (role === "DPS" && o.dps) {
+    s.push({ title: "Purge and control", cls: `role-${role}`, items: o.dps.purges ?? [] });
+    s.push({ title: "Personal defensive warnings", cls: "wipe", items: o.dps.defensives ?? [] });
+  }
+  if (o.tip) s.push({ title: "Practical tip", cls: "gold", items: [o.tip] });
+  return s.filter((sec) => sec.items.length);
+}
+
+function bossSections(boss, role) {
+  const body = boss.roles?.[role];
+  const s = [];
+  if (body) {
+    s.push({ title: "Your job", cls: `role-${role}`, items: body.job ?? [] });
+    if (body.avoid?.length) s.push({ title: "Avoid", cls: `role-${role}`, items: body.avoid });
+    const def = body.defensive ?? body.cooldowns;
+    if (def?.length) s.push({ title: role === "HEALER" ? "Cooldowns" : "Defensives", cls: `role-${role}`, items: def });
+  }
+  if (boss.wipe?.length) s.push({ title: "Wipe mechanic", cls: "wipe", items: boss.wipe });
+  return s;
+}
+---
+<Base title={`${d.dungeon} — Raven's Guild Playbook`}>
+  <h1>{d.dungeon}</h1>
+  <p class="dim">{d.season} · patch {d.patch} · playbook v{d.sourceVersion}</p>
+
+  <div class="role-tabs">
+    {ROLES.map((r) => (
+      <button class={`role-tab role-${r}`} data-role-tab={r}>{ROLE_LABEL[r]}</button>
+    ))}
+  </div>
+
+  <nav class="jump dim">
+    Jump to: <a href="#overview">Overview</a> · <a href="#route">Route</a>
+    {d.bosses.map((b, i) => (<span> · <a href={`#boss-${i + 1}`}>{b.name}</a></span>))}
+  </nav>
+
+  <h2 id="overview">Dungeon overview</h2>
+  {ROLES.map((role) => (
+    <div class="role-pane card" data-role={role}>
+      {overviewSections(d.overview ?? {}, role).map((sec) => (
+        <div>
+          <h3 class={sec.cls}>{sec.title}</h3>
+          <ul>{sec.items.map((it) => <li>{it}</li>)}</ul>
+        </div>
+      ))}
+    </div>
+  ))}
+
+  <h2 id="route">Route</h2>
+  <div class="card">
+    <p class="dim">
+      Paste an MDT export string (MDT → your route → Share → Export). It is decoded in your
+      browser and remembered on this device.
+    </p>
+    <textarea id="route-input" rows="3" placeholder="!v5yqoiimqu0..." spellcheck="false"></textarea>
+    <div class="route-actions">
+      <button id="route-import">Import route</button>
+      <button id="route-clear" class="secondary">Clear</button>
+      <span id="route-error" class="wipe"></span>
+    </div>
+    <div id="route-view"></div>
+  </div>
+
+  {d.bosses.map((b, i) => (
+    <section>
+      <h2 id={`boss-${i + 1}`}>{i + 1}. {b.name}</h2>
+      {ROLES.map((role) => (
+        <div class="role-pane card" data-role={role}>
+          {b.roles?.[role]?.reminder && <p class={`reminder role-${role}`}>{b.roles[role].reminder}</p>}
+          {bossSections(b, role).map((sec) => (
+            <div>
+              <h3 class={sec.cls}>{sec.title}</h3>
+              <ul class={sec.cls === "wipe" ? "wipe" : ""}>{sec.items.map((it) => <li>{it}</li>)}</ul>
+            </div>
+          ))}
+        </div>
+      ))}
+    </section>
+  ))}
+
+  <script type="application/json" id="mdt-data" set:html={JSON.stringify(mdt)} />
+
+  <style>
+    .role-tabs { display: flex; gap: 8px; margin: 18px 0 6px; position: sticky; top: 0; background: var(--bg); padding: 10px 0; z-index: 5; }
+    .role-tab {
+      background: var(--panel-2); color: inherit; border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 22px; font-size: 16px; font-weight: 600; cursor: pointer; opacity: 0.55;
+    }
+    .role-tab.active { opacity: 1; border-color: currentColor; }
+    .jump { font-size: 14px; margin-bottom: 6px; }
+    h3 { margin: 14px 0 4px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.04em; }
+    h3.gold { color: var(--gold); }
+    .reminder { font-size: 18px; font-weight: 700; margin: 2px 0 10px; }
+    .role-pane { display: none; }
+    body[data-role="TANK"] :global(.role-pane[data-role="TANK"]),
+    body[data-role="HEALER"] :global(.role-pane[data-role="HEALER"]),
+    body[data-role="DPS"] :global(.role-pane[data-role="DPS"]) { display: block; }
+    #route-input {
+      width: 100%; background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: ui-monospace, monospace;
+    }
+    .route-actions { display: flex; gap: 10px; align-items: center; margin: 10px 0; }
+    .route-actions button {
+      background: var(--gold); color: #1a1a1a; font-weight: 700; border: 0;
+      border-radius: 8px; padding: 8px 18px; cursor: pointer;
+    }
+    .route-actions button.secondary { background: var(--panel-2); color: var(--dim); border: 1px solid var(--border); }
+    :global(table.pulls) { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    :global(table.pulls th) { text-align: left; color: var(--dim); font-weight: 600; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+    :global(table.pulls td) { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    :global(table.pulls .num) { white-space: nowrap; }
+    :global(.pull-swatch) { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: baseline; }
+    :global(.route-title) { font-size: 17px; font-weight: 700; color: var(--gold); margin-top: 12px; }
+    :global(.boss-row td) { color: var(--gold); font-weight: 700; }
+  </style>
+
+  <script>
+    // --- role tabs ---------------------------------------------------------
+    const tabs = document.querySelectorAll("[data-role-tab]");
+    function setRole(r) {
+      localStorage.setItem("gp-role", r);
+      document.body.dataset.role = r;
+      tabs.forEach((t) => t.classList.toggle("active", t.dataset.roleTab === r));
+    }
+    setRole(localStorage.getItem("gp-role") || "TANK");
+    tabs.forEach((t) => t.addEventListener("click", () => setRole(t.dataset.roleTab)));
+  </script>
+
+  <script>
+    // --- MDT route import --------------------------------------------------
+    import { decodeMdtString, presetToRoute } from "../../lib/mdt-decode.js";
+
+    const mdtData = JSON.parse(document.getElementById("mdt-data").textContent || "null");
+    const slug = location.pathname.replace(/\/+$/, "").split("/").pop();
+    const storageKey = `gp-route-${slug}`;
+    const input = document.getElementById("route-input");
+    const errorEl = document.getElementById("route-error");
+    const view = document.getElementById("route-view");
+
+    function enemyInfo(index) {
+      return mdtData?.enemies?.find((e) => e.index === index)
+        ?? { name: `Enemy #${index}`, count: 0, isBoss: false };
+    }
+
+    function render(route) {
+      const total = mdtData?.totalCount || 0;
+      let running = 0;
+      const rows = route.pulls.map((pull) => {
+        let forces = 0;
+        let hasBoss = false;
+        const parts = pull.enemies.map((pe) => {
+          const info = enemyInfo(pe.enemyIndex);
+          forces += (info.count || 0) * pe.clones.length;
+          if (info.isBoss) hasBoss = true;
+          return `${pe.clones.length}× ${info.name}`;
+        });
+        running += forces;
+        const pct = total ? ((running / total) * 100).toFixed(1) : "?";
+        const swatch = pull.color ? `<span class="pull-swatch" style="background:#${pull.color.slice(-6)}"></span>` : "";
+        return `<tr class="${hasBoss ? "boss-row" : ""}">
+          <td class="num">${swatch}${pull.number}</td>
+          <td>${parts.join(", ") || "<span class='dim'>empty pull</span>"}</td>
+          <td class="num">${forces}</td>
+          <td class="num">${running} (${pct}%)</td>
+        </tr>`;
+      });
+      view.innerHTML = `
+        <div class="route-title">${route.name}</div>
+        <table class="pulls">
+          <thead><tr><th>Pull</th><th>Enemies</th><th>Forces</th><th>Total</th></tr></thead>
+          <tbody>${rows.join("")}</tbody>
+        </table>`;
+    }
+
+    async function importString(str, { save } = { save: true }) {
+      errorEl.textContent = "";
+      if (!str.trim()) return;
+      try {
+        const preset = await decodeMdtString(str);
+        const route = presetToRoute(preset);
+        if (mdtData?.dungeonIndex && route.dungeonIndex && route.dungeonIndex !== mdtData.dungeonIndex) {
+          errorEl.textContent = `That route is for another dungeon (MDT index ${route.dungeonIndex}, expected ${mdtData.dungeonIndex}).`;
+          return;
+        }
+        render(route);
+        if (save) localStorage.setItem(storageKey, str.trim());
+      } catch (err) {
+        errorEl.textContent = `Could not decode: ${err.message}`;
+      }
+    }
+
+    document.getElementById("route-import").addEventListener("click", () => importString(input.value));
+    document.getElementById("route-clear").addEventListener("click", () => {
+      localStorage.removeItem(storageKey);
+      input.value = "";
+      view.innerHTML = "";
+      errorEl.textContent = "";
+    });
+
+    const savedRoute = localStorage.getItem(storageKey);
+    if (savedRoute) {
+      input.value = savedRoute;
+      importString(savedRoute, { save: false });
+    }
+  </script>
+</Base>

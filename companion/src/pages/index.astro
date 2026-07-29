@@ -1,0 +1,21 @@
+---
+import Base from "../layouts/Base.astro";
+import { loadDungeons } from "../lib/content.js";
+
+const dungeons = loadDungeons();
+const base = import.meta.env.BASE_URL;
+---
+<Base>
+  <h1>Dungeons</h1>
+  <p class="dim">Guild playbooks — pick a dungeon. Same content as the in-game addon.</p>
+  {dungeons.map((d) => (
+    <a class="card dungeon-card" href={`${base}/dungeons/${d.slug}/`}>
+      <strong>{d.dungeon}</strong>
+      <span class="dim"> — {d.season} · {d.bosses.length} bosses</span>
+    </a>
+  ))}
+  <style>
+    .dungeon-card { display: block; color: var(--text); font-size: 18px; }
+    .dungeon-card:hover { border-color: var(--gold); text-decoration: none; }
+  </style>
+</Base>

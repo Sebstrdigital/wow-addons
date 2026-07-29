@@ -1,0 +1,207 @@
+{
+ "dungeonIndex": 153,
+ "slug": "magisters-terrace",
+ "totalCount": 585,
+ "enemies": [
+  {
+   "index": 1,
+   "id": 232369,
+   "name": "Arcane Magister",
+   "count": 7,
+   "isBoss": false,
+   "clones": 11
+  },
+  {
+   "index": 2,
+   "id": 234089,
+   "name": "Animated Codex",
+   "count": 2,
+   "isBoss": false,
+   "clones": 15
+  },
+  {
+   "index": 3,
+   "id": 251861,
+   "name": "Blazing Pyromancer",
+   "count": 12,
+   "isBoss": false,
+   "clones": 5
+  },
+  {
+   "index": 4,
+   "id": 240973,
+   "name": "Runed Spellbreaker",
+   "count": 12,
+   "isBoss": false,
+   "clones": 4
+  },
+  {
+   "index": 5,
+   "id": 234069,
+   "name": "Voidling",
+   "count": 1,
+   "isBoss": false,
+   "clones": 62
+  },
+  {
+   "index": 6,
+   "id": 234065,
+   "name": "Hollowsoul Shredder",
+   "count": 5,
+   "isBoss": false,
+   "clones": 22
+  },
+  {
+   "index": 7,
+   "id": 234064,
+   "name": "Dreaded Voidwalker",
+   "count": 7,
+   "isBoss": false,
+   "clones": 14
+  },
+  {
+   "index": 8,
+   "id": 234068,
+   "name": "Shadowrift Voidcaller",
+   "count": 12,
+   "isBoss": false,
+   "clones": 4
+  },
+  {
+   "index": 9,
+   "id": 234066,
+   "name": "Devouring Tyrant",
+   "count": 12,
+   "isBoss": false,
+   "clones": 5
+  },
+  {
+   "index": 10,
+   "id": 249086,
+   "name": "Void Infuser",
+   "count": 7,
+   "isBoss": false,
+   "clones": 17
+  },
+  {
+   "index": 11,
+   "id": 231861,
+   "name": "Arcanotron Custos",
+   "count": 0,
+   "isBoss": true,
+   "clones": 1
+  },
+  {
+   "index": 12,
+   "id": 231863,
+   "name": "Seranel Sunlash",
+   "count": 0,
+   "isBoss": true,
+   "clones": 1
+  },
+  {
+   "index": 13,
+   "id": 231864,
+   "name": "Gemellus",
+   "count": 0,
+   "isBoss": true,
+   "clones": 1
+  },
+  {
+   "index": 14,
+   "id": 231865,
+   "name": "Degentrius",
+   "count": 0,
+   "isBoss": true,
+   "clones": 1
+  },
+  {
+   "index": 15,
+   "id": 232106,
+   "name": "Brightscale Wyrm",
+   "count": 1,
+   "isBoss": false,
+   "clones": 48
+  },
+  {
+   "index": 16,
+   "id": 234062,
+   "name": "Arcane Sentry",
+   "count": 16,
+   "isBoss": false,
+   "clones": 3
+  },
+  {
+   "index": 17,
+   "id": 234067,
+   "name": "Vigilant Librarian",
+   "count": 0,
+   "isBoss": false,
+   "clones": 1
+  },
+  {
+   "index": 18,
+   "id": 234124,
+   "name": "Sunblade Enforcer",
+   "count": 5,
+   "isBoss": false,
+   "clones": 17
+  },
+  {
+   "index": 19,
+   "id": 234486,
+   "name": "Lightward Healer",
+   "count": 5,
+   "isBoss": false,
+   "clones": 12
+  },
+  {
+   "index": 20,
+   "id": 239636,
+   "name": "Gemellus",
+   "count": 0,
+   "isBoss": true,
+   "clones": 1
+  },
+  {
+   "index": 21,
+   "id": 241354,
+   "name": "Void-Infused Brightscale",
+   "count": 1,
+   "isBoss": false,
+   "clones": 10
+  },
+  {
+   "index": 22,
+   "id": 241397,
+   "name": "Celestial Drifter",
+   "count": 0,
+   "isBoss": true,
+   "clones": 1
+  },
+  {
+   "index": 23,
+   "id": 255376,
+   "name": "Unstable Voidling",
+   "count": 0,
+   "isBoss": false,
+   "clones": 6
+  },
+  {
+   "index": 24,
+   "id": 257447,
+   "name": "Hollowsoul Shredder",
+   "count": 5,
+   "isBoss": false,
+   "clones": 2
+  },
+  {
+   "index": 25,
+   "id": 259387,
+   "name": "Spellwoven Familiar",
+   "count": 1,
+   "isBoss": false,
+   "clones": 13
+  }
+ ]
+}
