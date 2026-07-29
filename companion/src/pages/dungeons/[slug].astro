@@ -96,7 +96,11 @@ function bossSections(boss, role) {
     </div>
     <div id="route-map" hidden>
       <svg id="map-svg" viewBox="0 0 840 555" preserveAspectRatio="xMidYMid meet"></svg>
-      <p class="dim map-hint">Scroll to zoom · drag to pan · hover a ring for pull info</p>
+      <p class="dim map-hint">
+        Scroll to zoom · drag to pan · hover a ring for pull info ·
+        <svg width="14" height="14" viewBox="0 0 14 14" style="vertical-align:-2px"><circle cx="7" cy="7" r="5" fill="rgba(255,255,255,0.08)" stroke="rgba(255,120,120,0.9)" stroke-width="1.4" stroke-dasharray="3 2"/></svg>
+        dashed red = skipped mobs (hover for name)
+      </p>
     </div>
     <div id="route-view"></div>
   </div>
@@ -170,6 +174,7 @@ function bossSections(boss, role) {
       pointer-events: none;
     }
     :global(#map-svg .pull-group:hover path), :global(#map-svg .pull-group:hover circle) { filter: brightness(1.25); }
+    :global(#map-svg .skipped-dot:hover) { fill: rgba(255, 120, 120, 0.35); }
   </style>
 
   <script>
@@ -247,12 +252,26 @@ function bossSections(boss, role) {
       svg.innerHTML = "";
       svg.appendChild(el("image", { href: mdtData.mapUrl, x: 0, y: 0, width: MAP_W, height: MAP_H }));
 
-      // faint dots for every mob on the map
+      // mobs NOT part of the route — clearly visible dashed markers
+      const used = new Set();
+      for (const pull of route.pulls) {
+        for (const pe of pull.enemies) {
+          for (const cloneIdx of pe.clones) used.add(`${pe.enemyIndex}:${cloneIdx}`);
+        }
+      }
       for (const enemy of mdtData.enemies) {
         for (const c of enemy.positions) {
-          if (c.sublevel !== 1) continue;
+          if (c.sublevel !== 1 || used.has(`${enemy.index}:${c.i}`)) continue;
           const [x, y] = toPx(c);
-          svg.appendChild(el("circle", { cx: x, cy: y, r: enemy.isBoss ? 6 : 2.6, fill: "rgba(200,200,200,0.35)" }));
+          const dot = el("circle", {
+            cx: x, cy: y, r: enemy.isBoss ? 8 : 4.5, class: "skipped-dot",
+            fill: "rgba(255,255,255,0.08)", stroke: "rgba(255,120,120,0.9)",
+            "stroke-width": 1.4, "stroke-dasharray": "3 2",
+          });
+          const title = el("title", {});
+          title.textContent = `SKIPPED: ${enemy.name}${enemy.count ? ` (${enemy.count} forces)` : ""}`;
+          dot.appendChild(title);
+          svg.appendChild(dot);
         }
       }
 
