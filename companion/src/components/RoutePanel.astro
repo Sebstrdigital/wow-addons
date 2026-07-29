@@ -1,0 +1,337 @@
+---
+// Self-contained MDT route panel: paste/import UI, map with pull rings, pull list.
+// `payload` is the extracted MDT dungeon data (+ mapUrl) or null.
+const { payload } = Astro.props;
+---
+<div class="card">
+  <p class="dim">
+    Paste an MDT export string (MDT → your route → Share → Export). It is decoded in your
+    browser and remembered on this device.
+  </p>
+  <textarea id="route-input" rows="3" placeholder="!v5yqoiimqu0..." spellcheck="false"></textarea>
+  <div class="route-actions">
+    <button id="route-import">Import route</button>
+    <button id="route-clear" class="secondary">Clear</button>
+    <span id="route-error" class="wipe"></span>
+  </div>
+  <div class="route-tabs" id="route-tabs" hidden>
+    <button data-rtab="map" class="active">Map</button>
+    <button data-rtab="list">Pull list</button>
+  </div>
+  <div id="route-map" hidden>
+    <div id="map-tooltip" hidden></div>
+    <svg id="map-svg" viewBox="0 0 840 555" preserveAspectRatio="xMidYMid meet"></svg>
+    <p class="dim map-hint">
+      Scroll to zoom · drag to pan · hover a ring for pull info ·
+      <svg width="14" height="14" viewBox="0 0 14 14" style="vertical-align:-2px"><circle cx="7" cy="7" r="5" fill="rgba(255,255,255,0.08)" stroke="rgba(255,120,120,0.9)" stroke-width="1.4" stroke-dasharray="3 2"/></svg>
+      dashed red = skipped mobs (hover for name)
+    </p>
+  </div>
+  <div id="route-view"></div>
+</div>
+
+<script type="application/json" id="mdt-data" set:html={JSON.stringify(payload)} />
+
+<style>
+  #route-input {
+    width: 100%; background: var(--bg); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-family: ui-monospace, monospace;
+  }
+  .route-actions { display: flex; gap: 10px; align-items: center; margin: 10px 0; }
+  .route-actions button {
+    background: var(--gold); color: #1a1a1a; font-weight: 700; border: 0;
+    border-radius: 8px; padding: 8px 18px; cursor: pointer;
+  }
+  .route-actions button.secondary { background: var(--panel-2); color: var(--dim); border: 1px solid var(--border); }
+  :global(table.pulls) { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  :global(table.pulls th) { text-align: left; color: var(--dim); font-weight: 600; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  :global(table.pulls td) { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  :global(table.pulls .num) { white-space: nowrap; }
+  :global(.pull-swatch) { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: baseline; }
+  :global(.route-title) { font-size: 17px; font-weight: 700; color: var(--gold); margin-top: 12px; }
+  :global(.boss-row td) { color: var(--gold); font-weight: 700; }
+  .route-tabs { display: flex; gap: 8px; margin: 14px 0 8px; }
+  .route-tabs button {
+    background: var(--panel-2); color: var(--dim); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 18px; font-weight: 600; cursor: pointer;
+  }
+  .route-tabs button.active { color: var(--gold); border-color: var(--gold); }
+  #map-svg {
+    width: 100%; height: auto; display: block; border-radius: 10px;
+    border: 1px solid var(--border); background: #0d0e11; cursor: grab; touch-action: none;
+  }
+  #map-svg:active { cursor: grabbing; }
+  .map-hint { font-size: 13px; margin: 6px 2px; }
+  :global(#map-svg .pull-label) {
+    font: 700 15px system-ui, sans-serif; fill: #fff;
+    paint-order: stroke; stroke: rgba(0,0,0,0.85); stroke-width: 3px;
+    pointer-events: none;
+  }
+  :global(#map-svg .pull-group:hover path), :global(#map-svg .pull-group:hover circle) { filter: brightness(1.25); }
+  :global(#map-svg .skipped-dot:hover) { fill: rgba(255, 120, 120, 0.35); }
+  #route-map { position: relative; }
+  #map-tooltip {
+    position: absolute; z-index: 10; pointer-events: none;
+    background: rgba(12, 13, 16, 0.95); border: 1px solid var(--gold);
+    border-radius: 8px; padding: 8px 12px; font-size: 13px; line-height: 1.45;
+    white-space: pre-line; max-width: 320px; color: var(--text);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  }
+</style>
+
+<script>
+  // --- MDT route import ----------------------------------------------------
+  import { decodeMdtString, presetToRoute } from "../lib/mdt-decode.js";
+
+  const mdtData = JSON.parse(document.getElementById("mdt-data").textContent || "null");
+  const slug = location.pathname.replace(/\/+$/, "").split("/").pop();
+  const storageKey = `gp-route-${slug}`;
+  const input = document.getElementById("route-input");
+  const errorEl = document.getElementById("route-error");
+  const view = document.getElementById("route-view");
+
+  function enemyInfo(index) {
+    return mdtData?.enemies?.find((e) => e.index === index)
+      ?? { name: `Enemy #${index}`, count: 0, isBoss: false };
+  }
+
+  // --- map rendering --------------------------------------------------------
+  const MAP_W = 840, MAP_H = 555;
+  const svg = document.getElementById("map-svg");
+  const mapWrap = document.getElementById("route-map");
+  const tabsEl = document.getElementById("route-tabs");
+  const listEl = document.getElementById("route-view");
+
+  function convexHull(points) {
+    const pts = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    if (pts.length <= 2) return pts;
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lower = [], upper = [];
+    for (const p of pts) {
+      while (lower.length >= 2 && cross(lower.at(-2), lower.at(-1), p) <= 0) lower.pop();
+      lower.push(p);
+    }
+    for (const p of pts.reverse()) {
+      while (upper.length >= 2 && cross(upper.at(-2), upper.at(-1), p) <= 0) upper.pop();
+      upper.push(p);
+    }
+    return lower.slice(0, -1).concat(upper.slice(0, -1));
+  }
+
+  function paddedHullPath(points, pad = 10) {
+    const cx = points.reduce((s, p) => s + p[0], 0) / points.length;
+    const cy = points.reduce((s, p) => s + p[1], 0) / points.length;
+    if (points.length === 1) return null; // caller draws a circle
+    const hull = convexHull(points).map(([x, y]) => {
+      const dx = x - cx, dy = y - cy;
+      const len = Math.hypot(dx, dy) || 1;
+      return [x + (dx / len) * pad, y + (dy / len) * pad];
+    });
+    return hull.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ") + " Z";
+  }
+
+  const toPx = (c) => [c.x, -c.y]; // MDT map units: x right, y negative-down
+
+  function renderMap(route) {
+    if (!mdtData?.mapUrl) { mapWrap.hidden = true; return; }
+    const el = (tag, attrs) => {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", tag);
+      for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+      return node;
+    };
+    svg.innerHTML = "";
+    svg.appendChild(el("image", { href: mdtData.mapUrl, x: 0, y: 0, width: MAP_W, height: MAP_H }));
+
+    // mobs NOT part of the route — clearly visible dashed markers
+    const used = new Set();
+    for (const pull of route.pulls) {
+      for (const pe of pull.enemies) {
+        for (const cloneIdx of pe.clones) used.add(`${pe.enemyIndex}:${cloneIdx}`);
+      }
+    }
+    for (const enemy of mdtData.enemies) {
+      for (const c of enemy.positions) {
+        if (c.sublevel !== 1 || used.has(`${enemy.index}:${c.i}`)) continue;
+        const [x, y] = toPx(c);
+        const dot = el("circle", {
+          cx: x, cy: y, r: enemy.isBoss ? 8 : 4.5, class: "skipped-dot",
+          fill: "rgba(255,255,255,0.08)", stroke: "rgba(255,120,120,0.9)",
+          "stroke-width": 1.4, "stroke-dasharray": "3 2",
+          "data-tip": `SKIPPED: ${enemy.name}${enemy.count ? ` (${enemy.count} forces)` : ""}`,
+        });
+        svg.appendChild(dot);
+      }
+    }
+
+    // pull rings + colored mob dots
+    route.pulls.forEach((pull) => {
+      const color = pull.color ? `#${pull.color.slice(-6)}` : "#ffd100";
+      const points = [];
+      let forces = 0;
+      const names = [];
+      for (const pe of pull.enemies) {
+        const info = enemyInfo(pe.enemyIndex);
+        forces += (info.count || 0) * pe.clones.length;
+        names.push(`${pe.clones.length}× ${info.name}`);
+        for (const cloneIdx of pe.clones) {
+          const c = (info.positions || []).find((p) => p.i === cloneIdx);
+          if (c && c.sublevel === 1) points.push(toPx(c));
+        }
+      }
+      if (!points.length) return;
+      const g = el("g", {
+        class: "pull-group",
+        "data-tip": `Pull ${pull.number} — ${forces} forces\n${names.join("\n")}`,
+      });
+      const path = paddedHullPath(points);
+      if (path) {
+        g.appendChild(el("path", { d: path, fill: color + "26", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }));
+      } else {
+        g.appendChild(el("circle", { cx: points[0][0], cy: points[0][1], r: 14, fill: color + "26", stroke: color, "stroke-width": 2 }));
+      }
+      for (const [x, y] of points) {
+        g.appendChild(el("circle", { cx: x, cy: y, r: 3.2, fill: color, stroke: "#111", "stroke-width": 0.6 }));
+      }
+      const cx = points.reduce((s, p) => s + p[0], 0) / points.length;
+      const cy = points.reduce((s, p) => s + p[1], 0) / points.length;
+      const label = el("text", { x: cx, y: cy, class: "pull-label", "text-anchor": "middle", "dominant-baseline": "central" });
+      label.textContent = pull.number;
+      g.appendChild(label);
+      svg.appendChild(g);
+    });
+  }
+
+  // tooltip
+  const tooltip = document.getElementById("map-tooltip");
+  svg.addEventListener("pointermove", (e) => {
+    if (drag) { tooltip.hidden = true; return; }
+    const target = e.target.closest?.("[data-tip]");
+    if (!target) { tooltip.hidden = true; return; }
+    tooltip.textContent = target.getAttribute("data-tip");
+    tooltip.hidden = false;
+    const wrapRect = mapWrap.getBoundingClientRect();
+    let tx = e.clientX - wrapRect.left + 14;
+    let ty = e.clientY - wrapRect.top + 14;
+    const maxX = wrapRect.width - tooltip.offsetWidth - 8;
+    if (tx > maxX) tx = e.clientX - wrapRect.left - tooltip.offsetWidth - 14;
+    tooltip.style.left = `${tx}px`;
+    tooltip.style.top = `${ty}px`;
+  });
+  svg.addEventListener("pointerleave", () => (tooltip.hidden = true));
+
+  // zoom + pan
+  let vb = { x: 0, y: 0, w: MAP_W, h: MAP_H };
+  const applyVb = () => svg.setAttribute("viewBox", `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  svg.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    const rect = svg.getBoundingClientRect();
+    const mx = vb.x + ((e.clientX - rect.left) / rect.width) * vb.w;
+    const my = vb.y + ((e.clientY - rect.top) / rect.height) * vb.h;
+    const factor = e.deltaY > 0 ? 1.15 : 1 / 1.15;
+    const w = Math.min(MAP_W * 1.2, Math.max(60, vb.w * factor));
+    const h = w * (MAP_H / MAP_W);
+    vb = { x: mx - ((mx - vb.x) / vb.w) * w, y: my - ((my - vb.y) / vb.h) * h, w, h };
+    applyVb();
+  }, { passive: false });
+  let drag = null;
+  svg.addEventListener("pointerdown", (e) => { drag = { x: e.clientX, y: e.clientY, vb: { ...vb } }; svg.setPointerCapture(e.pointerId); });
+  svg.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    const rect = svg.getBoundingClientRect();
+    vb.x = drag.vb.x - ((e.clientX - drag.x) / rect.width) * vb.w;
+    vb.y = drag.vb.y - ((e.clientY - drag.y) / rect.height) * vb.h;
+    applyVb();
+  });
+  svg.addEventListener("pointerup", () => (drag = null));
+
+  // tabs
+  tabsEl.querySelectorAll("[data-rtab]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      tabsEl.querySelectorAll("[data-rtab]").forEach((b) => b.classList.toggle("active", b === btn));
+      const showMap = btn.dataset.rtab === "map";
+      mapWrap.hidden = !showMap;
+      listEl.hidden = showMap;
+    });
+  });
+
+  function showRoute(route) {
+    render(route);
+    const mapAvailable = !!mdtData?.mapUrl;
+    tabsEl.hidden = !mapAvailable;
+    if (mapAvailable) {
+      renderMap(route);
+      vb = { x: 0, y: 0, w: MAP_W, h: MAP_H };
+      applyVb();
+      mapWrap.hidden = false;
+      listEl.hidden = true;
+      tabsEl.querySelectorAll("[data-rtab]").forEach((b) => b.classList.toggle("active", b.dataset.rtab === "map"));
+    } else {
+      mapWrap.hidden = true;
+      listEl.hidden = false;
+    }
+  }
+
+  function render(route) {
+    const total = mdtData?.totalCount || 0;
+    let running = 0;
+    const rows = route.pulls.map((pull) => {
+      let forces = 0;
+      let hasBoss = false;
+      const parts = pull.enemies.map((pe) => {
+        const info = enemyInfo(pe.enemyIndex);
+        forces += (info.count || 0) * pe.clones.length;
+        if (info.isBoss) hasBoss = true;
+        return `${pe.clones.length}× ${info.name}`;
+      });
+      running += forces;
+      const pct = total ? ((running / total) * 100).toFixed(1) : "?";
+      const swatch = pull.color ? `<span class="pull-swatch" style="background:#${pull.color.slice(-6)}"></span>` : "";
+      return `<tr class="${hasBoss ? "boss-row" : ""}">
+        <td class="num">${swatch}${pull.number}</td>
+        <td>${parts.join(", ") || "<span class='dim'>empty pull</span>"}</td>
+        <td class="num">${forces}</td>
+        <td class="num">${running} (${pct}%)</td>
+      </tr>`;
+    });
+    view.innerHTML = `
+      <div class="route-title">${route.name}</div>
+      <table class="pulls">
+        <thead><tr><th>Pull</th><th>Enemies</th><th>Forces</th><th>Total</th></tr></thead>
+        <tbody>${rows.join("")}</tbody>
+      </table>`;
+  }
+
+  async function importString(str, { save } = { save: true }) {
+    errorEl.textContent = "";
+    if (!str.trim()) return;
+    try {
+      const preset = await decodeMdtString(str);
+      const route = presetToRoute(preset);
+      if (mdtData?.dungeonIndex && route.dungeonIndex && route.dungeonIndex !== mdtData.dungeonIndex) {
+        errorEl.textContent = `That route is for another dungeon (MDT index ${route.dungeonIndex}, expected ${mdtData.dungeonIndex}).`;
+        return;
+      }
+      showRoute(route);
+      if (save) localStorage.setItem(storageKey, str.trim());
+    } catch (err) {
+      errorEl.textContent = `Could not decode: ${err.message}`;
+    }
+  }
+
+  document.getElementById("route-import").addEventListener("click", () => importString(input.value));
+  document.getElementById("route-clear").addEventListener("click", () => {
+    localStorage.removeItem(storageKey);
+    input.value = "";
+    view.innerHTML = "";
+    view.hidden = false;
+    errorEl.textContent = "";
+    tabsEl.hidden = true;
+    mapWrap.hidden = true;
+  });
+
+  const savedRoute = localStorage.getItem(storageKey);
+  if (savedRoute) {
+    input.value = savedRoute;
+    importString(savedRoute, { save: false });
+  }
+</script>

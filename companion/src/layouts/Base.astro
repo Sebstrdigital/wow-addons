@@ -39,7 +39,10 @@ const base = import.meta.env.BASE_URL;
         border-bottom: 1px solid var(--border);
       }
       header.site .brand { font-size: 20px; font-weight: 700; color: var(--gold); }
-      header.site .tag { color: var(--dim); font-size: 13px; }
+      header.site .tag { color: var(--dim); font-size: 13px; margin-left: auto; }
+      header.site .topnav { display: flex; gap: 16px; margin-left: 18px; }
+      header.site .topnav a { color: var(--text); font-weight: 600; }
+      header.site .topnav a:hover { color: var(--gold); text-decoration: none; }
       main { max-width: 1180px; margin: 0 auto; padding: 22px; }
       h1 { color: var(--gold); margin: 0 0 4px; }
       h2 { color: var(--gold); border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-top: 38px; }
@@ -59,6 +62,10 @@ const base = import.meta.env.BASE_URL;
   <body>
     <header class="site">
       <a class="brand" href={base}>Raven's Guild Playbook</a>
+      <nav class="topnav">
+        <a href={base}>Playbooks</a>
+        <a href={`${base}/routes/`}>Routes</a>
+      </nav>
       <span class="tag">Mythic+ second screen</span>
     </header>
     <main><slot /></main>

@@ -18,6 +18,14 @@ export function loadDungeons() {
   return out.sort((a, b) => a.dungeon.localeCompare(b.dungeon));
 }
 
+export function loadMdtSlugs() {
+  if (!fs.existsSync(MDT_DIR)) return [];
+  return fs.readdirSync(MDT_DIR)
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.replace(/\.json$/, ""))
+    .sort();
+}
+
 export function loadMdtData(slug) {
   const file = path.join(MDT_DIR, `${slug}.json`);
   if (!fs.existsSync(file)) return null;

@@ -1,0 +1,28 @@
+---
+import Base from "../../layouts/Base.astro";
+import RoutePanel from "../../components/RoutePanel.astro";
+import { loadDungeons, loadMdtData, loadMdtSlugs } from "../../lib/content.js";
+import fs from "node:fs";
+
+export function getStaticPaths() {
+  return loadMdtSlugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const playbook = loadDungeons().find((d) => d.slug === slug);
+const name = playbook?.dungeon
+  ?? slug.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+const mdt = loadMdtData(slug);
+const hasMap = fs.existsSync(new URL(`../../../public/maps/${slug}.webp`, import.meta.url));
+const mdtPayload = mdt ? { ...mdt, mapUrl: hasMap ? `${import.meta.env.BASE_URL}/maps/${slug}.webp` : null } : null;
+const base = import.meta.env.BASE_URL;
+---
+<Base title={`${name} route — Raven's Guild Playbook`}>
+  <h1>{name} — Route</h1>
+  <p class="dim">
+    {playbook
+      ? <span>Tactics playbook: <a href={`${base}/dungeons/${slug}/`}>open {name} playbook</a></span>
+      : "No playbook for this dungeon yet — route viewer only."}
+  </p>
+  <RoutePanel payload={mdtPayload} />
+</Base>
