@@ -95,6 +95,7 @@ function bossSections(boss, role) {
       <button data-rtab="list">Pull list</button>
     </div>
     <div id="route-map" hidden>
+      <div id="map-tooltip" hidden></div>
       <svg id="map-svg" viewBox="0 0 840 555" preserveAspectRatio="xMidYMid meet"></svg>
       <p class="dim map-hint">
         Scroll to zoom · drag to pan · hover a ring for pull info ·
@@ -175,6 +176,14 @@ function bossSections(boss, role) {
     }
     :global(#map-svg .pull-group:hover path), :global(#map-svg .pull-group:hover circle) { filter: brightness(1.25); }
     :global(#map-svg .skipped-dot:hover) { fill: rgba(255, 120, 120, 0.35); }
+    #route-map { position: relative; }
+    #map-tooltip {
+      position: absolute; z-index: 10; pointer-events: none;
+      background: rgba(12, 13, 16, 0.95); border: 1px solid var(--gold);
+      border-radius: 8px; padding: 8px 12px; font-size: 13px; line-height: 1.45;
+      white-space: pre-line; max-width: 320px; color: var(--text);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
   </style>
 
   <script>
@@ -267,10 +276,8 @@ function bossSections(boss, role) {
             cx: x, cy: y, r: enemy.isBoss ? 8 : 4.5, class: "skipped-dot",
             fill: "rgba(255,255,255,0.08)", stroke: "rgba(255,120,120,0.9)",
             "stroke-width": 1.4, "stroke-dasharray": "3 2",
+            "data-tip": `SKIPPED: ${enemy.name}${enemy.count ? ` (${enemy.count} forces)` : ""}`,
           });
-          const title = el("title", {});
-          title.textContent = `SKIPPED: ${enemy.name}${enemy.count ? ` (${enemy.count} forces)` : ""}`;
-          dot.appendChild(title);
           svg.appendChild(dot);
         }
       }
@@ -291,10 +298,10 @@ function bossSections(boss, role) {
           }
         }
         if (!points.length) return;
-        const g = el("g", { class: "pull-group" });
-        const title = el("title", {});
-        title.textContent = `Pull ${pull.number} — ${forces} forces\n${names.join(", ")}`;
-        g.appendChild(title);
+        const g = el("g", {
+          class: "pull-group",
+          "data-tip": `Pull ${pull.number} — ${forces} forces\n${names.join("\n")}`,
+        });
         const path = paddedHullPath(points);
         if (path) {
           g.appendChild(el("path", { d: path, fill: color + "26", stroke: color, "stroke-width": 2, "stroke-linejoin": "round" }));
@@ -312,6 +319,24 @@ function bossSections(boss, role) {
         svg.appendChild(g);
       });
     }
+
+    // tooltip
+    const tooltip = document.getElementById("map-tooltip");
+    svg.addEventListener("pointermove", (e) => {
+      if (drag) { tooltip.hidden = true; return; }
+      const target = e.target.closest?.("[data-tip]");
+      if (!target) { tooltip.hidden = true; return; }
+      tooltip.textContent = target.getAttribute("data-tip");
+      tooltip.hidden = false;
+      const wrapRect = mapWrap.getBoundingClientRect();
+      let tx = e.clientX - wrapRect.left + 14;
+      let ty = e.clientY - wrapRect.top + 14;
+      const maxX = wrapRect.width - tooltip.offsetWidth - 8;
+      if (tx > maxX) tx = e.clientX - wrapRect.left - tooltip.offsetWidth - 14;
+      tooltip.style.left = `${tx}px`;
+      tooltip.style.top = `${ty}px`;
+    });
+    svg.addEventListener("pointerleave", () => (tooltip.hidden = true));
 
     // zoom + pan
     let vb = { x: 0, y: 0, w: MAP_W, h: MAP_H };
