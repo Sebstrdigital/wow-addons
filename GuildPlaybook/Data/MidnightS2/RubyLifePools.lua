@@ -9,6 +9,13 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "0.5",
   ["instanceID"] = nil,
+  ["quicksheet"] = {
+    ["trash"] = {
+      ["TANK"] = "Primal Juggernaut — Crushing Smash: Mitigate; face the mob away and sidestep Excavating Blast.; Flashfrost Earthshaper — Tectonic Slam: Call a hard stop; do not combine several dangerous casts.; Blazebound Destroyer — Inferno: Keep the pack stable; leave before Burnout finishes.; High Channeler Ryvati — Tempest Stormshield: Keep threat and move only when necessary; shield tuning changed on PTR.",
+      ["HEALER"] = "Primal Juggernaut — Crushing Smash: Watch the tank; keep moving for Excavating Blast.; Flashfrost Earthshaper — Tectonic Slam: Help stop it; prepare group healing if it completes.; Blazebound Destroyer — Inferno: Prepare group healing for the hit and follow-up damage.; High Channeler Ryvati — Tempest Stormshield: Expect a longer shield window; conserve mana during low pressure.",
+      ["DPS"] = "Flashfrost Chillweaver — Ice Shield: Highest interrupt priority; kill the Chillweaver first.; Flashfrost Earthshaper — Tectonic Slam: Use a stun or other hard stop.; Primalist Cinderweaver — Cinderbolt: Interrupt; purge or control Burning Ambition if casts become unsafe.; Flame Channeler — Shock Blast: Interrupt first; do not overlap the assigned kick.",
+    },
+  },
   ["overview"] = {
     ["interrupts"] = {
       {
@@ -97,6 +104,7 @@ ns.RegisterDungeon({
         "Thunderhead — Storm Breath: Sidestep the frontal; use a personal for Rolling Thunder if needed.",
         "High Channeler Ryvati — Tempest Stormshield: Break the shield quickly; PTR scaling was corrected.",
         "Tempest Channeler — Lightning Storm: Use a personal and keep damage going while safe.",
+        "Tempest Channeler — Lightning Storm: Use a personal and keep damage going while safe.",
       },
     },
     ["tip"] = "Version 0.5 Pre-Season Draft — confirm the live route, enemy forces, Dungeon Journal wording and launch hotfixes before relying on this guide. Live verification still needed: final timer, retained trash abilities, Frigid Shard and post-PTR tuning.",
@@ -104,6 +112,12 @@ ns.RegisterDungeon({
   ["bosses"] = {
     {
       ["name"] = "Melidrussa Chillworn",
+      ["sheet"] = {
+        ["TANK"] = "Hold Melidrussa steady and preserve a clear Hailbomb lane. Kick Frigid Shard. Gather whelps. Protect the floor.",
+        ["HEALER"] = "Prepare for Chillstorm, Hailburst and Frost Overload. Top first. Never heal from beside an ice bomb.",
+        ["DPS"] = "Place Hailbombs together. Place ice together. Kick. Burn the shield.",
+        ["WIPE"] = "Loose whelps or a blocked safe path during Chillstorm.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 188252,
       ["displayID"] = 106891,
@@ -164,6 +178,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Kokia Blazehoof",
+      ["sheet"] = {
+        ["TANK"] = "Cover Searing Blows and its bleed. Defensive. Cleave. Move before Burnout.",
+        ["HEALER"] = "Prepare group healing for Inferno. Inferno is the check; Searing Blows is still happening.",
+        ["DPS"] = "Control Ritual of Blazebinding placement. Add first. Kick. Give Boulder a lane.",
+        ["WIPE"] = "Dying while the group swaps to the add or holding the boss in Burnout.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 189232,
       ["displayID"] = 106851,
@@ -222,6 +242,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Kyrakka and Erkhart Stormvein",
+      ["sheet"] = {
+        ["TANK"] = "Keep Kyrakka hittable whenever possible. Protect the group from breath. Preserve the path.",
+        ["HEALER"] = "Top Inferno Spit targets before expiration. Top marks. Spread fire safely. Move early.",
+        ["DPS"] = "Prioritise Kyrakka whenever she is targetable. Kill Kyrakka. Edge the fire. Move.",
+        ["WIPE"] = "Breath through the group or no safe route through fire.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 190484,
       ["displayID"] = 107137,

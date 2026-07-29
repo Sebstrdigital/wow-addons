@@ -9,6 +9,14 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "1.6",
   ["instanceID"] = nil,
+  ["quicksheet"] = {
+    ["trash"] = {
+      ["TANK"] = "OPENING: Control Shrouded Fang — Cheap Shot; face Sandfury Stonefist — Ground Pound away.; POSITION: Keep charge lines and frontals clear of the party.; DEFENSIVE: Plan for Overload, Serpentstorm, Galvazzt vulnerability and Tainted Strike.",
+      ["HEALER"] = "OPENING: Prepare for Sandswept Hunter — Arrow Barrage and Stonefist tank pressure.; DISPEL: Confirm the final Season 2 Poison list after launch.; COOLDOWN: Plan Gale Force > soak, Serpentstorm, beam windows and Corruption Burst.",
+      ["DPS"] = "INTERRUPT: Shrouded Fang — Cheap Shot; Agitated Nimbus — Accumulate Charge.; KILL FIRST: Burrow adds; Essence Defilers; active Tormentors.; CONTROL: Break A Knot of Snakes; protect the Eye carrier.; DEFENSIVE: Use personals for Arrow Barrage, Serpentstorm, beams and Corruption Burst.",
+      ["ROUTE"] = "Protect the Eye carrier; final gauntlet cast names require live verification.",
+    },
+  },
   ["overview"] = {
     ["interrupts"] = {
       {
@@ -103,6 +111,12 @@ ns.RegisterDungeon({
   ["bosses"] = {
     {
       ["name"] = "Adderis and Aspix",
+      ["sheet"] = {
+        ["TANK"] = "Hold a clean push-to-soak route.",
+        ["HEALER"] = "Top before Gale Force; heal the soak.",
+        ["DPS"] = "Hit the vulnerable boss; place circles at the edge.",
+        ["WIPE"] = "Silence zones block the soak.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 133379,
       ["displayID"] = 83550,
@@ -157,6 +171,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Merektha",
+      ["sheet"] = {
+        ["TANK"] = "Stack Burrow adds away from her path.",
+        ["HEALER"] = "Top before Serpentstorm; move in Burrow.",
+        ["DPS"] = "Stack Knot targets; CC; burn Burrow adds.",
+        ["WIPE"] = "Slow add kills extend Burrow.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 133384,
       ["displayID"] = 88585,
@@ -212,6 +232,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Galvazzt",
+      ["sheet"] = {
+        ["TANK"] = "Edge the boss; preserve three beam lanes.",
+        ["HEALER"] = "Track all three beam soakers.",
+        ["DPS"] = "Claim a beam and hold it to the end.",
+        ["WIPE"] = "An uncovered beam charges the boss.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 133389,
       ["displayID"] = 81654,
@@ -265,6 +291,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Avatar of Sethraliss",
+      ["sheet"] = {
+        ["TANK"] = "Control Guardians and Tainted Strike.",
+        ["HEALER"] = "Heal the Avatar only after Defilers die.",
+        ["DPS"] = "Kill Defilers; push Tormentors below 50%.",
+        ["WIPE"] = "Uncleansed Lifeforce bursts repeatedly.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 133392,
       ["displayID"] = 83203,

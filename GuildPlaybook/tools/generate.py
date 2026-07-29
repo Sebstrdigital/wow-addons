@@ -59,11 +59,28 @@ def validate_overview(o, path):
             want_str_list(block[k], f"{role}.{k}")
 
 
+def validate_quicksheet(doc, path):
+    qs = doc.get("quicksheet")
+    if qs is not None:
+        trash = qs.get("trash")
+        if trash is not None:
+            for k, v in trash.items():
+                if k not in ("TANK", "HEALER", "DPS", "ROUTE") or not isinstance(v, str):
+                    fail(f"{path}: quicksheet.trash keys must be TANK/HEALER/DPS/ROUTE with string values (got {k})")
+    for boss in doc.get("bosses", []) + doc.get("minibosses", []):
+        sheet = boss.get("sheet")
+        if sheet is not None:
+            for k, v in sheet.items():
+                if k not in ("TANK", "HEALER", "DPS", "WIPE") or not isinstance(v, str):
+                    fail(f"{path}: {boss.get('name')}: sheet keys must be TANK/HEALER/DPS/WIPE with string values (got {k})")
+
+
 def validate(doc, path):
     for key in ("dungeon", "slug", "season", "overview", "bosses"):
         if key not in doc:
             fail(f"{path}: missing top-level key '{key}'")
     validate_overview(doc.get("overview") or {}, path)
+    validate_quicksheet(doc, path)
     for i, boss in enumerate(doc["bosses"] + doc.get("minibosses", []), 1):
         where = f"{path}: boss/miniboss #{i}"
         if "name" not in boss:

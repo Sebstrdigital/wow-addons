@@ -9,6 +9,14 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "0.9",
   ["instanceID"] = nil,
+  ["quicksheet"] = {
+    ["trash"] = {
+      ["TANK"] = "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; MITIGATE: Luminous Thornmaw — Grievous Gash; Virid Grovekeeper — Earthrupture Strike.; POSITION: Luminous Thornmaw — Solar Breath; Sporeblight Belcher — Lightwarden's Blight.",
+      ["HEALER"] = "HEAL: Sporeblight Belcher — Spouting Floret; Potatoad Matriarch — Toxic Spew.; TOP TO FULL: Luminous Thornmaw — Grievous Gash; Lightwarden Ruia — Grievous Thrash.; MOVE: Virid Grovekeeper — Uproot; Overgrown Hydra — Lightmaw Beams.; LIVE CHECK: Bloodthorn Roots dispel type and final tuning.",
+      ["DPS"] = "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; STOP DAMAGE: Spineshield Beetle — Spiny Shield reflects attacks.; KILL FIRST: Pollinating Lashers, roots, Potadpole eggs and boss shields.; MOVE: Thorny Saptor — Thornclaw Leap; Overgrown Hydra — Lightmaw Beams.",
+      ["ROUTE"] = "Current PTR left path; final placement requires live verification.",
+    },
+  },
   ["overview"] = {
     ["interrupts"] = {
       {
@@ -74,6 +82,12 @@ ns.RegisterDungeon({
   ["bosses"] = {
     {
       ["name"] = "Lightblossom Trinity",
+      ["sheet"] = {
+        ["TANK"] = "Steady bosses, mitigate Slam, block the beam.",
+        ["HEALER"] = "Heal Surge, support the bleed, protect the soak.",
+        ["DPS"] = "Kick Light Bolt; dodge plants; block beam.",
+        ["WIPE"] = "Block Lightblossom Beam; Light-Gorged becomes Overgrowth after 10 sec.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 243028,
       ["displayID"] = 129588,
@@ -126,6 +140,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Ikuzz the Light Hunter",
+      ["sheet"] = {
+        ["TANK"] = "Clear roots, open the lane, never let Ikuzz connect.",
+        ["HEALER"] = "Pre-heal, support the kite, avoid Footfalls.",
+        ["DPS"] = "Open lane; kite Gaze; avoid Footfalls.",
+        ["WIPE"] = "If Ikuzz catches the fixate, Incise and Crunched add a bleed and 5 sec stun.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 244887,
       ["displayID"] = 129424,
@@ -181,6 +201,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Lightwarden Ruia",
+      ["sheet"] = {
+        ["TANK"] = "Kick Wrath, walk the cones, let the healer top.",
+        ["HEALER"] = "Top to full, move for Lightfire, cooldown below 40%.",
+        ["DPS"] = "Kick Wrath; place beams wide; clean below 40%.",
+        ["WIPE"] = "Grievous Thrash clears only at full health; Lightfire damages and silences.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 245912,
       ["displayID"] = 129856,
@@ -236,6 +262,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Ziekket",
+      ["sheet"] = {
+        ["TANK"] = "Beam Lashers, manage orbs, brace for Thornspike.",
+        ["HEALER"] = "Heal the pulse, watch orb stacks, protect Thornspike.",
+        ["DPS"] = "Dormant at 1%; beam Lashers; catch assigned orbs.",
+        ["WIPE"] = "Essence reaching Ziekket triggers Fluorescent Outburst, shield and damage gain.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 247676,
       ["displayID"] = 136619,

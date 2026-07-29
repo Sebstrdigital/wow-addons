@@ -20,6 +20,14 @@ patch: "12.1.0"
 sourceVersion: "0.5"
 instanceID: null   # capture with /gp ids
 
+# All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
+quicksheet:
+  trash:
+    TANK: "High Evolutionist — Evolve: Interrupt first; group the pack for stops.; Ravenous Descendant — attack-speed stacks: Plan mitigation as damage ramps; live cast-name check.; Caustic Mist Totem — Destroy: Keep the interaction accessible."
+    HEALER: "High Evolutionist — Evolve: Call the interrupt; failed casts increase pull pressure.; Ravenous Descendant — attack-speed stacks: Expect rising tank damage; live cast-name check.; Caustic Mist Totem — Destroy: Cover the group during the interaction."
+    DPS: "High Evolutionist — Evolve: Must interrupt.; Ravenous Descendant — attack-speed stacks: Focus or control before the damage ramp.; Caustic Mist Totem — Destroy: Complete the interaction."
+    ROUTE: "Opening → Rav'i → Mutation Chambers → The Writhing Coil → Altar Ascent → Zul'jan"
+
 overview:
   interrupts:
     - { spell: "Evolve", note: "High Evolutionist — interrupt first" }
@@ -58,6 +66,11 @@ overview:
 
 bosses:
   - name: "Rav'i"
+    sheet:
+      TANK: "Correct pile → break shield → catch meat → survive roar."
+      HEALER: "Track Triple Shot → catch meat → prepare for roar."
+      DPS: "Break shield fast and catch your meat."
+      WIPE: "Long feeding adds Stuffed stacks and makes Fetid Roar lethal."
     encounterID: null   # fill via /gp ids
     npcID: 259445      # wowhead
     displayID: 144110  # wowhead modelviewer
@@ -104,6 +117,11 @@ bosses:
         reminder: "Break shield fast and catch your meat."
 
   - name: "The Writhing Coil"
+    sheet:
+      TANK: "Save movement → pull together → stop Toxic Atrophy."
+      HEALER: "Move first → heal while moving → stop Toxic Atrophy."
+      DPS: "Movement ready. Run immediately."
+      WIPE: "Moving late or not far enough fails the Death Rattle pull."
     encounterID: null   # fill via /gp ids
     npcID: 259446      # wowhead
     displayID: 144156  # wowhead modelviewer
@@ -150,6 +168,11 @@ bosses:
         reminder: "Movement ready. Run immediately."
 
   - name: "Zul'jan"
+    sheet:
+      TANK: "Soak beam → clear venom → dodge axes."
+      HEALER: "Track beam soaks and venom timers."
+      DPS: "Soak → clear → reposition."
+      WIPE: "Ignored beams empower Zul'jan; uncleared Ritual Venom bursts lethally."
     encounterID: null   # fill via /gp ids
     npcID: 259447      # wowhead
     displayID: 145435  # wowhead modelviewer

@@ -9,6 +9,13 @@ patch: "12.1.0"
 sourceVersion: "0.9"
 instanceID: null   # capture with /gp ids
 
+# All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
+quicksheet:
+  trash:
+    TANK: "Felmaster Lucsei — Blade Dance: Use mitigation and keep Lucsei stable.; Corrupted Warlock — Curse of Doom: Hold the pack still for the live split-damage visual.; Corrupted Warlock — Dark Pact: Keep control while the shield is removed.; Defiled Golem — Defiled Slam: Mitigate the heavy hit."
+    HEALER: "Felmaster Lucsei — Blade Dance: Pre-heal the group hit and damage-over-time effect.; Corrupted Warlock — Curse of Doom: Prepare for split damage; follow the live stack visual.; Corrupted Warlock — Dark Pact: Call the shield; purge only if your spec can.; Defiled Golem — Defiled Slam: Prepare a direct tank heal."
+    DPS: "Felmaster Lucsei — Blade Dance: Prioritise Lucsei and use a personal defensive.; Corrupted Warlock — Curse of Doom: Follow the live split visual; do not guess the stack count.; Corrupted Warlock — Dark Pact: Purge or break the shield; live-verify its dispel type.; Defiled Golem — Defiled Slam: Stop if the live build allows it; otherwise defensive."
+
 overview:
   interrupts:
     - { spell: "Mirror Image — Felstorm", note: "two interrupts per image on Mythic/Mythic+" }
@@ -59,6 +66,11 @@ overview:
 
 bosses:
   - name: "Kystia Manaheart"
+    sheet:
+      TANK: "Nibbles 20% → kick images twice → burst Kystia."
+      HEALER: "Pre-heal Destabilized; images cannot free-cast."
+      DPS: "Nibbles 20% → kick images twice → burst boss."
+      WIPE: "Free-casting Mirror Images overlap Destabilized."
     encounterID: null   # fill via /gp ids
     npcID: 252458      # wowhead
     displayID: 124578  # wowhead modelviewer
@@ -101,6 +113,11 @@ bosses:
         reminder: "Nibbles 20% → kick images twice → burst boss."
 
   - name: "Zaen Bladesorrow"
+    sheet:
+      TANK: "Preserve one box → defensive on Envenom → hide."
+      HEALER: "Cover first → heal Spree → protect tank."
+      DPS: "Bomb away → hide at 100 → reconnect."
+      WIPE: "No cover at 100 energy causes heavy shots and a long bleed."
     encounterID: null
     npcID: 234649      # wowhead
     displayID: 124592  # wowhead modelviewer
@@ -142,6 +159,11 @@ bosses:
         reminder: "Bomb away → hide at 100 → reconnect."
 
   - name: "Xathuux the Annihilator"
+    sheet:
+      TANK: "Front away → edge-kite Rage → preserve room."
+      HEALER: "External before Strike → cooldown for Rage."
+      DPS: "Behind boss → dodge axe → burst Rage."
+      WIPE: "Legion Strike hits the group and applies 80% healing reduction."
     encounterID: null
     npcID: 234647      # wowhead
     displayID: 140268  # wowhead modelviewer
@@ -183,6 +205,11 @@ bosses:
         reminder: "Behind boss → dodge axe → burst Rage."
 
   - name: "Lithiel Cinderfury"
+    sheet:
+      TANK: "Adds first → kick Bolt → click gateway."
+      HEALER: "Top → spread → gateway → recover."
+      DPS: "Kick Bolt → kill demons → click gateway."
+      WIPE: "Missing the gateway; surviving demons gain 100% haste."
     encounterID: null
     npcID: 234763      # wowhead
     displayID: 124577  # wowhead modelviewer

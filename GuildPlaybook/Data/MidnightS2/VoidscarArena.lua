@@ -9,6 +9,13 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "0.9",
   ["instanceID"] = nil,
+  ["quicksheet"] = {
+    ["trash"] = {
+      ["TANK"] = "Raj'kess the Spellstorm — Thundering Storm: Hold the pack steady; leave room for targeted strikes.; Watchful Harrower — Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss.; Devouring Brutalizer — Devour: Protect and help free the target before the cast completes.; Brutal Overseer — Brutal Slam: Mitigate the tank hit and DoT.",
+      ["HEALER"] = "Raj'kess the Spellstorm — Thundering Storm: Prepare spot healing for targeted strikes.; Watchful Harrower — Live Verification: Expect a long, high-pressure miniboss pull.; Devouring Brutalizer — Devour: Keep the target stable while the group breaks it free.; Brutal Overseer — Brutal Slam: Prepare focused tank healing for the hit and DoT.",
+      ["DPS"] = "Raj'kess the Spellstorm — Orb of Disruption: Kill immediately before Disrupting Blast.; Watchful Harrower — Live Verification: Commit priority damage to shorten the pull.; Devouring Brutalizer — Devour: Swap immediately and free the target.; Brutal Overseer — Brutal Slam: Use a personal if other damage overlaps.",
+    },
+  },
   ["overview"] = {
     ["interrupts"] = {
       {
@@ -67,6 +74,12 @@ ns.RegisterDungeon({
   ["bosses"] = {
     {
       ["name"] = "Taz'Rah",
+      ["sheet"] = {
+        ["TANK"] = "Mitigate Spike > run from Rift > dodge shade lines.",
+        ["HEALER"] = "Heal dash DoTs > move from Rift > separate shards.",
+        ["DPS"] = "Separate shards > dodge lines > run from Rift.",
+        ["WIPE"] = "Being pulled into Dark Rift while shades dash through the arena.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 238887,
       ["displayID"] = 140300,
@@ -120,6 +133,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Atroxus",
+      ["sheet"] = {
+        ["TANK"] = "Face away > mitigate Claw > keep the arena clean.",
+        ["HEALER"] = "Cooldown Roar > heal Claw > avoid the Creeper.",
+        ["DPS"] = "Creeper first > kite cleanly > dodge Breath.",
+        ["WIPE"] = "Roar facing the group or an uncontrolled Toxic Creeper.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 239008,
       ["displayID"] = 131553,
@@ -174,6 +193,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Charonus",
+      ["sheet"] = {
+        ["TANK"] = "Place the well > feed the orbs > brace after orbs.",
+        ["HEALER"] = "Feed your orb > dodge Cascade > stabilise Blast.",
+        ["DPS"] = "Guide orb to well > dodge Cascade > stay nearby.",
+        ["WIPE"] = "Poor Singularity placement leaving no safe orb route.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 248015,
       ["displayID"] = 141323,

@@ -32,6 +32,44 @@ local function heading(out, text, color)
     out[#out + 1] = (color or C.HEAD) .. text .. C.R
 end
 
+-- All-roles quick sheet: every role's one-liners, so each role knows the others' jobs.
+local function BuildQuicksheetText(d)
+    local out = {}
+    local qs = d.quicksheet or {}
+    if qs.trash then
+        heading(out, "Priority trash calls")
+        for _, role in ipairs({ "TANK", "HEALER", "DPS", "ROUTE" }) do
+            local line = qs.trash[role]
+            if line then
+                local color = C[role] or C.HEAD
+                out[#out + 1] = color .. role .. ":|r " .. C.BODY .. line .. C.R
+            end
+        end
+    end
+    local lists = { d.minibosses or {}, d.bosses or {} }
+    local n = 0
+    for _, list in ipairs(lists) do
+        for _, boss in ipairs(list) do
+            if boss.sheet then
+                n = n + 1
+                heading(out, n .. "  " .. boss.name)
+                for _, role in ipairs({ "TANK", "HEALER", "DPS" }) do
+                    if boss.sheet[role] then
+                        out[#out + 1] = (C[role] or C.HEAD) .. role .. ":|r " .. C.BODY .. boss.sheet[role] .. C.R
+                    end
+                end
+                if boss.sheet.WIPE then
+                    out[#out + 1] = C.WIPE .. "WIPE:|r " .. C.WIPE .. boss.sheet.WIPE .. C.R
+                end
+            end
+        end
+    end
+    if #out == 0 then
+        out[1] = C.DIM .. "No quick sheet for this dungeon yet." .. C.R
+    end
+    return table.concat(out, "\n")
+end
+
 local function BuildOverviewText(d, role)
     local o = d.overview or {}
     local out = {}
@@ -218,6 +256,9 @@ local function BuildNav(d)
         end
     else
         entries[#entries + 1] = { kind = "back", label = C.DIM .. "« Dungeons" .. C.R }
+        if d.quicksheet then
+            entries[#entries + 1] = { kind = "quicksheet", label = "Quick sheet (all roles)" }
+        end
         entries[#entries + 1] = { kind = "overview", label = "Overview & Trash" }
         for _, mb in ipairs(d.minibosses or {}) do
             entries[#entries + 1] = { kind = "boss", boss = mb, label = "* " .. mb.name }
@@ -360,6 +401,9 @@ function ns.UI_Refresh()
         if selected.kind == "boss" and selected.boss then
             sectionTitle:SetText(selected.boss.name)
             text:SetText(BuildBossText(selected.boss, ns.role))
+        elseif selected.kind == "quicksheet" then
+            sectionTitle:SetText("Quick sheet — all roles")
+            text:SetText(BuildQuicksheetText(d))
         else
             sectionTitle:SetText("Dungeon overview")
             text:SetText(BuildOverviewText(d, ns.role))

@@ -9,6 +9,14 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "0.9",
   ["instanceID"] = nil,
+  ["quicksheet"] = {
+    ["trash"] = {
+      ["TANK"] = "Keen-Eyed Screecher — Piercing Screech: group and control.; Spirit of Hunger — Starvation Effigy: tank beside it.; The Winter Squall — Harsh Winds: priority target.; Grizzled Warbringer — Poison Spear Volley: keep space clear.; Grizzled Warbringer — Primal Echo: mitigate.",
+      ["HEALER"] = "Keen-Eyed Screecher — Piercing Screech: pre-position for silence.; Spirit of Hunger — Starvation Effigy: kill; max health falls.; The Winter Squall — Harsh Winds: heal while moving.; Grizzled Warbringer — Poison Spear Volley: prepare for misses.; Grizzled Warbringer — Primal Echo: react quickly.",
+      ["DPS"] = "Keen-Eyed Screecher — Piercing Screech: interrupt / stop.; Spirit of Hunger — Starvation Effigy: kill immediately.; The Winter Squall — Harsh Winds: kill first.; Grizzled Warbringer — Poison Spear Volley: dodge.; Grizzled Warbringer — Primal Echo: use a personal.",
+      ["ROUTE"] = "Foraging > Hoardmonger > Winter > Sentinel > Heart of Rage > Nalorakk.",
+    },
+  },
   ["overview"] = {
     ["interrupts"] = {
       {
@@ -68,6 +76,12 @@ ns.RegisterDungeon({
   ["bosses"] = {
     {
       ["name"] = "The Hoardmonger",
+      ["sheet"] = {
+        ["TANK"] = "Control the pile > face slams away > keep the arena clear.",
+        ["HEALER"] = "Heal the roar > watch mushroom cleaners > limit spore stacks.",
+        ["DPS"] = "Clear mushrooms safely > dodge slams > defensive the roar.",
+        ["WIPE"] = "Uncleared Rotten Mushrooms burst and apply Toxic Spores to the party.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 248710,
       ["displayID"] = 129344,
@@ -127,6 +141,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Sentinel of Winter",
+      ["sheet"] = {
+        ["TANK"] = "Centre the boss > preserve Snowdrifts > move inside.",
+        ["HEALER"] = "Pre-heal > move inside > cover the Frost damage.",
+        ["DPS"] = "Kill cores > soak fragment > get inside.",
+        ["WIPE"] = "An unsoaked Rimeshatter causes party damage and a root.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 261053,
       ["displayID"] = 129418,
@@ -182,6 +202,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Nalorakk",
+      ["sheet"] = {
+        ["TANK"] = "Use Zul'jarra's cover > keep echoes outside > protect her.",
+        ["HEALER"] = "Heal interceptors > cover Fury > stay away from echoes.",
+        ["DPS"] = "Drop outside > intercept one lane > avoid stored echoes.",
+        ["WIPE"] = "Echoes reaching Zul'jarra trigger group damage and a stacking damage-taken penalty.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 258877,
       ["displayID"] = 125154,

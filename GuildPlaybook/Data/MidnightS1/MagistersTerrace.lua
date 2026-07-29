@@ -9,6 +9,14 @@ ns.RegisterDungeon({
   ["patch"] = "12.0.7",
   ["sourceVersion"] = "0.9",
   ["instanceID"] = 585,
+  ["quicksheet"] = {
+    ["trash"] = {
+      ["TANK"] = "Mitigate Sunblade Enforcer's Arcane Blade and Devouring Tyrant's Devouring Strike. Face Runed Spellbreakers away.",
+      ["HEALER"] = "Dispel Ethereal Shackles, Holy Fire and Consuming Void. Prepare for Arcane Volley, Ignition and Consuming Shadows.",
+      ["DPS"] = "Kick Arcane Magister—Polymorph; Blazing Pyromancer—Pyroblast; Void Infuser—Terror Wave. Kill healers/casters first.",
+      ["ROUTE"] = "Collect the library's 5% Haste tome. Limit Animated Codices and stagger Wyrm/Unstable Voidling deaths.",
+    },
+  },
   ["overview"] = {
     ["interrupts"] = {
       {
@@ -88,6 +96,12 @@ ns.RegisterDungeon({
   ["bosses"] = {
     {
       ["name"] = "Arcanotron Custos",
+      ["sheet"] = {
+        ["TANK"] = "Edge puddles. Move off residue. Mitigate Repulsing Slam.",
+        ["HEALER"] = "Dispel Shackles. Top before Arcane Expulsion.",
+        ["DPS"] = "Soak Orbs carefully. Burn during Refueling.",
+        ["WIPE"] = "Never let an Orb reach the boss.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 231861,
       ["displayID"] = 131334,
@@ -152,6 +166,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Seranel Sunlash",
+      ["sheet"] = {
+        ["TANK"] = "Keep the Zone accessible. Mitigate an unpurged Ward.",
+        ["HEALER"] = "Spot-heal Marks. Enter the Zone before Silence.",
+        ["DPS"] = "Purge Ward. Clear marks separately. Enter the Zone.",
+        ["WIPE"] = "Outside the Zone = damage and pacify.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 231863,
       ["displayID"] = 127739,
@@ -214,6 +234,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Gemellus",
+      ["sheet"] = {
+        ["TANK"] = "Keep copies in cleave. Touch your link. Run from Grasp.",
+        ["HEALER"] = "Watch Cosmic Sting and players caught by Grasp.",
+        ["DPS"] = "Cleave copies. Resolve Link. Use movement for Grasp.",
+        ["WIPE"] = "Do not get pulled into Cosmic Radiation.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 231864,
       ["displayID"] = 131317,
@@ -276,6 +302,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Degentrius",
+      ["sheet"] = {
+        ["TANK"] = "Face Fragment away. Leave melee before the dispel.",
+        ["HEALER"] = "Dispel after tank moves. Heal Entropy and overlaps.",
+        ["DPS"] = "Cover Essence impacts. Avoid Orbs and Void Torrent.",
+        ["WIPE"] = "Never miss an Essence. Trigger Null Bomb.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 231865,
       ["displayID"] = 132031,

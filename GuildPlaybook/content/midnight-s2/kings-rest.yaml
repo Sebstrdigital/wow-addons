@@ -9,6 +9,13 @@ patch: "12.1.0"
 sourceVersion: "0.5"
 instanceID: null   # capture with /gp ids
 
+# All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
+quicksheet:
+  trash:
+    TANK: "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away."
+    HEALER: "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away."
+    DPS: "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away."
+
 overview:
   interrupts:
     - { spell: "Shadow Bolt Volley", note: "must-stop cast" }
@@ -59,6 +66,11 @@ overview:
 
 bosses:
   - name: "The Golden Serpent"
+    sheet:
+      TANK: "Tank away from the marked gold pile. Boss away from gold → mitigate Tail Thrash → move from adds."
+      HEALER: "Prioritise Spit Gold targets. Track Spit Gold → safe Gust position → stabilise loose adds."
+      DPS: "Place Spit Gold tightly. Stack gold → control adds → leave early for Gust."
+      WIPE: "Animated Gold reaching the boss grants Luster: a shield and damage increase."
     encounterID: null   # fill via /gp ids
     npcID: 135322      # wowhead
     displayID: 84202  # wowhead modelviewer
@@ -105,6 +117,11 @@ bosses:
         reminder: "Stack gold → control adds → leave early for Gust."
 
   - name: "Mchimba the Embalmer"
+    sheet:
+      TANK: "Keep clear paths to every coffin. See Struggle → open that coffin → collect mummies."
+      HEALER: "Heal Desiccation targets above 90%. Desiccation ends above 90% → correct coffin → cover Slam."
+      DPS: "Use Struggle once if entombed. Shaking coffin first → kick the mummy."
+      WIPE: "Wrong coffin adds a mummy; Wretched Discharge must be interrupted."
     encounterID: null
     npcID: 134993      # wowhead
     displayID: 83529  # wowhead modelviewer
@@ -149,6 +166,11 @@ bosses:
         reminder: "Shaking coffin first → kick the mummy."
 
   - name: "The Council of Tribes"
+    sheet:
+      TANK: "Position the active boss so axes, charges and totems stay visible. Backhand defensive → soak charge → kick Nova."
+      HEALER: "Prepare for Kula's bleed, Aka'ali's tank spike and Zanazal's totems. Heal Axe → external Backhand → Explosive Totem first."
+      DPS: "Join Barrel Through. Soak together → Explosive Totem first → never miss Nova."
+      WIPE: "Missed Barrel Through, Poison Nova or Explosive Totem."
     encounterID: null
     npcID: 135475      # wowhead
     displayID: 84272  # wowhead modelviewer
@@ -197,6 +219,11 @@ bosses:
         reminder: "Soak together → Explosive Totem first → never miss Nova."
 
   - name: "Dazar, the First King"
+    sheet:
+      TANK: "Face Dazar away. Late Combo hurts most → control Reban → brace for Gilded."
+      HEALER: "Track increasing Blade Combo damage. Top group → cooldown Gilded → cover late Combo."
+      DPS: "Swap to Reban. Leap out → dodge spears → defensive for Gilded."
+      WIPE: "Gilded Destruction hits the group and leaves a 15-second Fire DoT."
     encounterID: null
     npcID: 136160      # wowhead
     displayID: 84352  # wowhead modelviewer

@@ -9,6 +9,14 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "0.5",
   ["instanceID"] = nil,
+  ["quicksheet"] = {
+    ["trash"] = {
+      ["TANK"] = "High Evolutionist — Evolve: Interrupt first; group the pack for stops.; Ravenous Descendant — attack-speed stacks: Plan mitigation as damage ramps; live cast-name check.; Caustic Mist Totem — Destroy: Keep the interaction accessible.",
+      ["HEALER"] = "High Evolutionist — Evolve: Call the interrupt; failed casts increase pull pressure.; Ravenous Descendant — attack-speed stacks: Expect rising tank damage; live cast-name check.; Caustic Mist Totem — Destroy: Cover the group during the interaction.",
+      ["DPS"] = "High Evolutionist — Evolve: Must interrupt.; Ravenous Descendant — attack-speed stacks: Focus or control before the damage ramp.; Caustic Mist Totem — Destroy: Complete the interaction.",
+      ["ROUTE"] = "Opening > Rav'i > Mutation Chambers > The Writhing Coil > Altar Ascent > Zul'jan",
+    },
+  },
   ["overview"] = {
     ["interrupts"] = {
       {
@@ -65,6 +73,12 @@ ns.RegisterDungeon({
   ["bosses"] = {
     {
       ["name"] = "Rav'i",
+      ["sheet"] = {
+        ["TANK"] = "Correct pile > break shield > catch meat > survive roar.",
+        ["HEALER"] = "Track Triple Shot > catch meat > prepare for roar.",
+        ["DPS"] = "Break shield fast and catch your meat.",
+        ["WIPE"] = "Long feeding adds Stuffed stacks and makes Fetid Roar lethal.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 259445,
       ["displayID"] = 144110,
@@ -126,6 +140,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "The Writhing Coil",
+      ["sheet"] = {
+        ["TANK"] = "Save movement > pull together > stop Toxic Atrophy.",
+        ["HEALER"] = "Move first > heal while moving > stop Toxic Atrophy.",
+        ["DPS"] = "Movement ready. Run immediately.",
+        ["WIPE"] = "Moving late or not far enough fails the Death Rattle pull.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 259446,
       ["displayID"] = 144156,
@@ -187,6 +207,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Zul'jan",
+      ["sheet"] = {
+        ["TANK"] = "Soak beam > clear venom > dodge axes.",
+        ["HEALER"] = "Track beam soaks and venom timers.",
+        ["DPS"] = "Soak > clear > reposition.",
+        ["WIPE"] = "Ignored beams empower Zul'jan; uncleared Ritual Venom bursts lethally.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 259447,
       ["displayID"] = 145435,

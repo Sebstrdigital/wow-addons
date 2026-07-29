@@ -62,10 +62,37 @@ function bossSections(boss, role) {
   </div>
 
   <nav class="jump dim">
-    Jump to: <a href="#overview">Overview & Trash</a> · <a href="#route">Route</a>
+    Jump to:
+    {d.quicksheet && <span><a href="#quicksheet">Quick sheet</a> · </span>}
+    <a href="#overview">Overview & Trash</a> · <a href="#route">Route</a>
     {(d.minibosses ?? []).map((b, i) => (<span> · <a href={`#mb-${i + 1}`}>★ {b.name}</a></span>))}
     {d.bosses.map((b, i) => (<span> · <a href={`#boss-${i + 1}`}>{b.name}</a></span>))}
   </nav>
+
+  {d.quicksheet && (
+    <section>
+      <h2 id="quicksheet">Quick sheet <span class="dim" style="font-size:15px">all roles — know each other's jobs</span></h2>
+      <div class="card">
+        {d.quicksheet.trash && (
+          <div>
+            <h3 class="gold">Priority trash calls</h3>
+            {["TANK", "HEALER", "DPS", "ROUTE"].map((r) =>
+              d.quicksheet.trash[r] && (
+                <p class="qs-line"><strong class={r === "ROUTE" ? "gold" : `role-${r}`}>{r}:</strong> {d.quicksheet.trash[r]}</p>
+              ))}
+          </div>
+        )}
+        {[...(d.minibosses ?? []), ...d.bosses].filter((b) => b.sheet).map((b, i) => (
+          <div class="qs-boss">
+            <h3 class="gold">{i + 1} · {b.name}</h3>
+            {["TANK", "HEALER", "DPS"].map((r) =>
+              b.sheet[r] && <p class="qs-line"><strong class={`role-${r}`}>{r}:</strong> {b.sheet[r]}</p>)}
+            {b.sheet.WIPE && <p class="qs-line wipe"><strong>WIPE:</strong> {b.sheet.WIPE}</p>}
+          </div>
+        ))}
+      </div>
+    </section>
+  )}
 
   <h2 id="overview">Dungeon overview & trash</h2>
   {ROLES.map((role) => (
@@ -124,6 +151,8 @@ function bossSections(boss, role) {
     }
     .role-tab.active { opacity: 1; border-color: currentColor; }
     .jump { font-size: 14px; margin-bottom: 6px; }
+    .qs-line { margin: 3px 0; }
+    .qs-boss { margin-top: 14px; }
     h3 { margin: 14px 0 4px; font-size: 15px; text-transform: uppercase; letter-spacing: 0.04em; }
     h3.gold { color: var(--gold); }
     .reminder { font-size: 18px; font-weight: 700; margin: 2px 0 10px; }

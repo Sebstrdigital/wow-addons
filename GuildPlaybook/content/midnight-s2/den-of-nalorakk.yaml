@@ -9,6 +9,14 @@ patch: "12.1.0"
 sourceVersion: "0.9"
 instanceID: null   # fill via /gp ids
 
+# All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
+quicksheet:
+  trash:
+    TANK: "Keen-Eyed Screecher — Piercing Screech: group and control.; Spirit of Hunger — Starvation Effigy: tank beside it.; The Winter Squall — Harsh Winds: priority target.; Grizzled Warbringer — Poison Spear Volley: keep space clear.; Grizzled Warbringer — Primal Echo: mitigate."
+    HEALER: "Keen-Eyed Screecher — Piercing Screech: pre-position for silence.; Spirit of Hunger — Starvation Effigy: kill; max health falls.; The Winter Squall — Harsh Winds: heal while moving.; Grizzled Warbringer — Poison Spear Volley: prepare for misses.; Grizzled Warbringer — Primal Echo: react quickly."
+    DPS: "Keen-Eyed Screecher — Piercing Screech: interrupt / stop.; Spirit of Hunger — Starvation Effigy: kill immediately.; The Winter Squall — Harsh Winds: kill first.; Grizzled Warbringer — Poison Spear Volley: dodge.; Grizzled Warbringer — Primal Echo: use a personal."
+    ROUTE: "Foraging → Hoardmonger → Winter → Sentinel → Heart of Rage → Nalorakk."
+
 overview:
   interrupts:
     - { spell: "Piercing Screech", note: "interrupt / stop" }
@@ -52,6 +60,11 @@ overview:
 
 bosses:
   - name: "The Hoardmonger"
+    sheet:
+      TANK: "Control the pile → face slams away → keep the arena clear."
+      HEALER: "Heal the roar → watch mushroom cleaners → limit spore stacks."
+      DPS: "Clear mushrooms safely → dodge slams → defensive the roar."
+      WIPE: "Uncleared Rotten Mushrooms burst and apply Toxic Spores to the party."
     encounterID: null   # fill via /gp ids
     npcID: 248710      # wowhead
     displayID: 129344  # wowhead modelviewer
@@ -96,6 +109,11 @@ bosses:
         reminder: "Clear mushrooms safely → dodge slams → defensive the roar."
 
   - name: "Sentinel of Winter"
+    sheet:
+      TANK: "Centre the boss → preserve Snowdrifts → move inside."
+      HEALER: "Pre-heal → move inside → cover the Frost damage."
+      DPS: "Kill cores → soak fragment → get inside."
+      WIPE: "An unsoaked Rimeshatter causes party damage and a root."
     encounterID: null   # fill via /gp ids
     npcID: 261053      # wowhead
     displayID: 129418  # wowhead modelviewer
@@ -136,6 +154,11 @@ bosses:
         reminder: "Kill cores → soak fragment → get inside."
 
   - name: "Nalorakk"
+    sheet:
+      TANK: "Use Zul'jarra's cover → keep echoes outside → protect her."
+      HEALER: "Heal interceptors → cover Fury → stay away from echoes."
+      DPS: "Drop outside → intercept one lane → avoid stored echoes."
+      WIPE: "Echoes reaching Zul'jarra trigger group damage and a stacking damage-taken penalty."
     encounterID: null   # fill via /gp ids
     npcID: 258877      # wowhead
     displayID: 125154  # wowhead modelviewer

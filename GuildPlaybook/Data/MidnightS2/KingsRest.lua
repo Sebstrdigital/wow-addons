@@ -9,6 +9,13 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "0.5",
   ["instanceID"] = nil,
+  ["quicksheet"] = {
+    ["trash"] = {
+      ["TANK"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away.",
+      ["HEALER"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away.",
+      ["DPS"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away.",
+    },
+  },
   ["overview"] = {
     ["interrupts"] = {
       {
@@ -85,6 +92,12 @@ ns.RegisterDungeon({
   ["bosses"] = {
     {
       ["name"] = "The Golden Serpent",
+      ["sheet"] = {
+        ["TANK"] = "Tank away from the marked gold pile. Boss away from gold > mitigate Tail Thrash > move from adds.",
+        ["HEALER"] = "Prioritise Spit Gold targets. Track Spit Gold > safe Gust position > stabilise loose adds.",
+        ["DPS"] = "Place Spit Gold tightly. Stack gold > control adds > leave early for Gust.",
+        ["WIPE"] = "Animated Gold reaching the boss grants Luster: a shield and damage increase.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 135322,
       ["displayID"] = 84202,
@@ -146,6 +159,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Mchimba the Embalmer",
+      ["sheet"] = {
+        ["TANK"] = "Keep clear paths to every coffin. See Struggle > open that coffin > collect mummies.",
+        ["HEALER"] = "Heal Desiccation targets above 90%. Desiccation ends above 90% > correct coffin > cover Slam.",
+        ["DPS"] = "Use Struggle once if entombed. Shaking coffin first > kick the mummy.",
+        ["WIPE"] = "Wrong coffin adds a mummy; Wretched Discharge must be interrupted.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 134993,
       ["displayID"] = 83529,
@@ -205,6 +224,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "The Council of Tribes",
+      ["sheet"] = {
+        ["TANK"] = "Position the active boss so axes, charges and totems stay visible. Backhand defensive > soak charge > kick Nova.",
+        ["HEALER"] = "Prepare for Kula's bleed, Aka'ali's tank spike and Zanazal's totems. Heal Axe > external Backhand > Explosive Totem first.",
+        ["DPS"] = "Join Barrel Through. Soak together > Explosive Totem first > never miss Nova.",
+        ["WIPE"] = "Missed Barrel Through, Poison Nova or Explosive Totem.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 135475,
       ["displayID"] = 84272,
@@ -268,6 +293,12 @@ ns.RegisterDungeon({
     },
     {
       ["name"] = "Dazar, the First King",
+      ["sheet"] = {
+        ["TANK"] = "Face Dazar away. Late Combo hurts most > control Reban > brace for Gilded.",
+        ["HEALER"] = "Track increasing Blade Combo damage. Top group > cooldown Gilded > cover late Combo.",
+        ["DPS"] = "Swap to Reban. Leap out > dodge spears > defensive for Gilded.",
+        ["WIPE"] = "Gilded Destruction hits the group and leaves a 15-second Fire DoT.",
+      },
       ["encounterID"] = nil,
       ["npcID"] = 136160,
       ["displayID"] = 84352,
