@@ -135,7 +135,7 @@ frame:Hide()
 
 local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 title:SetPoint("TOPLEFT", 16, -14)
-title:SetText("Guild Playbook")
+title:SetText("Raven's Guild Playbook")
 
 local subtitle = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
 subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -2)
