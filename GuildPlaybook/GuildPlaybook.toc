@@ -1,0 +1,12 @@
+## Interface: 120007, 120100
+## Title: Guild Playbook
+## Notes: Guild-curated Mythic+ tactics, filtered to your role.
+## Author: Sebastian & guild
+## Version: 0.1.0
+## SavedVariables: GuildPlaybookDB
+## IconTexture: Interface\Icons\INV_Misc_Book_09
+## AddonCompartmentFunc: GuildPlaybook_OnAddonCompartmentClick
+
+Core.lua
+Data\MidnightS1\MagistersTerrace.lua
+UI.lua
