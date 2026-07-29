@@ -18,6 +18,12 @@ export function loadDungeons() {
   return out.sort((a, b) => a.dungeon.localeCompare(b.dungeon));
 }
 
+// Build-safe map lookup (import.meta.url is unreliable across compiled pages)
+export function mapUrlFor(slug, baseUrl) {
+  const file = path.resolve(process.cwd(), `public/maps/${slug}.webp`);
+  return fs.existsSync(file) ? `${baseUrl}/maps/${slug}.webp` : null;
+}
+
 export function loadMdtSlugs() {
   if (!fs.existsSync(MDT_DIR)) return [];
   return fs.readdirSync(MDT_DIR)

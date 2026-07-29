@@ -1,6 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { loadDungeons, loadMdtData } from "../../lib/content.js";
+import { loadDungeons, loadMdtData, mapUrlFor } from "../../lib/content.js";
 import RoutePanel from "../../components/RoutePanel.astro";
 
 export function getStaticPaths() {
@@ -9,9 +9,7 @@ export function getStaticPaths() {
 
 const { dungeon: d } = Astro.props;
 const mdt = loadMdtData(d.slug);
-import fs from "node:fs";
-const hasMap = fs.existsSync(new URL(`../../../public/maps/${d.slug}.webp`, import.meta.url));
-const mdtPayload = mdt ? { ...mdt, mapUrl: hasMap ? `${import.meta.env.BASE_URL}/maps/${d.slug}.webp` : null } : null;
+const mdtPayload = mdt ? { ...mdt, name: d.dungeon, mapUrl: mapUrlFor(d.slug, import.meta.env.BASE_URL) } : null;
 const ROLES = ["TANK", "HEALER", "DPS"];
 const ROLE_LABEL = { TANK: "Tank", HEALER: "Healer", DPS: "DPS" };
 
@@ -63,11 +61,12 @@ function bossSections(boss, role) {
   </div>
 
   <nav class="jump dim">
-    Jump to: <a href="#overview">Overview</a> · <a href="#route">Route</a>
+    Jump to: <a href="#overview">Overview & Trash</a> · <a href="#route">Route</a>
+    {(d.minibosses ?? []).map((b, i) => (<span> · <a href={`#mb-${i + 1}`}>★ {b.name}</a></span>))}
     {d.bosses.map((b, i) => (<span> · <a href={`#boss-${i + 1}`}>{b.name}</a></span>))}
   </nav>
 
-  <h2 id="overview">Dungeon overview</h2>
+  <h2 id="overview">Dungeon overview & trash</h2>
   {ROLES.map((role) => (
     <div class="role-pane card" data-role={role}>
       {overviewSections(d.overview ?? {}, role).map((sec) => (
@@ -81,6 +80,23 @@ function bossSections(boss, role) {
 
   <h2 id="route">Route</h2>
   <RoutePanel payload={mdtPayload} />
+
+  {(d.minibosses ?? []).map((b, i) => (
+    <section>
+      <h2 id={`mb-${i + 1}`}>★ {b.name} <span class="dim" style="font-size:15px">mini-boss</span></h2>
+      {ROLES.map((role) => (
+        <div class="role-pane card" data-role={role}>
+          {b.roles?.[role]?.reminder && <p class={`reminder role-${role}`}>{b.roles[role].reminder}</p>}
+          {bossSections(b, role).map((sec) => (
+            <div>
+              <h3 class={sec.cls}>{sec.title}</h3>
+              <ul class={sec.cls === "wipe" ? "wipe" : ""}>{sec.items.map((it) => <li>{it}</li>)}</ul>
+            </div>
+          ))}
+        </div>
+      ))}
+    </section>
+  ))}
 
   {d.bosses.map((b, i) => (
     <section>

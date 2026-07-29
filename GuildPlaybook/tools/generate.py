@@ -34,8 +34,8 @@ def validate(doc, path):
     for key in ("dungeon", "slug", "season", "overview", "bosses"):
         if key not in doc:
             fail(f"{path}: missing top-level key '{key}'")
-    for i, boss in enumerate(doc["bosses"], 1):
-        where = f"{path}: boss #{i}"
+    for i, boss in enumerate(doc["bosses"] + doc.get("minibosses", []), 1):
+        where = f"{path}: boss/miniboss #{i}"
         if "name" not in boss:
             fail(f"{where}: missing 'name'")
         if "roles" not in boss:

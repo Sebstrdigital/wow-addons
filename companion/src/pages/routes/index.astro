@@ -1,8 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import RoutePanel from "../../components/RoutePanel.astro";
-import { loadDungeons, loadMdtData, loadMdtSlugs } from "../../lib/content.js";
-import fs from "node:fs";
+import { loadDungeons, loadMdtData, loadMdtSlugs, mapUrlFor } from "../../lib/content.js";
 
 const playbooks = new Map(loadDungeons().map((d) => [d.slug, d]));
 const dungeons = {};
@@ -12,12 +11,7 @@ for (const slug of loadMdtSlugs()) {
   if (!mdt) continue;
   const name = playbooks.get(slug)?.dungeon
     ?? slug.split("-").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
-  const hasMap = fs.existsSync(new URL(`../../../public/maps/${slug}.webp`, import.meta.url));
-  dungeons[mdt.dungeonIndex] = {
-    ...mdt,
-    name,
-    mapUrl: hasMap ? `${import.meta.env.BASE_URL}/maps/${slug}.webp` : null,
-  };
+  dungeons[mdt.dungeonIndex] = { ...mdt, name, mapUrl: mapUrlFor(slug, import.meta.env.BASE_URL) };
   names.push(name);
 }
 const registry = { registry: true, dungeons };

@@ -206,7 +206,10 @@ local function BuildNav(d)
         end
     else
         entries[#entries + 1] = { kind = "back", label = C.DIM .. "« Dungeons" .. C.R }
-        entries[#entries + 1] = { kind = "overview", label = "Overview" }
+        entries[#entries + 1] = { kind = "overview", label = "Overview & Trash" }
+        for _, mb in ipairs(d.minibosses or {}) do
+            entries[#entries + 1] = { kind = "boss", boss = mb, label = "* " .. mb.name }
+        end
         for i, boss in ipairs(d.bosses or {}) do
             entries[#entries + 1] = { kind = "boss", boss = boss, label = i .. ". " .. boss.name }
         end
