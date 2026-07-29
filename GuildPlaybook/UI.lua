@@ -176,9 +176,17 @@ end
 
 local navButtons = {}
 local selected = { kind = "overview", boss = nil }
+local viewedDungeon = nil   -- dungeon shown in the panel (may differ from ns.currentDungeon while browsing)
+
+local function SortedDungeons()
+    local list = {}
+    for _, d in pairs(ns.dungeons) do list[#list + 1] = d end
+    table.sort(list, function(a, b) return a.dungeon < b.dungeon end)
+    return list
+end
 
 local nav = CreateFrame("Frame", nil, frame)
-nav:SetPoint("TOPLEFT", 14, -80)
+nav:SetPoint("TOPLEFT", 14, -104)
 nav:SetPoint("BOTTOMLEFT", 14, 14)
 nav:SetWidth(NAV_W)
 
@@ -191,10 +199,17 @@ end
 
 local function BuildNav(d)
     for _, btn in ipairs(navButtons) do btn:Hide() end
-    if not d then return end
-    local entries = { { kind = "overview", label = "Overview" } }
-    for i, boss in ipairs(d.bosses or {}) do
-        entries[#entries + 1] = { kind = "boss", boss = boss, label = i .. ". " .. boss.name }
+    local entries = {}
+    if not d then
+        for _, dungeon in ipairs(SortedDungeons()) do
+            entries[#entries + 1] = { kind = "dungeon", dungeon = dungeon, label = dungeon.dungeon }
+        end
+    else
+        entries[#entries + 1] = { kind = "back", label = C.DIM .. "« Dungeons" .. C.R }
+        entries[#entries + 1] = { kind = "overview", label = "Overview" }
+        for i, boss in ipairs(d.bosses or {}) do
+            entries[#entries + 1] = { kind = "boss", boss = boss, label = i .. ". " .. boss.name }
+        end
     end
     local prev
     for i, entry in ipairs(entries) do
@@ -224,8 +239,14 @@ local function BuildNav(d)
         btn:SetText(entry.label)
         btn.kind, btn.boss = entry.kind, entry.boss
         btn:SetScript("OnClick", function()
-            selected = { kind = entry.kind, boss = entry.boss }
-            ns.safecall(ns.UI_Refresh)
+            if entry.kind == "dungeon" then
+                ns.safecall(ns.UI_SetDungeon, entry.dungeon)
+            elseif entry.kind == "back" then
+                ns.safecall(ns.UI_SetDungeon, nil)
+            else
+                selected = { kind = entry.kind, boss = entry.boss }
+                ns.safecall(ns.UI_Refresh)
+            end
         end)
         btn:Show()
         prev = btn
@@ -253,18 +274,55 @@ local sectionTitle = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 sectionTitle:SetPoint("BOTTOMLEFT", scroll, "TOPLEFT", 0, 6)
 sectionTitle:SetText("")
 
+-- Model side-cart: shows the boss model when the selected boss has a
+-- displayID (preferred, always renders) or npcID (needs client cache).
+local sidecar = CreateFrame("Frame", "GuildPlaybookModelFrame", frame, "BackdropTemplate")
+sidecar:SetSize(220, 300)
+sidecar:SetPoint("TOPLEFT", frame, "TOPRIGHT", -6, -30)
+sidecar:SetBackdrop({
+    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+    tile = true, tileSize = 32, edgeSize = 24,
+    insets = { left = 6, right = 6, top = 6, bottom = 6 },
+})
+sidecar:Hide()
+
+local modelTitle = sidecar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+modelTitle:SetPoint("TOP", 0, -16)
+
+local model = CreateFrame("PlayerModel", nil, sidecar)
+model:SetPoint("TOPLEFT", 12, -34)
+model:SetPoint("BOTTOMRIGHT", -12, 12)
+
+local function UpdateSidecar()
+    local boss = (selected.kind == "boss") and selected.boss or nil
+    if not boss or not (boss.displayID or boss.npcID) then
+        sidecar:Hide()
+        return
+    end
+    modelTitle:SetText(boss.name)
+    model:ClearModel()
+    if boss.displayID then
+        model:SetDisplayInfo(boss.displayID)
+    else
+        model:SetCreature(boss.npcID)
+    end
+    model:SetRotation(0.5)
+    sidecar:Show()
+end
+
 -- ------------------------------------------------------------------
 -- Public API used by Core.lua
 -- ------------------------------------------------------------------
 
 function ns.UI_Refresh()
-    local d = ns.currentDungeon
+    local d = viewedDungeon
     UpdateRoleTabs()
     UpdateNavHighlight()
     if not d then
-        subtitle:SetText(C.DIM .. "No playbook for this zone. /gp list" .. C.R)
-        sectionTitle:SetText("")
-        text:SetText(C.DIM .. "Enter a covered dungeon, or use /gp list to see loaded playbooks." .. C.R)
+        subtitle:SetText(C.DIM .. "Pick a dungeon" .. C.R)
+        sectionTitle:SetText("Playbooks")
+        text:SetText(C.DIM .. "Select a dungeon on the left.\n\nThe playbook loads automatically when you enter a covered dungeon." .. C.R)
     else
         subtitle:SetText(d.dungeon .. C.DIM .. "  —  " .. (d.season or "") .. C.R)
         if selected.kind == "boss" and selected.boss then
@@ -277,15 +335,21 @@ function ns.UI_Refresh()
     end
     content:SetHeight(text:GetStringHeight() + 20)
     scroll:SetVerticalScroll(0)
+    UpdateSidecar()
 end
 
 function ns.UI_SetDungeon(d)
+    viewedDungeon = d
     selected = { kind = "overview", boss = nil }
     BuildNav(d)
     ns.UI_Refresh()
 end
 
-function ns.UI_SelectBoss(boss)
+function ns.UI_SelectBoss(dungeon, boss)
+    if viewedDungeon ~= dungeon then
+        viewedDungeon = dungeon
+        BuildNav(dungeon)
+    end
     selected = { kind = "boss", boss = boss }
     ns.UI_Refresh()
     frame:Show()
@@ -307,5 +371,7 @@ function ns.UI_Toggle()
         frame:Show()
     end
 end
+
+BuildNav(nil)   -- start in dungeon-list mode until zone detection kicks in
 
 ns.uiLoaded = true

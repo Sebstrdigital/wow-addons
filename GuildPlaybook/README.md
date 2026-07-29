@@ -15,7 +15,7 @@ Copy the `GuildPlaybook` folder into `World of Warcraft/_retail_/Interface/AddOn
 
 ## Editing content
 
-1. Edit or add a YAML file under `content/<season>/` — one file per dungeon. Follow the structure of `content/midnight-s1/magisters-terrace.yaml`: a per-role dungeon overview plus one entry per boss with `job` / `avoid` / `defensive` (healers: `cooldowns`) / `reminder` lists per role and a shared `wipe` list.
+1. Edit or add a YAML file under `content/<season>/` — one file per dungeon. Follow the structure of `content/midnight-s1/magisters-terrace.yaml`: a per-role dungeon overview plus one entry per boss with `job` / `avoid` / `defensive` (healers: `cooldowns`) / `reminder` lists per role and a shared `wipe` list. Optional per boss: `displayID` (or `npcID`) shows a 3D model of the boss next to the panel — both numbers are on the boss's Wowhead page (npc ID is in the URL, display ID under "Screenshots/Modelviewer" or via the wow.tools/MDT data).
 2. Run `python3 tools/generate.py` from the `GuildPlaybook` folder (needs PyYAML). It validates the YAML and writes `Data/<Season>/<Dungeon>.lua`.
 3. Add any **new** Data file to `GuildPlaybook.toc` (below `Core.lua`).
 4. `/reload` in-game.

@@ -122,7 +122,7 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2)
         end
         local hit = ns.byEncounterID[encounterID]
         if hit and hit.dungeon == ns.currentDungeon then
-            ns.safecall(ns.UI_SelectBoss, hit.boss)
+            ns.safecall(ns.UI_SelectBoss, hit.dungeon, hit.boss)
         end
     elseif event == "ENCOUNTER_END" then
         if ns.currentDungeon then

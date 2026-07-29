@@ -89,6 +89,8 @@ ns.RegisterDungeon({
     {
       ["name"] = "Arcanotron Custos",
       ["encounterID"] = nil,
+      ["npcID"] = nil,
+      ["displayID"] = nil,
       ["wipe"] = {
         "An Energy Orb reaching the boss damages the group and empowers it.",
         "Poor puddle placement can leave the group without safe space.",
@@ -151,6 +153,8 @@ ns.RegisterDungeon({
     {
       ["name"] = "Seranel Sunlash",
       ["encounterID"] = nil,
+      ["npcID"] = nil,
+      ["displayID"] = nil,
       ["wipe"] = {
         "Standing outside the Suppression Zone when the silence cast finishes causes heavy damage and an eight-second pacify.",
         "Clearing two Runic Marks together can stack group damage.",
@@ -211,6 +215,8 @@ ns.RegisterDungeon({
     {
       ["name"] = "Gemellus",
       ["encounterID"] = nil,
+      ["npcID"] = nil,
+      ["displayID"] = nil,
       ["wipe"] = {
         "Reaching a copy during Astral Grasp causes extreme damage.",
         "Failing Neural Link leaves the boss protected and prolongs the encounter.",
@@ -271,6 +277,8 @@ ns.RegisterDungeon({
     {
       ["name"] = "Degentrius",
       ["encounterID"] = nil,
+      ["npcID"] = nil,
+      ["displayID"] = nil,
       ["wipe"] = {
         "Missing an Unstable Void Essence impact damages the whole group; repeated misses can wipe the party.",
         "Null Bomb must be triggered before it expires.",

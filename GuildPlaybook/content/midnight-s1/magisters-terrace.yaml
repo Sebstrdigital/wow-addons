@@ -64,6 +64,8 @@ overview:
 bosses:
   - name: "Arcanotron Custos"
     encounterID: null   # fill via /gp ids
+    npcID: null       # boss npc ID (wowhead URL number) — enables the 3D model side-cart
+    displayID: null   # preferred over npcID: model display ID, renders without cache
     wipe:
       - "An Energy Orb reaching the boss damages the group and empowers it."
       - "Poor puddle placement can leave the group without safe space."
@@ -111,6 +113,8 @@ bosses:
 
   - name: "Seranel Sunlash"
     encounterID: null
+    npcID: null       # boss npc ID (wowhead URL number) — enables the 3D model side-cart
+    displayID: null   # preferred over npcID: model display ID, renders without cache
     wipe:
       - "Standing outside the Suppression Zone when the silence cast finishes causes heavy damage and an eight-second pacify."
       - "Clearing two Runic Marks together can stack group damage."
@@ -156,6 +160,8 @@ bosses:
 
   - name: "Gemellus"
     encounterID: null
+    npcID: null       # boss npc ID (wowhead URL number) — enables the 3D model side-cart
+    displayID: null   # preferred over npcID: model display ID, renders without cache
     wipe:
       - "Reaching a copy during Astral Grasp causes extreme damage."
       - "Failing Neural Link leaves the boss protected and prolongs the encounter."
@@ -201,6 +207,8 @@ bosses:
 
   - name: "Degentrius"
     encounterID: null
+    npcID: null       # boss npc ID (wowhead URL number) — enables the 3D model side-cart
+    displayID: null   # preferred over npcID: model display ID, renders without cache
     wipe:
       - "Missing an Unstable Void Essence impact damages the whole group; repeated misses can wipe the party."
       - "Null Bomb must be triggered before it expires."
