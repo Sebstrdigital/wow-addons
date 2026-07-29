@@ -110,7 +110,7 @@ end
 -- Frame
 -- ------------------------------------------------------------------
 
-local PANEL_W, PANEL_H, NAV_W = 460, 520, 120
+local PANEL_W, PANEL_H, NAV_W = 600, 680, 160
 
 local frame = CreateFrame("Frame", "GuildPlaybookFrame", UIParent, "BackdropTemplate")
 frame:SetSize(PANEL_W, PANEL_H)
@@ -156,7 +156,7 @@ end
 local lastRoleBtn
 for _, role in ipairs({ "TANK", "HEALER", "DPS" }) do
     local btn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    btn:SetSize(70, 22)
+    btn:SetSize(85, 26)
     if lastRoleBtn then
         btn:SetPoint("LEFT", lastRoleBtn, "RIGHT", 4, 0)
     else
@@ -216,10 +216,10 @@ local function BuildNav(d)
         local btn = navButtons[i]
         if not btn then
             btn = CreateFrame("Button", nil, nav)
-            btn:SetHeight(26)
+            btn:SetHeight(30)
             btn:SetPoint("LEFT")
             btn:SetPoint("RIGHT")
-            local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
             fs:SetPoint("LEFT", 2, 0)
             fs:SetPoint("RIGHT", -2, 0)
             fs:SetJustifyH("LEFT")
@@ -263,7 +263,7 @@ local content = CreateFrame("Frame", nil, scroll)
 content:SetSize(PANEL_W - NAV_W - 60, 1)
 scroll:SetScrollChild(content)
 
-local text = content:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+local text = content:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
 text:SetPoint("TOPLEFT")
 text:SetWidth(PANEL_W - NAV_W - 60)
 text:SetJustifyH("LEFT")
@@ -277,7 +277,7 @@ sectionTitle:SetText("")
 -- Model side-cart: shows the boss model when the selected boss has a
 -- displayID (preferred, always renders) or npcID (needs client cache).
 local sidecar = CreateFrame("Frame", "GuildPlaybookModelFrame", frame, "BackdropTemplate")
-sidecar:SetSize(220, 300)
+sidecar:SetSize(300, 420)
 sidecar:SetPoint("TOPLEFT", frame, "TOPRIGHT", -6, -30)
 sidecar:SetBackdrop({
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
