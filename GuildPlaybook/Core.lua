@@ -144,6 +144,7 @@ local function Usage()
     print("  /gp auto        follow your assigned role again")
     print("  /gp ids         toggle ID capture mode (prints instance/encounter IDs)")
     print("  /gp list        list loaded dungeons")
+    print("  /gp minimap     show/hide the minimap button")
 end
 
 SLASH_GUILDPLAYBOOK1, SLASH_GUILDPLAYBOOK2 = "/gp", "/guildplaybook"
@@ -180,6 +181,12 @@ SlashCmdList.GUILDPLAYBOOK = function(msg)
         ns.captureIDs = not ns.captureIDs
         print("|cff69ccf0Guild Playbook:|r ID capture " .. (ns.captureIDs and "ON — enter the dungeon and pull bosses; IDs print to chat." or "off."))
         if ns.captureIDs then CheckZone() end
+    elseif msg == "minimap" then
+        if ns.ToggleMinimapButton then
+            ns.ToggleMinimapButton()
+        else
+            print("|cff69ccf0Guild Playbook:|r minimap button unavailable (libraries failed to load).")
+        end
     elseif msg == "list" then
         for slug, d in pairs(ns.dungeons) do
             print(("  %s (%s, instanceID=%s)"):format(d.dungeon, d.season, tostring(d.instanceID)))
