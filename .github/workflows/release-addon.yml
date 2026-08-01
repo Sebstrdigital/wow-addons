@@ -63,8 +63,23 @@ jobs:
           }))
           PY
           )
-          curl -sf -H "X-Api-Token: ${CF_API_KEY}" \
+          RESPONSE=$(curl -s -w '\n%{http_code}' -H "X-Api-Token: ${CF_API_KEY}" \
             -F "metadata=${METADATA}" \
             -F "file=@GuildPlaybook-${GITHUB_REF_NAME}.zip" \
-            "https://wow.curseforge.com/api/projects/${CF_PROJECT_ID}/upload-files"
-          echo "Uploaded to CurseForge project ${CF_PROJECT_ID}"
+            "https://wow.curseforge.com/api/projects/${CF_PROJECT_ID}/upload-file")
+          HTTP_CODE=$(printf '%s' "$RESPONSE" | tail -n1)
+          BODY=$(printf '%s' "$RESPONSE" | sed '$d')
+          FILE_ID=$(python3 - "$HTTP_CODE" "$BODY" <<'PY'
+          import json, sys
+          code, body = sys.argv[1], sys.argv[2]
+          try:
+              file_id = json.loads(body)["id"]
+          except Exception:
+              file_id = None
+          if not code.startswith("2") or not isinstance(file_id, int):
+              print(f"CurseForge upload failed (HTTP {code}): {body[:2000]}", file=sys.stderr)
+              sys.exit(1)
+          print(file_id)
+          PY
+          )
+          echo "Uploaded to CurseForge project ${CF_PROJECT_ID}, file id ${FILE_ID}"
