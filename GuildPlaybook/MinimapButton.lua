@@ -12,7 +12,7 @@ local ROLE_CYCLE = { TANK = "HEALER", HEALER = "DPS", DPS = nil }
 local broker = ldb:NewDataObject("GuildPlaybook", {
     type = "launcher",
     text = "Stand as One's Playbook",
-    icon = "Interface\\Icons\\INV_Misc_Book_09",
+    icon = "Interface\\AddOns\\GuildPlaybook\\Media\\icon",
     OnClick = function(_, button)
         if button == "RightButton" then
             -- Cycle role view: auto -> TANK -> HEALER -> DPS -> auto,

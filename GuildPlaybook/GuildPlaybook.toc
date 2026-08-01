@@ -4,7 +4,7 @@
 ## Author: Sebastian & guild
 ## Version: 0.4.0
 ## SavedVariables: GuildPlaybookDB
-## IconTexture: Interface\Icons\INV_Misc_Book_09
+## IconTexture: Interface\AddOns\GuildPlaybook\Media\icon
 ## AddonCompartmentFunc: GuildPlaybook_OnAddonCompartmentClick
 
 Libs\LibStub\LibStub.lua
