@@ -13,6 +13,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check TOC version matches tag
+        run: |
+          set -euo pipefail
+          TOC_VERSION=$(sed -n 's/^## Version:[[:space:]]*//p' GuildPlaybook/GuildPlaybook.toc | tr -d '\r')
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$TOC_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::TOC version (${TOC_VERSION}) does not match tag (${TAG_VERSION}). Bump GuildPlaybook.toc before tagging." >&2
+            exit 1
+          fi
+
       - name: Build addon zip
         run: |
           VERSION="${GITHUB_REF_NAME}"
@@ -52,6 +62,10 @@ jobs:
           PY
           )
           echo "Game version IDs: ${IDS}"
+          if [ "${IDS}" = "[]" ]; then
+            echo "::error::No CurseForge game-version IDs matched the TOC Interface versions. CurseForge's version list may lag the patch — upload manually once and retry next tag." >&2
+            exit 1
+          fi
           METADATA=$(python3 - "$IDS" <<'PY'
           import json, os, sys
           print(json.dumps({
