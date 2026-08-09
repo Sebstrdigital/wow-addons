@@ -161,7 +161,6 @@ local function BuildTrashText(segment, role)
     local calls = (segment.roles or {})[role]
     local out = {}
 
-    heading(out, segment.name)
     if calls and #calls > 0 then
         heading(out, "Your calls", C[role])
         bullets(calls, out)
@@ -177,6 +176,10 @@ end
 -- ------------------------------------------------------------------
 
 local PANEL_W, PANEL_H, NAV_W = 600, 680, 160
+
+-- Nav rows size themselves to their wrapped label. Trash segment names run well
+-- past the column width, and truncating them made distinct entries read alike.
+local NAV_ROW_MIN, NAV_ROW_PAD = 30, 10
 
 local frame = CreateFrame("Frame", "GuildPlaybookFrame", UIParent, "BackdropTemplate")
 frame:SetSize(PANEL_W, PANEL_H)
@@ -300,14 +303,15 @@ local function BuildNav(d)
         local btn = navButtons[i]
         if not btn then
             btn = CreateFrame("Button", nil, nav)
-            btn:SetHeight(30)
             btn:SetPoint("LEFT")
             btn:SetPoint("RIGHT")
             local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+            -- An explicit width (rather than a LEFT/RIGHT anchor pair) is what
+            -- makes GetStringHeight report the wrapped height right away.
             fs:SetPoint("LEFT", 2, 0)
-            fs:SetPoint("RIGHT", -2, 0)
+            fs:SetWidth(NAV_W - 4)
             fs:SetJustifyH("LEFT")
-            fs:SetWordWrap(false)
+            fs:SetWordWrap(true)
             btn:SetFontString(fs)
             btn:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
             navButtons[i] = btn
@@ -321,6 +325,7 @@ local function BuildNav(d)
             btn:SetPoint("TOP", nav, "TOP", 0, 0)
         end
         btn:SetText(entry.label)
+        btn:SetHeight(math.max(NAV_ROW_MIN, btn:GetFontString():GetStringHeight() + NAV_ROW_PAD))
         btn.kind, btn.boss, btn.segment = entry.kind, entry.boss, entry.segment
         btn:SetScript("OnClick", function()
             if entry.kind == "dungeon" then

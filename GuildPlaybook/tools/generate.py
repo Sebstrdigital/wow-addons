@@ -25,6 +25,15 @@ DATA = ROOT / "Data"
 ROLES = ("TANK", "HEALER", "DPS")
 ROLE_SECTIONS = ("job", "avoid", "defensive", "cooldowns", "reminder")
 
+# Anything not listed here is a typo. A misspelled key used to survive
+# generation and then be silently ignored by the Lua side, which lost a whole
+# feature for that dungeon without a single error anywhere.
+TOP_LEVEL_KEYS = (
+    "dungeon", "slug", "season", "patch", "sourceVersion", "instanceID",
+    "quicksheet", "overview", "bosses", "minibosses", "trashSegments",
+)
+SEGMENT_KEYS = ("name", "after", "npcs", "roles")
+
 
 def fail(msg):
     sys.exit(f"error: {msg}")
@@ -114,6 +123,9 @@ def validate_trash_segments(doc, path):
         if not isinstance(name, str) or not name.strip():
             fail(f"{where}: 'name' must be a non-empty string")
         where = f"{path}: trashSegments '{name}'"
+        for key in seg:
+            if key not in SEGMENT_KEYS:
+                fail(f"{where}: unknown key '{key}' (use {'/'.join(SEGMENT_KEYS)})")
         after = seg.get("after")
         if after is not None:
             if not isinstance(after, str):
@@ -138,9 +150,15 @@ def validate_trash_segments(doc, path):
 
 
 def validate(doc, path):
+    if not isinstance(doc, dict):
+        fail(f"{path}: document must be a mapping (got {type(doc).__name__})")
     for key in ("dungeon", "slug", "season", "overview", "bosses"):
         if key not in doc:
             fail(f"{path}: missing top-level key '{key}'")
+    for key in doc:
+        if key not in TOP_LEVEL_KEYS:
+            fail(f"{path}: unknown top-level key '{key}' "
+                 f"(valid: {', '.join(TOP_LEVEL_KEYS)})")
     validate_overview(doc.get("overview") or {}, path)
     validate_quicksheet(doc, path)
     validate_trash_segments(doc, path)
@@ -164,7 +182,7 @@ def lua_str(s):
     # WoW's default fonts have no glyph for "→" (renders as a box) — keep
     # arrows in the YAML for readability, ship ">" in-game.
     s = str(s).replace("→", ">")
-    s = s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+    s = s.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n").replace("\r", "\\r")
     return f'"{s}"'
 
 
