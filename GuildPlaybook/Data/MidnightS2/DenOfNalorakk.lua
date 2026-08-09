@@ -7,13 +7,13 @@ ns.RegisterDungeon({
   ["slug"] = "den-of-nalorakk",
   ["season"] = "midnight-s2",
   ["patch"] = "12.1.0",
-  ["sourceVersion"] = "0.9",
+  ["sourceVersion"] = "0.10",
   ["instanceID"] = nil,
   ["quicksheet"] = {
     ["trash"] = {
-      ["TANK"] = "Keen-Eyed Screecher — Piercing Screech: group and control.; Spirit of Hunger — Starvation Effigy: tank beside it.; The Winter Squall — Harsh Winds: priority target.; Grizzled Warbringer — Poison Spear Volley: keep space clear.; Grizzled Warbringer — Primal Echo: mitigate.",
-      ["HEALER"] = "Keen-Eyed Screecher — Piercing Screech: pre-position for silence.; Spirit of Hunger — Starvation Effigy: kill; max health falls.; The Winter Squall — Harsh Winds: heal while moving.; Grizzled Warbringer — Poison Spear Volley: prepare for misses.; Grizzled Warbringer — Primal Echo: react quickly.",
-      ["DPS"] = "Keen-Eyed Screecher — Piercing Screech: interrupt / stop.; Spirit of Hunger — Starvation Effigy: kill immediately.; The Winter Squall — Harsh Winds: kill first.; Grizzled Warbringer — Poison Spear Volley: dodge.; Grizzled Warbringer — Primal Echo: use a personal.",
+      ["TANK"] = "Keen-Eyed Screecher — Piercing Screech: group and stop.; Spirit of Hunger — Starvation Effigy: tank beside it.; The Winter Squall — Harsh Winds: keep shelter close.; Grizzled Warbringer — Poison Spear Volley: keep space clear.; Grizzled Warbringer — Primal Echo: mitigate.",
+      ["HEALER"] = "Keen-Eyed Screecher — Piercing Screech: pre-position for silence.; Spirit of Hunger — Starvation Effigy: kill it; maximum health falls.; The Winter Squall — Harsh Winds: heal while moving.; Grizzled Warbringer — Poison Spear Volley: prepare for missed circles.; Grizzled Warbringer — Primal Echo: react quickly.",
+      ["DPS"] = "Keen-Eyed Screecher — Piercing Screech: interrupt / stop.; Spirit of Hunger — Starvation Effigy: kill immediately.; The Winter Squall — Harsh Winds: kill first.; Grizzled Warbringer — Poison Spear Volley: dodge circles.; Grizzled Warbringer — Primal Echo: use a personal.",
       ["ROUTE"] = "Foraging > Hoardmonger > Winter > Sentinel > Heart of Rage > Nalorakk.",
     },
   },
@@ -58,7 +58,7 @@ ns.RegisterDungeon({
         "Personal defensives: boss roars, Frozen Tempest and difficult Fury sequences.",
       },
       ["pullWarnings"] = {
-        "Keen-Eyed Screecher — Razor Dive: Use a defensive if targeted repeatedly; stop the eagle where possible.",
+        "Keen-Eyed Screecher — Razor Dive: The cast is less frequent after the PTR cooldown increase; use a defensive if repeatedly targeted.",
         "Spirit of Hunger — Starvation Effigy: Immediate swap: kill the Starvation Effigy before health reduction stacks.",
         "Territorial Matriarch — Mother's Wrath: Use a stop if available and give the healer room to dispel.",
         "The Winter Squall — Harsh Winds: Priority target. Kill The Winter Squall to end Harsh Winds.",
@@ -71,7 +71,146 @@ ns.RegisterDungeon({
         "Loa Speaker Nanea — Volatile Totem: Immediate swap to Volatile Totems. Exact release behaviour requires live verification.",
       },
     },
-    ["tip"] = "Mechanics beat uptime.",
+    ["tip"] = {
+      "Mechanics beat uptime: clear mushrooms, soak Rimeshatter and place echoes outside.",
+      "Version 0.10, reviewed and verified 9 August 2026; supersedes PTR Draft 0.9 (27 July 2026). The documents claim four changes since 27 July; date-anchored in the text: Razor Dive's cooldown increased (28 July PTR) and Fury of the War God echoes gained a new 1-second pre-charge window. Also new in this draft, though not explicitly dated: Bonded Beasttamer's Overwhelmed Prey removed, Overwhelming Onslaught knockback reduced 50%.",
+      "Requires live verification: the Glacial Revenant, Frigid Mauler/Terra Rumbler and Bonded Beasttamer ability packages; the Loyal Saberfang cast name; and the Screecher/Striker naming discrepancy.",
+    },
+  },
+  ["trashSegments"] = {
+    {
+      ["name"] = "Opening trash — The Foraging",
+      ["after"] = nil,
+      ["npcs"] = {
+        {
+          ["name"] = "Keen-Eyed Screecher",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Spirit of Hunger",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Territorial Matriarch",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Keen-Eyed Screecher — Piercing Screech: Group it tightly; the cast damages and silences the party for 2 seconds.",
+          "Keen-Eyed Screecher — Razor Dive: The 28 July PTR increased its cooldown; still watch repeated dives and the stacking bleed.",
+          "Spirit of Hunger — Starvation Effigy: Keep the pack near the effigy so the group can swap immediately.",
+          "Territorial Matriarch — Mother's Wrath: Expect rising pressure while stacks remain.",
+        },
+        ["HEALER"] = {
+          "Keen-Eyed Screecher — Piercing Screech: Pre-position before the silence; do not begin a long cast as Screech completes.",
+          "Keen-Eyed Screecher — Razor Dive: The cast is less frequent after the PTR change; track and stabilise the stacking bleed.",
+          "Spirit of Hunger — Starvation Effigy: Maximum health falls while the effigy lives; do not try to heal through it.",
+          "Territorial Matriarch — Mother's Wrath: Dispel Mother's Wrath; the current PTR removes all stacks.",
+        },
+        ["DPS"] = {
+          "Keen-Eyed Screecher — Piercing Screech: Top stop priority. Interrupt or crowd-control the party-wide silence.",
+          "Keen-Eyed Screecher — Razor Dive: The cast is less frequent after the PTR change; use a defensive if repeatedly targeted.",
+          "Spirit of Hunger — Starvation Effigy: Immediate swap. Kill the effigy before maximum-health reduction stacks.",
+          "Territorial Matriarch — Mother's Wrath: Stop the cast where possible and give the healer room to dispel.",
+        },
+      },
+    },
+    {
+      ["name"] = "Winter gauntlet — after The Hoardmonger",
+      ["after"] = "The Hoardmonger",
+      ["npcs"] = {
+        {
+          ["name"] = "The Winter Squall",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Glacial Revenant",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Frigid Mauler",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Terra Rumbler",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "The Winter Squall — Harsh Winds: Pull deliberately and keep the group near shelter; killing the Squall ends Harsh Winds.",
+          "Glacial Revenant — Current ability package: Requires live verification. Avoid combining it with another unknown high-risk pack.",
+          "Frigid Mauler / Terra Rumbler — Current ability package: Requires live verification. Face large enemies away until frontals are confirmed.",
+        },
+        ["HEALER"] = {
+          "The Winter Squall — Harsh Winds: Heal while moving between shelter; the effect ends when the Squall dies.",
+          "Glacial Revenant — Current ability package: Requires live verification. Keep a cooldown available for first contact.",
+          "Frigid Mauler / Terra Rumbler — Current ability package: Requires live verification. Watch tank damage during the first pulls.",
+        },
+        ["DPS"] = {
+          "The Winter Squall — Harsh Winds: Priority target. Kill the Squall to stop Harsh Winds.",
+          "Glacial Revenant — Current ability package: Requires live verification. Watch the cast bar and stop dangerous casts.",
+          "Frigid Mauler / Terra Rumbler — Current ability package: Requires live verification. Respect frontals and ground telegraphs.",
+        },
+      },
+    },
+    {
+      ["name"] = "Heart of Rage — after Sentinel of Winter",
+      ["after"] = "Sentinel of Winter",
+      ["npcs"] = {
+        {
+          ["name"] = "Grizzled Warbringer",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Bonded Beasttamer",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Loyal Saberfang",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Loa Speaker Nanea",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Grizzled Warbringer — Poison Spear Volley: Keep the area readable; impacts land after a 3-second travel time.",
+          "Grizzled Warbringer — Primal Echo: Use mitigation during the short, intense damage-over-time window.",
+          "Bonded Beasttamer — Current ability package: Control it with its bonded beast. Overwhelmed Prey was removed.",
+          "Loyal Saberfang — Fixate (cast name unconfirmed): Help control its path while it pursues a non-tank player.",
+          "Loa Speaker Nanea — Volatile Totem: Position Nanea so the group can reach spawned totems.",
+        },
+        ["HEALER"] = {
+          "Grizzled Warbringer — Poison Spear Volley: Prepare for avoidable party damage if players are slow to move.",
+          "Grizzled Warbringer — Primal Echo: React quickly to the short, high periodic-damage window.",
+          "Bonded Beasttamer — Current ability package: Expect a dangerous pack; the release-build cast list still needs confirmation.",
+          "Loyal Saberfang — Fixate (cast name unconfirmed): Keep the pursued player stable.",
+          "Loa Speaker Nanea — Volatile Totem: Prepare for damage if a totem is not removed quickly.",
+        },
+        ["DPS"] = {
+          "Grizzled Warbringer — Poison Spear Volley: Move out of impact circles; current travel time is 3 seconds.",
+          "Grizzled Warbringer — Primal Echo: Use a personal if targeted and avoid adding spear damage.",
+          "Bonded Beasttamer — Current ability package: Priority target; exact current interrupt list requires live verification.",
+          "Loyal Saberfang — Fixate (cast name unconfirmed): Priority kill; the targeted player kites without crossing the group.",
+          "Loa Speaker Nanea — Volatile Totem: Immediate swap to Volatile Totems; exact release behaviour requires live verification.",
+        },
+      },
+    },
   },
   ["bosses"] = {
     {
@@ -203,9 +342,9 @@ ns.RegisterDungeon({
     {
       ["name"] = "Nalorakk",
       ["sheet"] = {
-        ["TANK"] = "Use Zul'jarra's cover > keep echoes outside > protect her.",
-        ["HEALER"] = "Heal interceptors > cover Fury > stay away from echoes.",
-        ["DPS"] = "Drop outside > intercept one lane > avoid stored echoes.",
+        ["TANK"] = "Use Zul'jarra's cover > 1-second lane check > intercept echoes.",
+        ["HEALER"] = "Pre-heal Fury > use the 1-second window > heal interceptors.",
+        ["DPS"] = "Drop outside > take your lane in 1 second > intercept once.",
         ["WIPE"] = "Echoes reaching Zul'jarra trigger group damage and a stacking damage-taken penalty.",
       },
       ["encounterID"] = nil,
@@ -219,9 +358,9 @@ ns.RegisterDungeon({
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
-            "Stand in Zul'jarra's Defensive Stance coverage for Overwhelming Onslaught.",
+            "Stand behind Zul'jarra for Overwhelming Onslaught; its PTR knockback is 50% lower, but the protection remains required.",
             "Keep Echoing Maul placements away from the centre.",
-            "Help assign separate echo-interception lanes during Fury of the War God.",
+            "Echoes now wait 1 second before charging — use that window to help assign separate echo-interception lanes during Fury of the War God.",
           },
           ["avoid"] = {
             "Stored Echoing Maul locations and unsafe Forceful Slam angles.",
@@ -230,15 +369,16 @@ ns.RegisterDungeon({
             "Mitigate Overwhelming Onslaught and Forceful Slam.",
             "Use a group defensive for difficult Fury sequences.",
           },
-          ["reminder"] = "Use Zul'jarra's cover > keep echoes outside > protect her.",
+          ["reminder"] = "Use Zul'jarra's cover > 1-second lane check > intercept echoes.",
         },
         ["HEALER"] = {
           ["job"] = {
             "Keep echo interceptors healthy during Fury of the War God.",
-            "Prepare for Overwhelming Onslaught as a group mechanic.",
+            "Prepare for Overwhelming Onslaught as a group mechanic; its knockback is 50% lower on the current PTR.",
             "Track the arena before each Echoing Maul.",
             "Recover the party quickly if an echo reaches Zul'jarra.",
             "Current PTR: Fury interceptors no longer receive Spectral Slash from the intercepted echo.",
+            "Use the new 1-second pre-charge window on Fury echoes to confirm lanes and prepare recovery.",
           },
           ["avoid"] = {
             "Stored Echoing Maul locations and duplicate interceptions.",
@@ -246,12 +386,12 @@ ns.RegisterDungeon({
           ["cooldowns"] = {
             "Use a healing cooldown during Fury; save recovery for a failed interception.",
           },
-          ["reminder"] = "Heal interceptors > cover Fury > stay away from echoes.",
+          ["reminder"] = "Pre-heal Fury > use the 1-second window > heal interceptors.",
         },
         ["DPS"] = {
           ["job"] = {
             "Place Echoing Maul at an outside edge.",
-            "Intercept one assigned echo during Fury of the War God.",
+            "Intercept one assigned echo during Fury of the War God; echoes now wait 1 second before charging, so take your lane during that window.",
             "Return without crossing stored echoes.",
             "No boss interrupt priority confirmed; mechanic execution is the priority.",
           },
@@ -261,7 +401,7 @@ ns.RegisterDungeon({
           ["defensive"] = {
             "Use a personal before a dangerous Fury or Onslaught sequence.",
           },
-          ["reminder"] = "Drop outside > intercept one lane > avoid stored echoes.",
+          ["reminder"] = "Drop outside > take your lane in 1 second > intercept once.",
         },
       },
     },

@@ -1,12 +1,68 @@
 # Guild Playbook content — Voidscar Arena (Midnight Season 2)
-# Source: guild PDF playbooks (Tank/Healer/DPS, Draft 0.9, patch 12.1 PTR)
+# Source: guild DOCX playbooks "Voidscar Arena - {Tank,Healer,DPS} Playbook and
+#         Cheat Sheet" (Draft 0.10, Patch 12.1 PTR, five-source review verified
+#         9 August 2026).
 # Edit this file, then run tools/generate.py to regenerate the Lua data.
+#
+# Content mapping: the v0.10 documents assert exactly one gameplay change since
+# the prior review (27 July): Atroxus — Noxious Breath cast time 3 sec → 4 sec.
+# That change is applied to Atroxus's sheet, roles and wipe list below. Every
+# other boss's "Quick Reminder" prose reads differently in the new documents
+# (e.g. Taz'Rah, Charonus), but no gameplay change is asserted for them and the
+# same mechanics are still described — that reads as template reformatting, not
+# a tactical change, so their existing wording is preserved rather than rewritten.
+#
+# quicksheet.trash gains a ROUTE entry, transcribed verbatim from the documents'
+# "Route:" line. Caveat: that route opens with a player CHOICE point ("Opening
+# miniboss choice"), and ROUTE is a flat string that cannot represent a branch —
+# both miniboss options are folded into one linear step here; see trashSegments'
+# "Opening trash" segment for the branch detail. The TANK/HEALER/DPS trash
+# one-liners are otherwise unchanged: the new documents' "Top Priority Calls"
+# reorders which ability leads each role's card, but Thundering Storm is still
+# called out in the same documents' trash-section prose, so this reads as a
+# template change rather than a dropped mechanic.
+#
+# REMOVED: none. Checked every quicksheet/overview/boss field against the new
+# documents field-by-field; nothing present before is absent now. The only
+# wording drops are inside the three Atroxus sheet.reminder one-liners, and
+# they are required by the Noxious Breath propagation itself: "keep the arena
+# clean" (TANK), "heal Claw" (HEALER) and "kite cleanly" (DPS) no longer fit in
+# the terse reminder once it leads with "4-sec Breath dodge", but the same
+# content survives in full in roles.{TANK,HEALER,DPS}.job/avoid/cooldowns for
+# that boss — moved, not lost.
+#
+# Also without a home: each document opens with a one-line "Role Mission"
+# statement that doesn't fit overview.tip or any other field (it's role
+# philosophy, not a Voidscar-specific tactical tip):
+#   Tank: "Control facing, steady the route and create safe space for every
+#          mechanic."
+#   Healer: "Prepare for predictable group damage, dispel when confirmed and
+#            preserve movement space."
+#   DPS: "Delete priority targets, respect movement mechanics and trade boss
+#         uptime for safety."
+#
+# trashSegments is new this pass: the documents' "Opening Trash", "Relevant
+# Trash — Taz'Rah to Atroxus" and "Relevant Trash — Atroxus to Charonus"
+# sections map onto three segments. Unlike Ruby Life Pools, these sections read
+# identically across all three role documents for this dungeon, so the per-role
+# bullets below combine that shared body text with the role-specific "Top
+# Priority Calls" one-liners from each document's page-1 cheat sheet.
+# npcID/displayID are null throughout: nothing in this repo sources trash NPC
+# IDs, and a wrong displayID renders the wrong creature in-game. "Domanaar
+# lieutenants" is named only as a category in the documents (no specific NPC),
+# so it appears as a role-bullet note rather than an npcs[] entry.
+#
+# Still without a home in the schema: Enemy Forces values, miniboss buff
+# values, the opening-miniboss melee/caster choice mechanic, lieutenant casts
+# and crowd-control interactions — all explicitly flagged "requires live
+# verification" in the source documents and folded into overview.tip instead
+# of modelled as fields.
 
 dungeon: "Voidscar Arena"
 slug: voidscar-arena
 season: midnight-s2
 patch: "12.1.0"
-sourceVersion: "0.9"
+sourceVersion: "0.10"
 instanceID: null   # capture with /gp ids
 
 # All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
@@ -15,6 +71,7 @@ quicksheet:
     TANK: "Raj'kess the Spellstorm — Thundering Storm: Hold the pack steady; leave room for targeted strikes.; Watchful Harrower — Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss.; Devouring Brutalizer — Devour: Protect and help free the target before the cast completes.; Brutal Overseer — Brutal Slam: Mitigate the tank hit and DoT."
     HEALER: "Raj'kess the Spellstorm — Thundering Storm: Prepare spot healing for targeted strikes.; Watchful Harrower — Live Verification: Expect a long, high-pressure miniboss pull.; Devouring Brutalizer — Devour: Keep the target stable while the group breaks it free.; Brutal Overseer — Brutal Slam: Prepare focused tank healing for the hit and DoT."
     DPS: "Raj'kess the Spellstorm — Orb of Disruption: Kill immediately before Disrupting Blast.; Watchful Harrower — Live Verification: Commit priority damage to shorten the pull.; Devouring Brutalizer — Devour: Swap immediately and free the target.; Brutal Overseer — Brutal Slam: Use a personal if other damage overlaps."
+    ROUTE: "Opening miniboss choice → Taz'Rah → Watchful Harrower section → Atroxus → Domanaar lieutenants → Charonus."
 
 overview:
   interrupts:
@@ -54,6 +111,67 @@ overview:
     - "Tank: Preserve movement for gravity pulls and knockbacks."
     - "Healer: Enter Watchful Harrower with mana and a cooldown ready."
     - "DPS: Priority mechanics are worth more than boss uptime."
+    - "Version 0.10, five-source review verified 9 August 2026. One gameplay change found since 27 July: Atroxus — Noxious Breath cast time increased 3 sec → 4 sec."
+    - "Version note: current live game remains Midnight Season 1 / Patch 12.0.7 as of 9 Aug; this guide targets Season 2 / Patch 12.1 PTR."
+    - "Requires live verification: final 12.1 trash placements, Enemy Forces values, miniboss buffs, lieutenant casts, crowd-control interactions and post-PTR tuning."
+
+# Named trash packs between the bosses, straight from the playbooks' trash sections.
+trashSegments:
+  - name: "Opening trash — before Taz'Rah"
+    after: null
+    npcs:
+      - { name: "Raj'kess the Spellstorm", npcID: null, displayID: null }
+      - { name: "Agitated Voidscythe", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Raj'kess the Spellstorm — Orb of Disruption: Destroy the orb immediately before Disrupting Blast; face the pack cleanly and call the kill."
+        - "Raj'kess the Spellstorm — Thundering Storm: Avoid the targeted lightning strikes; hold the pack steady and leave room for strikes."
+        - "Agitated Voidscythe — Corrosive Essence: Separate from other targeted players."
+        - "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification."
+      HEALER:
+        - "Raj'kess the Spellstorm — Orb of Disruption: Support the immediate orb kill before Disrupting Blast."
+        - "Raj'kess the Spellstorm — Thundering Storm: Avoid the targeted lightning strikes; prepare spot healing for hits."
+        - "Agitated Voidscythe — Corrosive Essence: Separate targeted players and triage quickly."
+        - "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification."
+      DPS:
+        - "Raj'kess the Spellstorm — Orb of Disruption: Kill immediately before Disrupting Blast."
+        - "Raj'kess the Spellstorm — Thundering Storm: Avoid the targeted lightning strikes."
+        - "Agitated Voidscythe — Corrosive Essence: Separate from other targeted players."
+        - "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification."
+
+  - name: "Watchful Harrower trash — Taz'Rah to Atroxus"
+    after: "Taz'Rah"
+    npcs:
+      - { name: "Watchful Harrower", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Watchful Harrower — Requires Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss; confirm its final live ability package."
+        - "Position: Avoid adding nearby packs; Watchful Harrowers have true sight."
+      HEALER:
+        - "Watchful Harrower — Requires Live Verification: Expect a long, high-pressure miniboss pull; confirm its final live ability package."
+        - "Position: Avoid adding nearby packs; Watchful Harrowers have true sight."
+      DPS:
+        - "Watchful Harrower — Requires Live Verification: Commit priority damage to shorten the pull; confirm its final live ability package."
+        - "Position: Avoid adding nearby packs; Watchful Harrowers have true sight."
+
+  - name: "Domanaar lieutenants trash — Atroxus to Charonus"
+    after: "Atroxus"
+    npcs:
+      - { name: "Devouring Brutalizer", npcID: null, displayID: null }
+      - { name: "Brutal Overseer", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Devouring Brutalizer — Devour: Protect and help free the target before the cast completes; keep the trapped player reachable for the swap."
+        - "Brutal Overseer — Brutal Slam: Mitigate the tank hit and DoT; keep the impact away from allies."
+        - "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification."
+      HEALER:
+        - "Devouring Brutalizer — Devour: Keep the target stable while the group breaks it free; pre-heal the trapped target."
+        - "Brutal Overseer — Brutal Slam: Prepare focused tank healing for the hit and DoT."
+        - "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification."
+      DPS:
+        - "Devouring Brutalizer — Devour: Swap immediately and free the target."
+        - "Brutal Overseer — Brutal Slam: Use a personal if other damage overlaps."
+        - "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification."
 
 bosses:
   - name: "Taz'Rah"
@@ -101,36 +219,39 @@ bosses:
 
   - name: "Atroxus"
     sheet:
-      TANK: "Face away → mitigate Claw → keep the arena clean."
-      HEALER: "Cooldown Roar → heal Claw → avoid the Creeper."
-      DPS: "Creeper first → kite cleanly → dodge Breath."
-      WIPE: "Roar facing the group or an uncontrolled Toxic Creeper."
+      TANK: "Face away → 4-sec Breath dodge → Creeper first."
+      HEALER: "4-sec Breath move → Roar cooldown → Creeper pressure."
+      DPS: "Creeper first → 4-sec Breath dodge → avoid pools."
+      WIPE: "Breath through the group or leaving the Toxic Creeper alive beside players."
     encounterID: null
     npcID: 239008      # wowhead
     displayID: 131553  # wowhead modelviewer
     wipe:
-      - "Roar facing the group or an uncontrolled Toxic Creeper."
-      - "A Creeper surviving during Roar or heavy tank damage."
+      - "Breath through the group or leaving the Toxic Creeper alive beside players."
+      - "An ignored Creeper compounds aura damage during Roar or poison pools."
       - "Ignoring the Creeper and allowing its aura to pressure the group."
     roles:
       TANK:
         job:
           - "Face Atroxus away."
-          - "Mitigate Hulking Claw and aim Sickening Roar away."
+          - "Mitigate Hulking Claw and recover from its knockback and damage-over-time effect."
+          - "Make the Toxic Creeper easy to reach."
         avoid:
-          - "Noxious Breath, Poison Splash and Poison Pools."
+          - "Noxious Breath — now a 4-sec cast; use the longer warning to sidestep without spinning the boss."
+          - "Poison Splash and Poison Pools."
         defensive:
-          - "Use a defensive for Hulking Claw and its lingering damage."
-        reminder: "Face away → mitigate Claw → keep the arena clean."
+          - "Use a defensive for Hulking Claw or a dangerous Sickening Roar overlap."
+        reminder: "Face away → 4-sec Breath dodge → Creeper first."
       HEALER:
         job:
-          - "Prepare for Sickening Roar and heal Hulking Claw's lingering damage."
+          - "Cover Sickening Roar and the tank's Hulking Claw damage."
           - "Prioritise the tank and the Toxic Creeper's fixated target."
         avoid:
-          - "Noxious Breath, Poison Splash and the Creeper's close aura."
+          - "Noxious Breath — now a 4-sec cast; reposition during the longer window."
+          - "Poison Splash and the Creeper's close aura."
         cooldowns:
-          - "Use group healing for Sickening Roar."
-        reminder: "Cooldown Roar → heal Claw → avoid the Creeper."
+          - "Use group healing for Sickening Roar; save throughput after repositioning for the 4-sec Breath."
+        reminder: "4-sec Breath move → Roar cooldown → Creeper pressure."
       DPS:
         job:
           - "Kill the Toxic Creeper immediately."
@@ -140,8 +261,8 @@ bosses:
         avoid:
           - "Noxious Breath, poison impacts, pools and the Creeper aura."
         defensive:
-          - "Use a personal for Sickening Roar."
-        reminder: "Creeper first → kite cleanly → dodge Breath."
+          - "Noxious Breath now casts for 4 sec — move early, and use a personal for Sickening Roar."
+        reminder: "Creeper first → 4-sec Breath dodge → avoid pools."
 
   - name: "Charonus"
     sheet:

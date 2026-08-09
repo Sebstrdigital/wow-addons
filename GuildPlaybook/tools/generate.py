@@ -75,12 +75,75 @@ def validate_quicksheet(doc, path):
                     fail(f"{path}: {boss.get('name')}: sheet keys must be TANK/HEALER/DPS/WIPE with string values (got {k})")
 
 
+def validate_npcs(npcs, where):
+    if npcs is None:
+        return
+    if not isinstance(npcs, list):
+        fail(f"{where}: 'npcs' must be a list")
+    for j, npc in enumerate(npcs, 1):
+        if not isinstance(npc, dict):
+            fail(f"{where}: npcs #{j} must be a mapping")
+        name = npc.get("name")
+        if not isinstance(name, str) or not name.strip():
+            fail(f"{where}: npcs #{j} 'name' must be a non-empty string")
+        for key in npc:
+            if key not in ("name", "npcID", "displayID"):
+                fail(f"{where}: npcs '{name}': unknown key '{key}' (use name/npcID/displayID)")
+        for key in ("npcID", "displayID"):
+            val = npc.get(key)
+            # Most trash IDs are still unknown, so null is the expected state:
+            # names are authored now and the IDs backfilled later.
+            if val is None:
+                continue
+            if isinstance(val, bool) or not isinstance(val, int) or val <= 0:
+                fail(f"{where}: npcs '{name}': {key} must be null or a positive integer (got {val!r})")
+
+
+def validate_trash_segments(doc, path):
+    segments = doc.get("trashSegments")
+    if segments is None:
+        return
+    if not isinstance(segments, list):
+        fail(f"{path}: trashSegments must be a list")
+    boss_names = [b.get("name") for b in doc.get("bosses", [])]
+    for i, seg in enumerate(segments, 1):
+        where = f"{path}: trashSegments #{i}"
+        if not isinstance(seg, dict):
+            fail(f"{where}: must be a mapping")
+        name = seg.get("name")
+        if not isinstance(name, str) or not name.strip():
+            fail(f"{where}: 'name' must be a non-empty string")
+        where = f"{path}: trashSegments '{name}'"
+        after = seg.get("after")
+        if after is not None:
+            if not isinstance(after, str):
+                fail(f"{where}: 'after' must be a string or null (got {after!r})")
+            if after not in boss_names:
+                fail(f"{where}: 'after' is {after!r}, which is not a boss in this file "
+                     f"(valid: {', '.join(repr(n) for n in boss_names)})")
+        validate_npcs(seg.get("npcs"), where)
+        roles = seg.get("roles")
+        if roles is None:
+            continue
+        if not isinstance(roles, dict):
+            fail(f"{where}: 'roles' must be a mapping")
+        for role, calls in roles.items():
+            if role not in ROLES:
+                fail(f"{where}: unknown role '{role}' (use {'/'.join(ROLES)})")
+            if not isinstance(calls, list) or not calls:
+                fail(f"{where} {role}: must be a non-empty list of strings")
+            for call in calls:
+                if not isinstance(call, str) or not call.strip():
+                    fail(f"{where} {role}: every call must be a non-empty string (got {call!r})")
+
+
 def validate(doc, path):
     for key in ("dungeon", "slug", "season", "overview", "bosses"):
         if key not in doc:
             fail(f"{path}: missing top-level key '{key}'")
     validate_overview(doc.get("overview") or {}, path)
     validate_quicksheet(doc, path)
+    validate_trash_segments(doc, path)
     for i, boss in enumerate(doc["bosses"] + doc.get("minibosses", []), 1):
         where = f"{path}: boss/miniboss #{i}"
         if "name" not in boss:

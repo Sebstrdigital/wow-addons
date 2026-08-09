@@ -156,6 +156,22 @@ local function BuildBossText(boss, role)
     return table.concat(out, "\n")
 end
 
+-- A named trash segment sitting between two bosses.
+local function BuildTrashText(segment, role)
+    local calls = (segment.roles or {})[role]
+    local out = {}
+
+    heading(out, segment.name)
+    if calls and #calls > 0 then
+        heading(out, "Your calls", C[role])
+        bullets(calls, out)
+    else
+        out[#out + 1] = C.DIM .. "No " .. (ROLE_LABEL[role] or role) .. " calls for this trash." .. C.R
+    end
+
+    return table.concat(out, "\n")
+end
+
 -- ------------------------------------------------------------------
 -- Frame
 -- ------------------------------------------------------------------
@@ -225,7 +241,7 @@ end
 -- Navigation (Overview + bosses) ----------------------------------
 
 local navButtons = {}
-local selected = { kind = "overview", boss = nil }
+local selected = { kind = "overview", boss = nil, segment = nil }
 local viewedDungeon = nil   -- dungeon shown in the panel (may differ from ns.currentDungeon while browsing)
 
 local function SortedDungeons()
@@ -243,6 +259,7 @@ nav:SetWidth(NAV_W)
 local function UpdateNavHighlight()
     for _, btn in ipairs(navButtons) do
         local isSelected = (btn.kind == selected.kind) and (btn.boss == selected.boss)
+                           and (btn.segment == selected.segment)
         btn:GetFontString():SetTextColor(isSelected and 1 or 0.82, isSelected and 0.82 or 0.82, isSelected and 0 or 0.82)
     end
 end
@@ -263,8 +280,19 @@ local function BuildNav(d)
         for _, mb in ipairs(d.minibosses or {}) do
             entries[#entries + 1] = { kind = "boss", boss = mb, label = "* " .. mb.name }
         end
+        -- Trash segments sit in dungeon order: after == nil before the first
+        -- boss, otherwise straight after the boss they name.
+        local function addTrash(afterBoss)
+            for _, seg in ipairs(d.trashSegments or {}) do
+                if seg.after == afterBoss then
+                    entries[#entries + 1] = { kind = "trash", segment = seg, label = "~ " .. seg.name }
+                end
+            end
+        end
+        addTrash(nil)
         for i, boss in ipairs(d.bosses or {}) do
             entries[#entries + 1] = { kind = "boss", boss = boss, label = i .. ". " .. boss.name }
+            addTrash(boss.name)
         end
     end
     local prev
@@ -293,14 +321,14 @@ local function BuildNav(d)
             btn:SetPoint("TOP", nav, "TOP", 0, 0)
         end
         btn:SetText(entry.label)
-        btn.kind, btn.boss = entry.kind, entry.boss
+        btn.kind, btn.boss, btn.segment = entry.kind, entry.boss, entry.segment
         btn:SetScript("OnClick", function()
             if entry.kind == "dungeon" then
                 ns.safecall(ns.UI_SetDungeon, entry.dungeon)
             elseif entry.kind == "back" then
                 ns.safecall(ns.UI_SetDungeon, nil)
             else
-                selected = { kind = entry.kind, boss = entry.boss }
+                selected = { kind = entry.kind, boss = entry.boss, segment = entry.segment }
                 ns.safecall(ns.UI_Refresh)
             end
         end)
@@ -359,9 +387,38 @@ local model = CreateFrame("PlayerModel", nil, sidecar)
 model:SetPoint("TOPLEFT", 12, -34)
 model:SetPoint("BOTTOMRIGHT", -12, 12)
 
+-- Bosses and trash NPCs are both just {name, displayID, npcID}, so they drive
+-- the model the same way.
+local function HasModel(e)
+    return e ~= nil and (e.displayID or e.npcID) ~= nil
+end
+
+local function ApplyModel(e)
+    model:ClearModel()
+    if e.displayID then
+        model:SetDisplayInfo(e.displayID)
+    else
+        model:SetCreature(e.npcID)
+    end
+    model:SetRotation(0.5)
+end
+
+-- Trash is authored with names alone and the IDs backfilled later, so a segment
+-- usually has none yet; take the first that can actually render.
+local function FirstModelledNPC(segment)
+    for _, npc in ipairs(segment.npcs or {}) do
+        if HasModel(npc) then return npc end
+    end
+end
+
 local function UpdateSidecar()
-    local boss = (selected.kind == "boss") and selected.boss or nil
-    if not boss or not (boss.displayID or boss.npcID) then
+    local subject
+    if selected.kind == "boss" then
+        subject = HasModel(selected.boss) and selected.boss or nil
+    elseif selected.kind == "trash" and selected.segment then
+        subject = FirstModelledNPC(selected.segment)
+    end
+    if not subject then
         sidecar:Hide()
         return
     end
@@ -373,14 +430,8 @@ local function UpdateSidecar()
     else
         sidecar:SetPoint("TOPLEFT", frame, "TOPRIGHT", -6, -30)
     end
-    modelTitle:SetText(boss.name)
-    model:ClearModel()
-    if boss.displayID then
-        model:SetDisplayInfo(boss.displayID)
-    else
-        model:SetCreature(boss.npcID)
-    end
-    model:SetRotation(0.5)
+    modelTitle:SetText(subject.name)
+    ApplyModel(subject)
     sidecar:Show()
 end
 
@@ -401,6 +452,9 @@ function ns.UI_Refresh()
         if selected.kind == "boss" and selected.boss then
             sectionTitle:SetText(selected.boss.name)
             text:SetText(BuildBossText(selected.boss, ns.role))
+        elseif selected.kind == "trash" and selected.segment then
+            sectionTitle:SetText(selected.segment.name)
+            text:SetText(BuildTrashText(selected.segment, ns.role))
         elseif selected.kind == "quicksheet" then
             sectionTitle:SetText("Quick sheet — all roles")
             text:SetText(BuildQuicksheetText(d))

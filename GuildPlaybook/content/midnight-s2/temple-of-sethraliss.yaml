@@ -1,6 +1,58 @@
 # Guild Playbook content — Temple of Sethraliss (Midnight Season 2)
-# Source: guild PDF playbooks (Tank/Healer/DPS, Reference Standard 1.6, patch 12.1 PTR)
+# Source: guild DOCX playbooks "Temple of Sethraliss - {Tank,Healer,DPS} Playbook and
+#         Cheat Sheet" (Standard 1.6, Patch 12.1 PTR, reviewed 9 August 2026).
 # Edit this file, then run tools/generate.py to regenerate the Lua data.
+#
+# Version note: these documents declare the SAME "Standard 1.6" as the prior
+# YAML, reviewed 9 August 2026 with no comparison date given — they are the
+# source the existing content was already transcribed from, not a newer
+# revision. sourceVersion stays "1.6". This pass is additive: the new
+# trashSegments field, plus a small set of inline deltas the documents state
+# that the prior YAML had not yet captured. It deliberately does NOT rewrite
+# existing narrative content the documents do not contradict.
+#
+# Content mapping: the documents' four named trash sections (Opening, the two
+# "Relevant Trash" blocks, and the Eyes Gauntlet) map 1:1 onto trashSegments —
+# this dungeon had no trashSegments field before this pass. quicksheet.trash
+# and each boss's `sheet` one-liners are treated as literal transcriptions of
+# the cheat sheets' page-1 cards and updated to match the cards' current
+# wording exactly (OPENING/POSITION/DEFENSIVE/DISPEL/COOLDOWN/ROUTE lines,
+# and each boss's TANK/HEALER/DPS/WIPE line).
+#
+# Confirmed inline deltas applied to overview/roles/wipe beyond trashSegments:
+# - Corrupted Guardian's tank-damage ability is "Vile Charge" (documents no
+#   longer use "Tainted Strike"); renamed everywhere it appears.
+# - Avatar of Sethraliss now has a single Essence Defiler, not multiple
+#   (matches the file's own pre-existing tank-role wording, which was already
+#   singular); "Defilers" changed to "Defiler" elsewhere for consistency.
+# - Adderis and Aspix: Tempest Winds now pacifies for 4 seconds (was 8) and
+#   the documents consistently call the zone "Tempest Winds", not "circle";
+#   the soak is stated as 4.5 seconds; the immune boss is named "Storm
+#   Blessed" (previously just "the vulnerable boss" / unnamed).
+# - Galvazzt: missed beams now feed a Consume Charge that is 60% stronger
+#   (added as a note on the existing wipe line; not previously in the file).
+# - Avatar of Sethraliss: Corruption Burst vulnerability now stacks to a
+#   documented 300% and can chain-wipe (added as a new wipe bullet).
+# - Opening trash, Sandswept Hunter — Arrow Barrage: now a 9-second cast with
+#   lower damage (captured in trashSegments, the field this content belongs
+#   in — this dungeon had no trash content modelled before this pass).
+#
+# REMOVED from the prior YAML by this pass: none. Content absent from the new
+# documents — "Imbued Stormcaller — Shock" in overview.interrupts,
+# "dangerous support enemies" in overview.killPriority, and the "Anchor the
+# pack away from patrols and charge lines" tank pull warning — is RETAINED,
+# suspected doc omission: the documents' page-1 cards are an at-a-glance
+# subset, not an exhaustive trash/interrupt roster, so absence there is not
+# treated as confirmation the content is gone.
+#
+# Still without a home in the schema: the 33-minute PTR timer / reduced Enemy
+# Forces note (folded into overview.tip). The Healer document's Mistweaver
+# Way of the Crane class note is spec-specific and does not fit
+# overview.healer.pressure (a damage-source list, not a class caveat), so it
+# is recorded here instead: "Class note: Mistweaver Way of the Crane is fixed
+# on PTR; similar spells still require live verification."
+# The PTR verification hedges are kept verbatim on purpose; do not clean them
+# out until the guides are re-verified on live.
 
 dungeon: "Temple of Sethraliss"
 slug: temple-of-sethraliss
@@ -9,18 +61,18 @@ patch: "12.1.0"
 sourceVersion: "1.6"
 instanceID: null   # capture with /gp ids
 
-# All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
+# All-roles quick sheet (from the Tank/Healer/DPS cheat sheets' page-1 cards)
 quicksheet:
   trash:
-    TANK: "OPENING: Control Shrouded Fang — Cheap Shot; face Sandfury Stonefist — Ground Pound away.; POSITION: Keep charge lines and frontals clear of the party.; DEFENSIVE: Plan for Overload, Serpentstorm, Galvazzt vulnerability and Tainted Strike."
-    HEALER: "OPENING: Prepare for Sandswept Hunter — Arrow Barrage and Stonefist tank pressure.; DISPEL: Confirm the final Season 2 Poison list after launch.; COOLDOWN: Plan Gale Force → soak, Serpentstorm, beam windows and Corruption Burst."
-    DPS: "INTERRUPT: Shrouded Fang — Cheap Shot; Agitated Nimbus — Accumulate Charge.; KILL FIRST: Burrow adds; Essence Defilers; active Tormentors.; CONTROL: Break A Knot of Snakes; protect the Eye carrier.; DEFENSIVE: Use personals for Arrow Barrage, Serpentstorm, beams and Corruption Burst."
-    ROUTE: "Protect the Eye carrier; final gauntlet cast names require live verification."
+    TANK: "OPENING: Control Shrouded Fang — Cheap Shot; face Sandfury Stonefist — Ground Pound away.; POSITION: Keep charge lines, Burrow paths and beam lanes clear of the party.; DEFENSIVE: Plan for Overload, Serpentstorm, Consume Charge and Guardian pressure."
+    HEALER: "OPENING: Prepare for Sandswept Hunter — Arrow Barrage and Stonefist tank pressure.; DISPEL: Confirm Poison removals live; fewer dungeon abilities remain dispellable.; COOLDOWN: Plan Gale Force → soak, Serpentstorm, three beams and Corruption Burst."
+    DPS: "INTERRUPT: Shrouded Fang — Cheap Shot; Agitated Nimbus — Accumulate Charge.; KILL FIRST: Burrow adds; the single Essence Defiler; active Faithless Tormentors.; CONTROL: Break A Knot of Snakes; stop Essence Disruption in the Eye gauntlet.; DEFENSIVE: Use personals for Arrow Barrage, Serpentstorm, beams and Corruption Burst."
+    ROUTE: "33-minute PTR timer; reduced Enemy Forces allow more routing choice — confirm the live route.; Keep the Eye carrier stable; final gauntlet cast names remain pre-release, requiring live verification."
 
 overview:
   interrupts:
     - { spell: "Charged Dust Devil — Healing Surge", note: "interrupt first" }
-    - { spell: "Agitated Nimbus — Accumulate Charge", note: "interrupt first; assign kicks, purge the buff if it lands" }
+    - { spell: "Agitated Nimbus — Accumulate Charge", note: "interrupt first; assign kicks, purge the buff if it lands — each stack is 8%" }
     - { spell: "Shrouded Fang — Cheap Shot", note: "control the reworked ambush window" }
     - { spell: "Imbued Stormcaller — Shock", note: "interrupt after Nimbus coverage" }
     - { spell: "Twisted Hexxer — Flame Shock", note: "interrupt / priority" }
@@ -28,14 +80,14 @@ overview:
     - "Dangerous casters"
     - "dangerous support enemies"
     - "Merektha's Burrow adds"
-    - "Essence Defilers"
-    - "active Tormentors"
+    - "Essence Defiler"
+    - "active Faithless Tormentors"
   tank:
     damage:
       - "Adderis/Aspix — Overload."
       - "Merektha — Serpentstorm and add pressure."
-      - "Galvazzt — Galvanized vulnerability or Consume Charge."
-      - "Corrupted Guardian — Tainted Strike."
+      - "Galvazzt — Galvanized vulnerability or Consume Charge (missed beams now feed a 60%-stronger Consume Charge)."
+      - "Corrupted Guardian — Vile Charge (renamed from Tainted Strike)."
     pullWarnings:
       - "Do not combine summon waves or charged Nimbuses without cooldowns."
       - "Anchor the pack away from patrols and charge lines."
@@ -78,57 +130,134 @@ overview:
     - "Tank: Set the fight location first; use short, predictable movement."
     - "Healer: Anchor cooldowns to mechanics, not falling health bars."
     - "DPS: One correct interrupt or soak is worth more than one extra global."
+    - "Standard 1.6, reviewed 9 August 2026 against Patch 12.1 PTR notes. Confirm on live before applying blindly."
+    - "Requires live verification: final Eyes-gauntlet cast names, Shadowlash execute threshold, Tormentor execute threshold, and the live dungeon route (33-minute PTR timer, reduced Enemy Forces)."
+
+# Named trash packs between the bosses, straight from the playbooks' trash sections.
+# This dungeon had no trashSegments before this pass — all four are new.
+trashSegments:
+  - name: "Opening trash — before Adderis and Aspix"
+    after: null
+    npcs:
+      # IDs unknown — no source in this repo covers trash NPCs, and /gp ids only
+      # captures instance/encounter IDs. Backfill without touching the schema.
+      - { name: "Shrouded Fang", npcID: null, displayID: null }
+      - { name: "Sandfury Stonefist", npcID: null, displayID: null }
+      - { name: "Sandswept Hunter", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Shrouded Fang — Cheap Shot: Control and stop the ambush cast."
+        - "Sandfury Stonefist — Ground Pound: Face away and dodge the frontal; damage reduced 5% on PTR."
+        - "Sandswept Hunter — Arrow Barrage: Expect tank pressure alongside the caster's spread mechanic."
+      HEALER:
+        - "Sandswept Hunter — Arrow Barrage: Prepare for spread damage and Stonefist tank pressure together; now 9 seconds with lower damage."
+        - "Shrouded Fang — Cheap Shot: Stop the ambush cast before it lands."
+        - "Sandfury Stonefist — Ground Pound: Dodge the frontal; damage reduced 5% on PTR."
+      DPS:
+        - "Shrouded Fang — Cheap Shot: Interrupt the ambush cast."
+        - "Sandswept Hunter — Arrow Barrage: Spread and use a personal if targeted; now 9 seconds with lower damage."
+        - "Sandfury Stonefist — Ground Pound: Dodge the frontal; damage reduced 5% on PTR."
+
+  - name: "Relevant trash — between Adderis and Aspix & Merektha"
+    after: "Adderis and Aspix"
+    npcs:
+      - { name: "Dutiful Tamer", npcID: null, displayID: null }
+      - { name: "Sand-Sworn Rider", npcID: null, displayID: null }
+      - { name: "Barbed Krolusk", npcID: null, displayID: null }
+      - { name: "Swarming Krolusk", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Dutiful Tamer / Sand-Sworn Rider — Swarming Krolusks: Group the summons for cleave; summon health reduced."
+        - "Barbed Krolusk / Swarming Krolusk — Serrated Charge: Keep charge lines away from allies; impact and duration reduced."
+      HEALER:
+        - "Dutiful Tamer / Sand-Sworn Rider — Swarming Krolusks: Prepare for summon-wave damage; summon health reduced."
+        - "Barbed Krolusk / Swarming Krolusk — Serrated Charge: Stabilise the charge target's damage-over-time effect; impact and duration reduced."
+      DPS:
+        - "Dutiful Tamer / Sand-Sworn Rider — Swarming Krolusks: Control and cleave the summons quickly; summon health reduced."
+        - "Barbed Krolusk / Swarming Krolusk — Serrated Charge: Avoid the line; impact and duration reduced."
+
+  - name: "Relevant trash — between Merektha & Galvazzt"
+    after: "Merektha"
+    npcs:
+      - { name: "Agitated Nimbus", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Agitated Nimbus — Accumulate Charge: Assign kicks or purge; each stack is 8%."
+        - "Agitated Nimbus — Release Charge: Prepare recovery if charges remain; the clear bug was fixed."
+      HEALER:
+        - "Agitated Nimbus — Accumulate Charge: Assign kicks or purge; each stack is 8%."
+        - "Agitated Nimbus — Release Charge: Prepare recovery if charges remain; the clear bug was fixed."
+      DPS:
+        - "Agitated Nimbus — Accumulate Charge: Assign kicks or purge; each stack is 8%."
+        - "Agitated Nimbus — Release Charge: Prepare recovery if charges remain; the clear bug was fixed."
+
+  - name: "Eyes gauntlet & final trash — before Avatar of Sethraliss"
+    after: "Galvazzt"
+    npcs:
+      - { name: "Temple Disruptor", npcID: null, displayID: null }
+      - { name: "Eye of Sethraliss", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Temple Disruptor — Essence Disruption: Interrupt to keep the Eye from gaining energy."
+        - "Eye of Sethraliss — Siphon Energy: Protect the nearest carrier and finish both Eyes."
+      HEALER:
+        - "Temple Disruptor — Essence Disruption: Interrupt to keep the Eye from gaining energy."
+        - "Eye of Sethraliss — Siphon Energy: Protect the nearest carrier and finish both Eyes."
+      DPS:
+        - "Temple Disruptor — Essence Disruption: Interrupt to keep the Eye from gaining energy."
+        - "Eye of Sethraliss — Siphon Energy: Protect the nearest carrier and finish both Eyes."
 
 bosses:
   - name: "Adderis and Aspix"
     sheet:
-      TANK: "Hold a clean push-to-soak route."
-      HEALER: "Top before Gale Force; heal the soak."
-      DPS: "Hit the vulnerable boss; place circles at the edge."
-      WIPE: "Silence zones block the soak."
+      TANK: "Hold a clean push-to-soak route; hit only the unshielded boss."
+      HEALER: "Top before Gale Force; heal the 4.5-second soak."
+      DPS: "Hit only the boss without Storm Blessed; place two zones at the edge."
+      WIPE: "Bad Tempest Winds placement blocks the soak."
     encounterID: null   # fill via /gp ids
     npcID: 133379      # wowhead
     displayID: 83550  # wowhead modelviewer
     wipe:
-      - "Bad circle placement blocks Thunder and Lightning."
-      - "Silence zones block the soak."
-      - "A silenced healer or low soak target dies."
-      - "A silence zone stops recovery healing."
-      - "Bad circles wall off the soak."
+      - "Bad Tempest Winds placement blocks Thunder and Lightning."
+      - "Tempest Winds zones block the soak."
+      - "A pacified healer or low soak target dies."
+      - "A Tempest Winds zone stops recovery healing."
+      - "Bad Tempest Winds zones wall off the soak."
+      - "Attacking the boss with Storm Blessed active does no damage — hit only the unshielded target."
     roles:
       TANK:
         job:
-          - "Keep a clean Gale Force route to the soak."
-          - "Hold a clean push-to-soak route."
+          - "Keep a clean Gale Force route to Thunder and Lightning."
+          - "Hold a clean push-to-soak route; hit only the unshielded boss — Storm Blessed is immune."
         avoid:
-          - "Tempest Winds silence zones."
+          - "Tempest Winds zones — they pacify for 4 seconds, not silence."
         defensive:
           - "Mitigate Overload; save mobility for the push."
-        reminder: "Edge circles → same push → soak → move out."
+        reminder: "Edge Tempest Winds zones → same push → 4.5-sec soak → move out."
       HEALER:
         job:
-          - "Top the group before Gale Force."
+          - "Top the group before Gale Force and the 4.5-second group soak."
           - "Cover the soak and its follow-up explosion."
         avoid:
-          - "Tempest Winds; it silences for 8 seconds."
+          - "Tempest Winds; it pacifies for 4 seconds (two zones on Mythic)."
         cooldowns:
           - "Use one for the push-to-soak overlap."
         reminder: "Top → move together → heal soak → spread."
       DPS:
         job:
-          - "Attack the vulnerable boss; place circles at the edge."
+          - "Attack only the boss without Storm Blessed — the protected target is immune; place the two Tempest Winds zones at the edge."
           - "No boss kick; movement and soak are priority."
         avoid:
-          - "Silence zones and over-spreading."
+          - "Tempest Winds zones (they pacify) and over-spreading."
         defensive:
           - "Use a personal for the push-to-soak sequence."
-        reminder: "Edge circles → same push → soak → out."
+        reminder: "Edge Tempest Winds zones → same push → soak → out."
 
   - name: "Merektha"
     sheet:
-      TANK: "Stack Burrow adds away from her path."
-      HEALER: "Top before Serpentstorm; move in Burrow."
-      DPS: "Stack Knot targets; CC; burn Burrow adds."
+      TANK: "Hold stable; stack Burrow adds away from her marked path."
+      HEALER: "Top before Serpentstorm; track Burrow add damage."
+      DPS: "Stack Knot targets; CC coils; burn tougher Burrow adds."
       WIPE: "Slow add kills extend Burrow."
     encounterID: null   # fill via /gp ids
     npcID: 133384      # wowhead
@@ -172,14 +301,14 @@ bosses:
   - name: "Galvazzt"
     sheet:
       TANK: "Edge the boss; preserve three beam lanes."
-      HEALER: "Track all three beam soakers."
-      DPS: "Claim a beam and hold it to the end."
-      WIPE: "An uncovered beam charges the boss."
+      HEALER: "Track all three beam soakers for the full channel."
+      DPS: "Claim a beam immediately and hold it to the end."
+      WIPE: "Missed beams now make Consume Charge much harsher."
     encounterID: null   # fill via /gp ids
     npcID: 133389      # wowhead
     displayID: 81654  # wowhead modelviewer
     wipe:
-      - "An uncovered beam charges Galvazzt."
+      - "An uncovered beam charges Galvazzt — Consume Charge is now 60% stronger on a miss."
       - "A soaker dies or leaves early."
       - "A beam soaker dies or leaves early."
     roles:
@@ -214,44 +343,45 @@ bosses:
 
   - name: "Avatar of Sethraliss"
     sheet:
-      TANK: "Control Guardians and Tainted Strike."
-      HEALER: "Heal the Avatar only after Defilers die."
-      DPS: "Kill Defilers; push Tormentors below 50%."
-      WIPE: "Uncleansed Lifeforce bursts repeatedly."
+      TANK: "Control one Guardian per main phase and sustain Vile Charge."
+      HEALER: "Heal the Avatar when the single Defiler dies; line of sight is ignored."
+      DPS: "Kill the one Defiler; cleanse the Lifeforce without knockback."
+      WIPE: "Repeated Corruption Bursts amplify sharply."
     encounterID: null   # fill via /gp ids
     npcID: 133392      # wowhead
     displayID: 83203  # wowhead modelviewer
     wipe:
-      - "Defilers block healing; uncleansed Lifeforce bursts."
+      - "Defiler blocks healing; uncleansed Lifeforce bursts."
       - "Uncleansed Lifeforce bursts repeatedly."
-      - "Shadowlash stacks or Defilers suppress healing."
+      - "Shadowlash stacks or the Defiler suppress healing."
       - "Each remaining Lifeforce stack causes a Burst."
       - "Each remaining orb stack causes a Burst."
+      - "Repeated Corruption Bursts gain a stacking vulnerability, now up to 300%, and can chain-wipe; Shadowlash and Tormentor execute thresholds require live verification."
     roles:
       TANK:
         job:
           - "Protect the Eye carrier; control knockbacks (Eyes gauntlet — live cast names require verification)."
-          - "Pick up Guardians; control Tainted Strike stacks."
+          - "Pick up Guardians; control Vile Charge stacks (renamed from Tainted Strike)."
           - "Essence Defiler — Defiling Taint (priority)."
         avoid:
           - "Agony impacts and moving Lifeforce away."
         defensive:
           - "Use a major for stacked Guardian damage."
-        reminder: "Protect the Eye carrier → pick up Guardians → control Tainted Strike → major for stacked Guardian damage."
+        reminder: "Protect the Eye carrier → pick up Guardians → control Vile Charge → major for stacked Guardian damage."
       HEALER:
         job:
           - "Keep the Eye carrier stable through projectiles (Eyes gauntlet — live cast names require verification)."
-          - "Heal the Avatar only after Defilers die."
+          - "Heal the Avatar only after the Defiler dies."
           - "Use cleansed Lifeforce and Siphon the Weak to accelerate progress."
         avoid:
           - "Tormentor fixates, Hex Muck and Agony."
         cooldowns:
           - "Commit throughput only when Defiling Taint is gone."
-        reminder: "Defilers dead → avoid Tormentors → heal Avatar."
+        reminder: "Defiler dead → avoid Tormentors → heal Avatar."
       DPS:
         job:
           - "Protect the carrier and stop Eye recovery (Eyes gauntlet — live cast names require verification)."
-          - "Kill Defilers; push Tormentors below 50%."
+          - "Kill the Defiler; push Tormentors below 50%."
           - "Twisted Hexxer — Flame Shock (interrupt priority)."
           - "Cleanse Lifeforce only on assignment."
           - "Control Conscripts and Orb Guardians."
@@ -259,4 +389,4 @@ bosses:
           - "Hex Muck, Agony and unassigned Lifeforce contact."
         defensive:
           - "Use a personal for Corruption Burst."
-        reminder: "Kick → Defilers → cleanse → Tormentors."
+        reminder: "Kick → Defiler → cleanse → Tormentors."

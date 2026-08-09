@@ -7,13 +7,13 @@ ns.RegisterDungeon({
   ["slug"] = "the-blinding-vale",
   ["season"] = "midnight-s2",
   ["patch"] = "12.1.0",
-  ["sourceVersion"] = "0.9",
+  ["sourceVersion"] = "0.10",
   ["instanceID"] = nil,
   ["quicksheet"] = {
     ["trash"] = {
       ["TANK"] = "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; MITIGATE: Luminous Thornmaw — Grievous Gash; Virid Grovekeeper — Earthrupture Strike.; POSITION: Luminous Thornmaw — Solar Breath; Sporeblight Belcher — Lightwarden's Blight.",
       ["HEALER"] = "HEAL: Sporeblight Belcher — Spouting Floret; Potatoad Matriarch — Toxic Spew.; TOP TO FULL: Luminous Thornmaw — Grievous Gash; Lightwarden Ruia — Grievous Thrash.; MOVE: Virid Grovekeeper — Uproot; Overgrown Hydra — Lightmaw Beams.; LIVE CHECK: Bloodthorn Roots dispel type and final tuning.",
-      ["DPS"] = "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; STOP DAMAGE: Spineshield Beetle — Spiny Shield reflects attacks.; KILL FIRST: Pollinating Lashers, roots, Potadpole eggs and boss shields.; MOVE: Thorny Saptor — Thornclaw Leap; Overgrown Hydra — Lightmaw Beams.",
+      ["DPS"] = "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; STOP DAMAGE: Spineshield Beetle — Spiny Shield reflects attacks.; KILL FIRST: Pollinating Lashers, roots, Potadpole eggs and boss shields.; MOVE: Thorny Saptor — Hunting Leap; Overgrown Hydra — Lightmaw Beams.",
       ["ROUTE"] = "Current PTR left path; final placement requires live verification.",
     },
   },
@@ -67,7 +67,7 @@ ns.RegisterDungeon({
       },
       ["pullWarnings"] = {
         "Stop attacking into Spineshield Beetle — Spiny Shield.",
-        "Move: Thorny Saptor — Thornclaw Leap; Overgrown Hydra — Lightmaw Beams.",
+        "Move: Thorny Saptor — Hunting Leap; Overgrown Hydra — Lightmaw Beams.",
       },
       ["defensives"] = {
         "Save personals for scheduled party damage; do not spend them after the hit.",
@@ -77,6 +77,159 @@ ns.RegisterDungeon({
       "Tank: Use the current left-path PTR route; keep death pools and frontals away from the party.",
       "Healer: Pre-position for beam mechanics so movement does not interrupt recovery healing.",
       "DPS: Save personals for scheduled party damage; do not spend them after the hit.",
+      "Timer: 31 minutes, reduced from 33 minutes in the 28 July PTR update.",
+      "Tuning: Lightblossom Trinity and Lightwarden Ruia boss health are both 10% lower; Trinity's Thornblade bleed now lasts 12 sec.",
+      "Version 0.10, review and verified 9 August 2026 against Blizzard PTR updates and release schedule, Wowhead, Icy Veins, Warcraft Wiki and the current PTR community guide.",
+      "Requires live verification after Patch 12.1: final tuning, pack placement and Bloodthorn Roots dispel type.",
+    },
+  },
+  ["trashSegments"] = {
+    {
+      ["name"] = "Opening trash — before Lightblossom Trinity",
+      ["after"] = nil,
+      ["npcs"] = {
+        {
+          ["name"] = "Radiant Spellsower",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Virid Grovekeeper",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Sporeblight Belcher",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Radiant Spellsower — Frantic Blooming: Stop the 8 sec channel before dormant Lashers awaken.",
+          "Virid Grovekeeper — Uproot: Move out before the roots erupt and knock back.",
+          "Sporeblight Belcher — Spouting Floret: Prepare for repeated party damage.",
+        },
+        ["HEALER"] = {
+          "Radiant Spellsower — Frantic Blooming: Stop the 8 sec channel before dormant Lashers awaken.",
+          "Virid Grovekeeper — Uproot: Move out before the roots erupt and knock back.",
+          "Sporeblight Belcher — Spouting Floret: Prepare for repeated party damage.",
+        },
+        ["DPS"] = {
+          "Radiant Spellsower — Frantic Blooming: Stop the 8 sec channel before dormant Lashers awaken.",
+          "Virid Grovekeeper — Uproot: Move out before the roots erupt and knock back.",
+          "Sporeblight Belcher — Spouting Floret: Prepare for repeated party damage.",
+        },
+      },
+    },
+    {
+      ["name"] = "Bridge trash — before Ikuzz",
+      ["after"] = "Lightblossom Trinity",
+      ["npcs"] = {
+        {
+          ["name"] = "Underbrush Stalker",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Thorny Saptor",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Spineshield Beetle",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Underbrush Stalker — Thornblade: Watch the backstab and 6 sec bleed.",
+          "Thorny Saptor — Hunting Leap: Sidestep the fixed channel path; it should no longer turn during the cast.",
+          "Spineshield Beetle — Spiny Shield: Stop attacking into the reflect; break the absorb.",
+        },
+        ["HEALER"] = {
+          "Underbrush Stalker — Thornblade: Watch the backstab and 6 sec bleed.",
+          "Thorny Saptor — Hunting Leap: Sidestep the fixed channel path; it should no longer turn during the cast.",
+          "Spineshield Beetle — Spiny Shield: Stop attacking into the reflect; break the absorb.",
+        },
+        ["DPS"] = {
+          "Underbrush Stalker — Thornblade: Watch the backstab and 6 sec bleed.",
+          "Thorny Saptor — Hunting Leap: Sidestep the fixed channel path; it should no longer turn during the cast.",
+          "Spineshield Beetle — Spiny Shield: Stop attacking into the reflect; break the absorb.",
+        },
+      },
+    },
+    {
+      ["name"] = "Lower Vale trash — before Lightwarden Ruia",
+      ["after"] = "Ikuzz the Light Hunter",
+      ["npcs"] = {
+        {
+          ["name"] = "Luminous Thornmaw",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Overgrown Hydra",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Lightgorged Lasher",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Luminous Thornmaw — Grievous Gash: Clear the tank bleed by reaching full health.",
+          "Overgrown Hydra — Lightmaw Beams: Spread and keep moving out of the 4 yd beams.",
+          "Lightgorged Lasher — Lightboom Pollination: Break the shield before nearby enemies gain 50% damage and haste.",
+        },
+        ["HEALER"] = {
+          "Luminous Thornmaw — Grievous Gash: Clear the tank bleed by reaching full health.",
+          "Overgrown Hydra — Lightmaw Beams: Spread and keep moving out of the 4 yd beams.",
+          "Lightgorged Lasher — Lightboom Pollination: Break the shield before nearby enemies gain 50% damage and haste.",
+        },
+        ["DPS"] = {
+          "Luminous Thornmaw — Grievous Gash: Clear the tank bleed by reaching full health.",
+          "Overgrown Hydra — Lightmaw Beams: Spread and keep moving out of the 4 yd beams.",
+          "Lightgorged Lasher — Lightboom Pollination: Break the shield before nearby enemies gain 50% damage and haste.",
+        },
+      },
+    },
+    {
+      ["name"] = "Final approach — before Ziekket",
+      ["after"] = "Lightwarden Ruia",
+      ["npcs"] = {
+        {
+          ["name"] = "Potatoad Matriarch",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Sporeblight Belcher",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Potatoad Matriarch — Toxic Spew: Prepare for party damage and a 9 sec toxin.",
+          "Potatoad Matriarch — Toadspawn: Kill eggs and newborn Potadpoles quickly.",
+          "Sporeblight Belcher — Belch Spores: Move from every impact during the channel.",
+        },
+        ["HEALER"] = {
+          "Potatoad Matriarch — Toxic Spew: Prepare for party damage and a 9 sec toxin.",
+          "Potatoad Matriarch — Toadspawn: Kill eggs and newborn Potadpoles quickly.",
+          "Sporeblight Belcher — Belch Spores: Move from every impact during the channel.",
+        },
+        ["DPS"] = {
+          "Potatoad Matriarch — Toxic Spew: Prepare for party damage and a 9 sec toxin.",
+          "Potatoad Matriarch — Toadspawn: Kill eggs and newborn Potadpoles quickly.",
+          "Sporeblight Belcher — Belch Spores: Move from every impact during the channel.",
+        },
+      },
     },
   },
   ["bosses"] = {
@@ -113,7 +266,7 @@ ns.RegisterDungeon({
         ["HEALER"] = {
           ["job"] = {
             "Stabilise shared-health pressure and protect the assigned beam interceptor.",
-            "Bedrock Surge pulses for 8 sec; recover the Thornblade bleed before the next hit.",
+            "Bedrock Surge pulses for 8 sec; recover the stronger 12 sec Thornblade bleed.",
           },
           ["avoid"] = {
             "Fertile Loam, seeds, Fan of Thorns and unassigned beam contact.",
@@ -132,7 +285,7 @@ ns.RegisterDungeon({
             "Fertile Loam, seeds, Dash lanes and Fan of Thorns.",
           },
           ["defensive"] = {
-            "Use a personal during Bedrock Surge or while intercepting.",
+            "Use a personal during Bedrock Surge or while intercepting; respect the stronger 12 sec Thornblade bleed.",
           },
           ["reminder"] = "Kick Light Bolt, dodge plants, block the beam.",
         },
@@ -223,7 +376,7 @@ ns.RegisterDungeon({
             "Create a clean top-up window.",
           },
           ["avoid"] = {
-            "Lightfall, Lightfire beams and repeated Pulverizing Strikes hits.",
+            "Leave Lightfire before it forms; non-creators inside are hit immediately on creation.",
           },
           ["defensive"] = {
             "Rotate mitigation through Pulverizing Strikes.",
@@ -238,7 +391,7 @@ ns.RegisterDungeon({
             "Below 40%, Spirits of the Vale repeats abilities every 8 sec.",
           },
           ["avoid"] = {
-            "Lightfire beams, Lightfall and tank-facing cones.",
+            "Leave Lightfire before it forms; non-creators inside are hit immediately on creation.",
           },
           ["cooldowns"] = {
             "Save a group cooldown for the sub-40% sequence.",
@@ -251,7 +404,7 @@ ns.RegisterDungeon({
             "Priority: Lightwarden Ruia — Warden's Wrath.",
           },
           ["avoid"] = {
-            "Pulverizing Strikes cones, Lightfall and Lightfire beams.",
+            "Leave Lightfire before it forms; non-creators inside are hit immediately on creation.",
           },
           ["defensive"] = {
             "Use a personal below 40% or while waiting to be topped.",

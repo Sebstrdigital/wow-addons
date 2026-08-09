@@ -7,13 +7,14 @@ ns.RegisterDungeon({
   ["slug"] = "voidscar-arena",
   ["season"] = "midnight-s2",
   ["patch"] = "12.1.0",
-  ["sourceVersion"] = "0.9",
+  ["sourceVersion"] = "0.10",
   ["instanceID"] = nil,
   ["quicksheet"] = {
     ["trash"] = {
       ["TANK"] = "Raj'kess the Spellstorm — Thundering Storm: Hold the pack steady; leave room for targeted strikes.; Watchful Harrower — Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss.; Devouring Brutalizer — Devour: Protect and help free the target before the cast completes.; Brutal Overseer — Brutal Slam: Mitigate the tank hit and DoT.",
       ["HEALER"] = "Raj'kess the Spellstorm — Thundering Storm: Prepare spot healing for targeted strikes.; Watchful Harrower — Live Verification: Expect a long, high-pressure miniboss pull.; Devouring Brutalizer — Devour: Keep the target stable while the group breaks it free.; Brutal Overseer — Brutal Slam: Prepare focused tank healing for the hit and DoT.",
       ["DPS"] = "Raj'kess the Spellstorm — Orb of Disruption: Kill immediately before Disrupting Blast.; Watchful Harrower — Live Verification: Commit priority damage to shorten the pull.; Devouring Brutalizer — Devour: Swap immediately and free the target.; Brutal Overseer — Brutal Slam: Use a personal if other damage overlaps.",
+      ["ROUTE"] = "Opening miniboss choice > Taz'Rah > Watchful Harrower section > Atroxus > Domanaar lieutenants > Charonus.",
     },
   },
   ["overview"] = {
@@ -69,6 +70,105 @@ ns.RegisterDungeon({
       "Tank: Preserve movement for gravity pulls and knockbacks.",
       "Healer: Enter Watchful Harrower with mana and a cooldown ready.",
       "DPS: Priority mechanics are worth more than boss uptime.",
+      "Version 0.10, five-source review verified 9 August 2026. One gameplay change found since 27 July: Atroxus — Noxious Breath cast time increased 3 sec > 4 sec.",
+      "Version note: current live game remains Midnight Season 1 / Patch 12.0.7 as of 9 Aug; this guide targets Season 2 / Patch 12.1 PTR.",
+      "Requires live verification: final 12.1 trash placements, Enemy Forces values, miniboss buffs, lieutenant casts, crowd-control interactions and post-PTR tuning.",
+    },
+  },
+  ["trashSegments"] = {
+    {
+      ["name"] = "Opening trash — before Taz'Rah",
+      ["after"] = nil,
+      ["npcs"] = {
+        {
+          ["name"] = "Raj'kess the Spellstorm",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Agitated Voidscythe",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Raj'kess the Spellstorm — Orb of Disruption: Destroy the orb immediately before Disrupting Blast; face the pack cleanly and call the kill.",
+          "Raj'kess the Spellstorm — Thundering Storm: Avoid the targeted lightning strikes; hold the pack steady and leave room for strikes.",
+          "Agitated Voidscythe — Corrosive Essence: Separate from other targeted players.",
+          "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification.",
+        },
+        ["HEALER"] = {
+          "Raj'kess the Spellstorm — Orb of Disruption: Support the immediate orb kill before Disrupting Blast.",
+          "Raj'kess the Spellstorm — Thundering Storm: Avoid the targeted lightning strikes; prepare spot healing for hits.",
+          "Agitated Voidscythe — Corrosive Essence: Separate targeted players and triage quickly.",
+          "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification.",
+        },
+        ["DPS"] = {
+          "Raj'kess the Spellstorm — Orb of Disruption: Kill immediately before Disrupting Blast.",
+          "Raj'kess the Spellstorm — Thundering Storm: Avoid the targeted lightning strikes.",
+          "Agitated Voidscythe — Corrosive Essence: Separate from other targeted players.",
+          "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification.",
+        },
+      },
+    },
+    {
+      ["name"] = "Watchful Harrower trash — Taz'Rah to Atroxus",
+      ["after"] = "Taz'Rah",
+      ["npcs"] = {
+        {
+          ["name"] = "Watchful Harrower",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Watchful Harrower — Requires Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss; confirm its final live ability package.",
+          "Position: Avoid adding nearby packs; Watchful Harrowers have true sight.",
+        },
+        ["HEALER"] = {
+          "Watchful Harrower — Requires Live Verification: Expect a long, high-pressure miniboss pull; confirm its final live ability package.",
+          "Position: Avoid adding nearby packs; Watchful Harrowers have true sight.",
+        },
+        ["DPS"] = {
+          "Watchful Harrower — Requires Live Verification: Commit priority damage to shorten the pull; confirm its final live ability package.",
+          "Position: Avoid adding nearby packs; Watchful Harrowers have true sight.",
+        },
+      },
+    },
+    {
+      ["name"] = "Domanaar lieutenants trash — Atroxus to Charonus",
+      ["after"] = "Atroxus",
+      ["npcs"] = {
+        {
+          ["name"] = "Devouring Brutalizer",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Brutal Overseer",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Devouring Brutalizer — Devour: Protect and help free the target before the cast completes; keep the trapped player reachable for the swap.",
+          "Brutal Overseer — Brutal Slam: Mitigate the tank hit and DoT; keep the impact away from allies.",
+          "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification.",
+        },
+        ["HEALER"] = {
+          "Devouring Brutalizer — Devour: Keep the target stable while the group breaks it free; pre-heal the trapped target.",
+          "Brutal Overseer — Brutal Slam: Prepare focused tank healing for the hit and DoT.",
+          "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification.",
+        },
+        ["DPS"] = {
+          "Devouring Brutalizer — Devour: Swap immediately and free the target.",
+          "Brutal Overseer — Brutal Slam: Use a personal if other damage overlaps.",
+          "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification.",
+        },
+      },
     },
   },
   ["bosses"] = {
@@ -134,45 +234,48 @@ ns.RegisterDungeon({
     {
       ["name"] = "Atroxus",
       ["sheet"] = {
-        ["TANK"] = "Face away > mitigate Claw > keep the arena clean.",
-        ["HEALER"] = "Cooldown Roar > heal Claw > avoid the Creeper.",
-        ["DPS"] = "Creeper first > kite cleanly > dodge Breath.",
-        ["WIPE"] = "Roar facing the group or an uncontrolled Toxic Creeper.",
+        ["TANK"] = "Face away > 4-sec Breath dodge > Creeper first.",
+        ["HEALER"] = "4-sec Breath move > Roar cooldown > Creeper pressure.",
+        ["DPS"] = "Creeper first > 4-sec Breath dodge > avoid pools.",
+        ["WIPE"] = "Breath through the group or leaving the Toxic Creeper alive beside players.",
       },
       ["encounterID"] = nil,
       ["npcID"] = 239008,
       ["displayID"] = 131553,
       ["wipe"] = {
-        "Roar facing the group or an uncontrolled Toxic Creeper.",
-        "A Creeper surviving during Roar or heavy tank damage.",
+        "Breath through the group or leaving the Toxic Creeper alive beside players.",
+        "An ignored Creeper compounds aura damage during Roar or poison pools.",
         "Ignoring the Creeper and allowing its aura to pressure the group.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
             "Face Atroxus away.",
-            "Mitigate Hulking Claw and aim Sickening Roar away.",
+            "Mitigate Hulking Claw and recover from its knockback and damage-over-time effect.",
+            "Make the Toxic Creeper easy to reach.",
           },
           ["avoid"] = {
-            "Noxious Breath, Poison Splash and Poison Pools.",
+            "Noxious Breath — now a 4-sec cast; use the longer warning to sidestep without spinning the boss.",
+            "Poison Splash and Poison Pools.",
           },
           ["defensive"] = {
-            "Use a defensive for Hulking Claw and its lingering damage.",
+            "Use a defensive for Hulking Claw or a dangerous Sickening Roar overlap.",
           },
-          ["reminder"] = "Face away > mitigate Claw > keep the arena clean.",
+          ["reminder"] = "Face away > 4-sec Breath dodge > Creeper first.",
         },
         ["HEALER"] = {
           ["job"] = {
-            "Prepare for Sickening Roar and heal Hulking Claw's lingering damage.",
+            "Cover Sickening Roar and the tank's Hulking Claw damage.",
             "Prioritise the tank and the Toxic Creeper's fixated target.",
           },
           ["avoid"] = {
-            "Noxious Breath, Poison Splash and the Creeper's close aura.",
+            "Noxious Breath — now a 4-sec cast; reposition during the longer window.",
+            "Poison Splash and the Creeper's close aura.",
           },
           ["cooldowns"] = {
-            "Use group healing for Sickening Roar.",
+            "Use group healing for Sickening Roar; save throughput after repositioning for the 4-sec Breath.",
           },
-          ["reminder"] = "Cooldown Roar > heal Claw > avoid the Creeper.",
+          ["reminder"] = "4-sec Breath move > Roar cooldown > Creeper pressure.",
         },
         ["DPS"] = {
           ["job"] = {
@@ -185,9 +288,9 @@ ns.RegisterDungeon({
             "Noxious Breath, poison impacts, pools and the Creeper aura.",
           },
           ["defensive"] = {
-            "Use a personal for Sickening Roar.",
+            "Noxious Breath now casts for 4 sec — move early, and use a personal for Sickening Roar.",
           },
-          ["reminder"] = "Creeper first > kite cleanly > dodge Breath.",
+          ["reminder"] = "Creeper first > 4-sec Breath dodge > avoid pools.",
         },
       },
     },

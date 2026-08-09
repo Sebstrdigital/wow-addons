@@ -7,13 +7,13 @@ ns.RegisterDungeon({
   ["slug"] = "kings-rest",
   ["season"] = "midnight-s2",
   ["patch"] = "12.1.0",
-  ["sourceVersion"] = "0.5",
+  ["sourceVersion"] = "0.6",
   ["instanceID"] = nil,
   ["quicksheet"] = {
     ["trash"] = {
-      ["TANK"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away.",
-      ["HEALER"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away.",
-      ["DPS"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away.",
+      ["TANK"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away; this now comes before Pool.",
+      ["HEALER"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away; this now comes before Pool.",
+      ["DPS"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away; this now comes before Pool.",
     },
   },
   ["overview"] = {
@@ -28,7 +28,7 @@ ns.RegisterDungeon({
       },
       {
         ["spell"] = "Wretched Discharge",
-        ["note"] = "interrupt the Half-Finished Mummy's cast",
+        ["note"] = "Half-Finished Mummy's cast — now 5 seconds long, still mandatory",
       },
       {
         ["spell"] = "Poison Nova",
@@ -49,7 +49,7 @@ ns.RegisterDungeon({
         "Plan stops, soothes and pulls before the key.",
         "Danger windows: Royal Berserkers, Shadow of Zul, Debilitating Backhand and Blade Combo.",
         "Shadow-Borne Champion — Released Inhibitors: soothe the Haste enrage.",
-        "Shadow of Zul — Dark Revelation: two targets move 20+ yards away.",
+        "Shadow of Zul — Dark Revelation: two targets move 20+ yards away; this now comes before Pool of Darkness.",
       },
     },
     ["healer"] = {
@@ -84,10 +84,191 @@ ns.RegisterDungeon({
         "King Timalji — Bladestorm: Run out; do not drag it through allies.",
         "Purification Construct — Purification Beam: Follow the rotating beam.",
         "Honored Raptor — Hunting Leap: Leave the landing cleave.",
-        "Shadow of Zul — Pool of Darkness: Use the assigned soak plan.",
+        "Shadow of Zul — Dark Revelation: two targets move 20+ yards away; this now comes before Pool.",
+        "Shadow of Zul — Pool of Darkness: Use the assigned soak after Dark Revelation.",
       },
     },
-    ["tip"] = "Assign interrupts, gold placement and the first Pool of Darkness before starting.",
+    ["tip"] = {
+      "Version 0.6, verified 9 August 2026 against Blizzard PTR dungeon testing (7 Jul-3 Aug), Wowhead Midnight S2 overview and PTR data, Icy Veins Patch 12.1 overview and Warcraft Wiki. No gameplay change found after 27 July aside from Wretched Discharge (now 5 sec), Whirling Axe periodic damage (-11%) and Dark Revelation now preceding Pool of Darkness.",
+      "Assign interrupts, gold placement and the first Pool of Darkness before starting.",
+      "Requires live verification before Version 1.0: final Enemy Forces, dispel types, encounter timings and any launch hotfixes.",
+    },
+  },
+  ["trashSegments"] = {
+    {
+      ["name"] = "Opening trash — before The Golden Serpent",
+      ["after"] = nil,
+      ["npcs"] = {
+        {
+          ["name"] = "Shadow-Borne Witch Doctor",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Animated Guardian",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Shadow-Borne Champion",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Minion of Zul",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.",
+          "Animated Guardian — Suppression Slam: Dodge the aimed frontal and stun.",
+          "Shadow-Borne Champion — Released Inhibitors: Soothe the Haste enrage.",
+          "Minion of Zul — Bound by Shadow: Purge; control the beam-marked Fixate.",
+        },
+        ["HEALER"] = {
+          "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.",
+          "Animated Guardian — Suppression Slam: Dodge the aimed frontal and stun.",
+          "Shadow-Borne Champion — Released Inhibitors: Soothe the Haste enrage.",
+          "Minion of Zul — Bound by Shadow: Purge; control the beam-marked Fixate.",
+        },
+        ["DPS"] = {
+          "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.",
+          "Animated Guardian — Suppression Slam: Dodge the aimed frontal and stun.",
+          "Shadow-Borne Champion — Released Inhibitors: Soothe the Haste enrage.",
+          "Minion of Zul — Bound by Shadow: Purge; control the beam-marked Fixate.",
+        },
+      },
+    },
+    {
+      ["name"] = "Trash — The Golden Serpent to Mchimba",
+      ["after"] = "The Golden Serpent",
+      ["npcs"] = {
+        {
+          ["name"] = "Seneschal M'bara",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Guard Captain Atu",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "King Timalji",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Purification Construct",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.",
+          "Guard Captain Atu — Axe Barrage: Stop the channel.",
+          "King Timalji — Bladestorm: Run out; do not drag it through allies.",
+          "Purification Construct — Purification Beam: Follow the rotating beam.",
+        },
+        ["HEALER"] = {
+          "Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.",
+          "Guard Captain Atu — Axe Barrage: Stop the channel.",
+          "King Timalji — Bladestorm: Run out; do not drag it through allies.",
+          "Purification Construct — Purification Beam: Follow the rotating beam.",
+        },
+        ["DPS"] = {
+          "Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.",
+          "Guard Captain Atu — Axe Barrage: Stop the channel.",
+          "King Timalji — Bladestorm: Run out; do not drag it through allies.",
+          "Purification Construct — Purification Beam: Follow the rotating beam.",
+        },
+      },
+    },
+    {
+      ["name"] = "Trash — Mchimba to The Council of Tribes",
+      ["after"] = "Mchimba the Embalmer",
+      ["npcs"] = {
+        {
+          ["name"] = "Royal Berserker",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Spectral Hex Priest",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Spectral Shaman",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Honored Raptor",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Royal Berserker — Bloodthirsty Axe: Plan mitigation for heavy physical pressure.",
+          "Spectral Hex Priest — Hex: Interrupt the long control effect.",
+          "Spectral Shaman — Healing Tide Totem: Kill the totem immediately.",
+          "Honored Raptor — Hunting Leap: Leave the landing cleave.",
+        },
+        ["HEALER"] = {
+          "Royal Berserker — Bloodthirsty Axe: Plan mitigation for heavy physical pressure.",
+          "Spectral Hex Priest — Hex: Interrupt the long control effect.",
+          "Spectral Shaman — Healing Tide Totem: Kill the totem immediately.",
+          "Honored Raptor — Hunting Leap: Leave the landing cleave.",
+        },
+        ["DPS"] = {
+          "Royal Berserker — Bloodthirsty Axe: Plan mitigation for heavy physical pressure.",
+          "Spectral Hex Priest — Hex: Interrupt the long control effect.",
+          "Spectral Shaman — Healing Tide Totem: Kill the totem immediately.",
+          "Honored Raptor — Hunting Leap: Leave the landing cleave.",
+        },
+      },
+    },
+    {
+      ["name"] = "Final trash — The Council of Tribes to Dazar",
+      ["after"] = "The Council of Tribes",
+      ["npcs"] = {
+        {
+          ["name"] = "Shadow of Zul",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Minion of Zul",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Shadow of Zul — Shadow Barrage: Sustained tank magic damage.",
+          "Shadow of Zul — Dark Revelation: Two targets move 20+ yards away; this now comes before Pool.",
+          "Shadow of Zul — Pool of Darkness: Use the assigned soak after Dark Revelation.",
+          "Minion of Zul — Bound by Shadow: Purge, then control Fixate.",
+        },
+        ["HEALER"] = {
+          "Shadow of Zul — Shadow Barrage: Sustained tank magic damage.",
+          "Shadow of Zul — Dark Revelation: Two targets move 20+ yards away; this now comes before Pool.",
+          "Shadow of Zul — Pool of Darkness: Use the assigned soak after Dark Revelation.",
+          "Minion of Zul — Bound by Shadow: Purge, then control Fixate.",
+        },
+        ["DPS"] = {
+          "Shadow of Zul — Shadow Barrage: Sustained tank magic damage.",
+          "Shadow of Zul — Dark Revelation: Two targets move 20+ yards away; this now comes before Pool.",
+          "Shadow of Zul — Pool of Darkness: Use the assigned soak after Dark Revelation.",
+          "Minion of Zul — Bound by Shadow: Purge, then control Fixate.",
+        },
+      },
+    },
   },
   ["bosses"] = {
     {
@@ -160,24 +341,24 @@ ns.RegisterDungeon({
     {
       ["name"] = "Mchimba the Embalmer",
       ["sheet"] = {
-        ["TANK"] = "Keep clear paths to every coffin. See Struggle > open that coffin > collect mummies.",
-        ["HEALER"] = "Heal Desiccation targets above 90%. Desiccation ends above 90% > correct coffin > cover Slam.",
-        ["DPS"] = "Use Struggle once if entombed. Shaking coffin first > kick the mummy.",
-        ["WIPE"] = "Wrong coffin adds a mummy; Wretched Discharge must be interrupted.",
+        ["TANK"] = "Hold Mchimba near centre. See Struggle > correct coffin > stop the 5-sec cast.",
+        ["HEALER"] = "Heal Desiccation targets above 90%. Desiccation above 90% > correct coffin > 5-sec kick.",
+        ["DPS"] = "Use Struggle once if entombed. Shaking coffin first > kick the 5-sec cast.",
+        ["WIPE"] = "Wrong coffin adds a mummy; Wretched Discharge is now a 5-second must-stop cast.",
       },
       ["encounterID"] = nil,
       ["npcID"] = 134993,
       ["displayID"] = 83529,
       ["wipe"] = {
-        "Wrong coffin adds a mummy; Wretched Discharge must be interrupted.",
-        "Missed Wretched Discharge applies a dangerous group disease.",
+        "Wrong coffin adds a mummy; Wretched Discharge is now a 5-second must-stop cast.",
+        "A completed Wretched Discharge still applies a dangerous group disease, despite the longer cast.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
-            "Keep clear paths to every coffin.",
+            "Hold Mchimba near centre.",
             "Open the coffin showing Struggle.",
-            "Pick up Half-Finished Mummies.",
+            "Pick up released Half-Finished Mummies.",
           },
           ["avoid"] = {
             "Burn Corruption, Burning Ground and Explosive Acids.",
@@ -185,7 +366,7 @@ ns.RegisterDungeon({
           ["defensive"] = {
             "Use mitigation if Awakening Slam overlaps mummy pressure.",
           },
-          ["reminder"] = "See Struggle > open that coffin > collect mummies.",
+          ["reminder"] = "See Struggle > correct coffin > stop the 5-sec cast.",
         },
         ["HEALER"] = {
           ["job"] = {
@@ -194,22 +375,22 @@ ns.RegisterDungeon({
             "Help identify the correct coffin.",
             "Heal the Drain Fluids target.",
             "Heal Awakening Slam group damage.",
-            "Heal disease damage after a missed Wretched Discharge.",
+            "Heal disease damage after a missed Wretched Discharge, now a 5-second cast.",
           },
           ["avoid"] = {
             "Burn Corruption, Burning Ground and Explosive Acids.",
           },
           ["cooldowns"] = {
-            "Group cooldown for Awakening Slam when another mechanic overlaps.",
+            "Group cooldown for Awakening Slam when another mechanic overlaps; Wretched Discharge now gives a 5-second stop window instead of an instant cast.",
           },
-          ["reminder"] = "Desiccation ends above 90% > correct coffin > cover Slam.",
+          ["reminder"] = "Desiccation above 90% > correct coffin > 5-sec kick.",
         },
         ["DPS"] = {
           ["job"] = {
             "Use Struggle once if entombed.",
             "Open the shaking coffin if free.",
             "Swap to Half-Finished Mummies.",
-            "Interrupt Half-Finished Mummy's Wretched Discharge.",
+            "Interrupt Half-Finished Mummy's Wretched Discharge, now a 5-second cast but still mandatory.",
             "Prioritise the correct coffin before boss damage.",
           },
           ["avoid"] = {
@@ -218,14 +399,14 @@ ns.RegisterDungeon({
           ["defensive"] = {
             "Personal for Drain Fluids or Awakening Slam.",
           },
-          ["reminder"] = "Shaking coffin first > kick the mummy.",
+          ["reminder"] = "Shaking coffin first > kick the 5-sec cast.",
         },
       },
     },
     {
       ["name"] = "The Council of Tribes",
       ["sheet"] = {
-        ["TANK"] = "Position the active boss so axes, charges and totems stay visible. Backhand defensive > soak charge > kick Nova.",
+        ["TANK"] = "Position the active boss so axes, charges and totems stay visible. Backhand defensive > soak charge > never miss Nova.",
         ["HEALER"] = "Prepare for Kula's bleed, Aka'ali's tank spike and Zanazal's totems. Heal Axe > external Backhand > Explosive Totem first.",
         ["DPS"] = "Join Barrel Through. Soak together > Explosive Totem first > never miss Nova.",
         ["WIPE"] = "Missed Barrel Through, Poison Nova or Explosive Totem.",
@@ -245,13 +426,13 @@ ns.RegisterDungeon({
             "Reserve an interrupt for Poison Nova.",
           },
           ["avoid"] = {
-            "Whirling Axes.",
+            "Whirling Axes — periodic damage now 11% lower, but still avoid them.",
             "Aiming Barrel Through away from the group.",
           },
           ["defensive"] = {
             "Major mitigation for Debilitating Backhand and following hits.",
           },
-          ["reminder"] = "Backhand defensive > soak charge > kick Nova.",
+          ["reminder"] = "Backhand defensive > soak charge > never miss Nova.",
         },
         ["HEALER"] = {
           ["job"] = {
@@ -263,7 +444,7 @@ ns.RegisterDungeon({
             "Heal the group after a charge or totem overlap.",
           },
           ["avoid"] = {
-            "Whirling Axes and totem danger zones.",
+            "Whirling Axes and totem danger zones — periodic axe damage is now 11% lower, but still heal clipped players.",
           },
           ["cooldowns"] = {
             "External for Backhand.",
@@ -281,7 +462,7 @@ ns.RegisterDungeon({
             "Only target Lightning Bolt once Nova is covered.",
           },
           ["avoid"] = {
-            "Whirling Axes.",
+            "Whirling Axes — periodic damage now 11% lower, but still dodge them.",
             "Chasing through hazards for uptime.",
           },
           ["defensive"] = {

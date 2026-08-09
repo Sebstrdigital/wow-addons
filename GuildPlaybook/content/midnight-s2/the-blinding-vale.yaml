@@ -1,12 +1,51 @@
 # Guild Playbook content — The Blinding Vale (Midnight Season 2)
-# Source: guild PDF playbooks (Tank/Healer/DPS, Draft 0.9, patch 12.1 PTR)
+# Source: guild DOCX playbooks "The Blinding Vale - {Tank,Healer,DPS} Playbook and
+#         Cheat Sheet" (v0.10, Patch 12.1 PTR, review and verified 9 August 2026).
 # Edit this file, then run tools/generate.py to regenerate the Lua data.
+#
+# Content mapping: the documents' four named trash sections (Opening Trash,
+# Bridge Trash, Lower Vale Trash, Final Approach) now map 1:1 onto trashSegments;
+# they previously had no home in the schema. quicksheet.trash still carries the
+# cheat sheets' page-1 PRIORITY TRASH CALLS — the at-a-glance subset, not the
+# same content. The v0.10 documents' PTR verification hedges are kept verbatim
+# on purpose; do not clean them out until the guides are re-verified on live.
+#
+# trashSegments[].npcs carries the mob names the documents call out. Every
+# npcID/displayID here is null: nothing in this repo sources trash NPC IDs, and
+# a wrong displayID renders the wrong creature in-game, so they are left empty
+# rather than guessed. Unlike some other dungeons' documents, all three role
+# documents give identical, non-role-specific call text for each trash pack, so
+# the TANK/HEALER/DPS lists within a segment are transcribed identically on
+# purpose — that mirrors the source, it is not an authoring shortcut.
+#
+# Still without a home in the schema: the 31-minute dungeon timer (reduced from
+# 33 minutes in the 28 July PTR update) and the cross-boss tuning notes (Trinity
+# and Ruia boss health both 10% lower; Trinity's Thornblade bleed now runs 12
+# sec) are folded into overview.tip rather than modelled as fields, following
+# the same pattern Ruby Life Pools uses for its dungeon-wide notes. The
+# "VERIFIED SOURCES" list and the "review 9 August 2026" line are likewise
+# summarised in overview.tip rather than given a dedicated field.
+#
+# REMOVED (v0.9 -> v0.10): Lightwarden Ruia's TANK/HEALER/DPS avoid lines each
+# dropped the "Lightfall" ability mention (bosses.Lightwarden Ruia.roles.{TANK,
+# HEALER,DPS}.avoid), plus TANK's "repeated Pulverizing Strikes hits" phrase,
+# HEALER's "tank-facing cones" phrase, and DPS's "Pulverizing Strikes cones"
+# phrase. All three v0.10 role documents independently replace their avoid line
+# with the identical sentence "Leave Lightfire before it forms; non-creators
+# inside are hit immediately on creation." — that cross-document agreement is
+# why this is treated as a deliberate rewrite rather than a doc oversight.
+# Pulverizing Strikes mitigation is still covered under TANK's defensive field,
+# so tanks keep guidance on that ability; HEALER and DPS no longer have any
+# avoid-list reminder about the cone mechanic at all. "Lightfall" itself no
+# longer appears anywhere in the v0.10 documents for this boss — unclear
+# whether it was renamed into "Lightfire", retuned, or removed; flagged for
+# live verification.
 
 dungeon: "The Blinding Vale"
 slug: the-blinding-vale
 season: midnight-s2
 patch: "12.1.0"
-sourceVersion: "0.9"
+sourceVersion: "0.10"
 instanceID: null   # capture with /gp ids
 
 # All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
@@ -14,7 +53,7 @@ quicksheet:
   trash:
     TANK: "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; MITIGATE: Luminous Thornmaw — Grievous Gash; Virid Grovekeeper — Earthrupture Strike.; POSITION: Luminous Thornmaw — Solar Breath; Sporeblight Belcher — Lightwarden's Blight."
     HEALER: "HEAL: Sporeblight Belcher — Spouting Floret; Potatoad Matriarch — Toxic Spew.; TOP TO FULL: Luminous Thornmaw — Grievous Gash; Lightwarden Ruia — Grievous Thrash.; MOVE: Virid Grovekeeper — Uproot; Overgrown Hydra — Lightmaw Beams.; LIVE CHECK: Bloodthorn Roots dispel type and final tuning."
-    DPS: "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; STOP DAMAGE: Spineshield Beetle — Spiny Shield reflects attacks.; KILL FIRST: Pollinating Lashers, roots, Potadpole eggs and boss shields.; MOVE: Thorny Saptor — Thornclaw Leap; Overgrown Hydra — Lightmaw Beams."
+    DPS: "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; STOP DAMAGE: Spineshield Beetle — Spiny Shield reflects attacks.; KILL FIRST: Pollinating Lashers, roots, Potadpole eggs and boss shields.; MOVE: Thorny Saptor — Hunting Leap; Overgrown Hydra — Lightmaw Beams."
     ROUTE: "Current PTR left path; final placement requires live verification."
 
 overview:
@@ -51,13 +90,101 @@ overview:
       - "Kill first: Pollinating Lashers, roots, Potadpole eggs and boss shields."
     pullWarnings:
       - "Stop attacking into Spineshield Beetle — Spiny Shield."
-      - "Move: Thorny Saptor — Thornclaw Leap; Overgrown Hydra — Lightmaw Beams."
+      - "Move: Thorny Saptor — Hunting Leap; Overgrown Hydra — Lightmaw Beams."
     defensives:
       - "Save personals for scheduled party damage; do not spend them after the hit."
   tip:
     - "Tank: Use the current left-path PTR route; keep death pools and frontals away from the party."
     - "Healer: Pre-position for beam mechanics so movement does not interrupt recovery healing."
     - "DPS: Save personals for scheduled party damage; do not spend them after the hit."
+    - "Timer: 31 minutes, reduced from 33 minutes in the 28 July PTR update."
+    - "Tuning: Lightblossom Trinity and Lightwarden Ruia boss health are both 10% lower; Trinity's Thornblade bleed now lasts 12 sec."
+    - "Version 0.10, review and verified 9 August 2026 against Blizzard PTR updates and release schedule, Wowhead, Icy Veins, Warcraft Wiki and the current PTR community guide."
+    - "Requires live verification after Patch 12.1: final tuning, pack placement and Bloodthorn Roots dispel type."
+
+# Named trash packs between the bosses, straight from the playbooks' trash
+# sections. The three role documents give identical text per pack (no
+# role-specific tailoring in this dungeon's source), so each segment's
+# TANK/HEALER/DPS lists match on purpose.
+trashSegments:
+  - name: "Opening trash — before Lightblossom Trinity"
+    after: null
+    npcs:
+      - { name: "Radiant Spellsower", npcID: null, displayID: null }
+      - { name: "Virid Grovekeeper", npcID: null, displayID: null }
+      - { name: "Sporeblight Belcher", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Radiant Spellsower — Frantic Blooming: Stop the 8 sec channel before dormant Lashers awaken."
+        - "Virid Grovekeeper — Uproot: Move out before the roots erupt and knock back."
+        - "Sporeblight Belcher — Spouting Floret: Prepare for repeated party damage."
+      HEALER:
+        - "Radiant Spellsower — Frantic Blooming: Stop the 8 sec channel before dormant Lashers awaken."
+        - "Virid Grovekeeper — Uproot: Move out before the roots erupt and knock back."
+        - "Sporeblight Belcher — Spouting Floret: Prepare for repeated party damage."
+      DPS:
+        - "Radiant Spellsower — Frantic Blooming: Stop the 8 sec channel before dormant Lashers awaken."
+        - "Virid Grovekeeper — Uproot: Move out before the roots erupt and knock back."
+        - "Sporeblight Belcher — Spouting Floret: Prepare for repeated party damage."
+
+  - name: "Bridge trash — before Ikuzz"
+    after: "Lightblossom Trinity"
+    npcs:
+      - { name: "Underbrush Stalker", npcID: null, displayID: null }
+      - { name: "Thorny Saptor", npcID: null, displayID: null }
+      - { name: "Spineshield Beetle", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Underbrush Stalker — Thornblade: Watch the backstab and 6 sec bleed."
+        - "Thorny Saptor — Hunting Leap: Sidestep the fixed channel path; it should no longer turn during the cast."
+        - "Spineshield Beetle — Spiny Shield: Stop attacking into the reflect; break the absorb."
+      HEALER:
+        - "Underbrush Stalker — Thornblade: Watch the backstab and 6 sec bleed."
+        - "Thorny Saptor — Hunting Leap: Sidestep the fixed channel path; it should no longer turn during the cast."
+        - "Spineshield Beetle — Spiny Shield: Stop attacking into the reflect; break the absorb."
+      DPS:
+        - "Underbrush Stalker — Thornblade: Watch the backstab and 6 sec bleed."
+        - "Thorny Saptor — Hunting Leap: Sidestep the fixed channel path; it should no longer turn during the cast."
+        - "Spineshield Beetle — Spiny Shield: Stop attacking into the reflect; break the absorb."
+
+  - name: "Lower Vale trash — before Lightwarden Ruia"
+    after: "Ikuzz the Light Hunter"
+    npcs:
+      - { name: "Luminous Thornmaw", npcID: null, displayID: null }
+      - { name: "Overgrown Hydra", npcID: null, displayID: null }
+      - { name: "Lightgorged Lasher", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Luminous Thornmaw — Grievous Gash: Clear the tank bleed by reaching full health."
+        - "Overgrown Hydra — Lightmaw Beams: Spread and keep moving out of the 4 yd beams."
+        - "Lightgorged Lasher — Lightboom Pollination: Break the shield before nearby enemies gain 50% damage and haste."
+      HEALER:
+        - "Luminous Thornmaw — Grievous Gash: Clear the tank bleed by reaching full health."
+        - "Overgrown Hydra — Lightmaw Beams: Spread and keep moving out of the 4 yd beams."
+        - "Lightgorged Lasher — Lightboom Pollination: Break the shield before nearby enemies gain 50% damage and haste."
+      DPS:
+        - "Luminous Thornmaw — Grievous Gash: Clear the tank bleed by reaching full health."
+        - "Overgrown Hydra — Lightmaw Beams: Spread and keep moving out of the 4 yd beams."
+        - "Lightgorged Lasher — Lightboom Pollination: Break the shield before nearby enemies gain 50% damage and haste."
+
+  - name: "Final approach — before Ziekket"
+    after: "Lightwarden Ruia"
+    npcs:
+      - { name: "Potatoad Matriarch", npcID: null, displayID: null }
+      - { name: "Sporeblight Belcher", npcID: null, displayID: null }
+    roles:
+      TANK:
+        - "Potatoad Matriarch — Toxic Spew: Prepare for party damage and a 9 sec toxin."
+        - "Potatoad Matriarch — Toadspawn: Kill eggs and newborn Potadpoles quickly."
+        - "Sporeblight Belcher — Belch Spores: Move from every impact during the channel."
+      HEALER:
+        - "Potatoad Matriarch — Toxic Spew: Prepare for party damage and a 9 sec toxin."
+        - "Potatoad Matriarch — Toadspawn: Kill eggs and newborn Potadpoles quickly."
+        - "Sporeblight Belcher — Belch Spores: Move from every impact during the channel."
+      DPS:
+        - "Potatoad Matriarch — Toxic Spew: Prepare for party damage and a 9 sec toxin."
+        - "Potatoad Matriarch — Toadspawn: Kill eggs and newborn Potadpoles quickly."
+        - "Sporeblight Belcher — Belch Spores: Move from every impact during the channel."
 
 bosses:
   - name: "Lightblossom Trinity"
@@ -86,7 +213,7 @@ bosses:
       HEALER:
         job:
           - "Stabilise shared-health pressure and protect the assigned beam interceptor."
-          - "Bedrock Surge pulses for 8 sec; recover the Thornblade bleed before the next hit."
+          - "Bedrock Surge pulses for 8 sec; recover the stronger 12 sec Thornblade bleed."
         avoid:
           - "Fertile Loam, seeds, Fan of Thorns and unassigned beam contact."
         cooldowns:
@@ -99,7 +226,7 @@ bosses:
         avoid:
           - "Fertile Loam, seeds, Dash lanes and Fan of Thorns."
         defensive:
-          - "Use a personal during Bedrock Surge or while intercepting."
+          - "Use a personal during Bedrock Surge or while intercepting; respect the stronger 12 sec Thornblade bleed."
         reminder: "Kick Light Bolt, dodge plants, block the beam."
 
   - name: "Ikuzz the Light Hunter"
@@ -167,7 +294,7 @@ bosses:
           - "Interrupt Warden's Wrath."
           - "Create a clean top-up window."
         avoid:
-          - "Lightfall, Lightfire beams and repeated Pulverizing Strikes hits."
+          - "Leave Lightfire before it forms; non-creators inside are hit immediately on creation."
         defensive:
           - "Rotate mitigation through Pulverizing Strikes."
           - "Major personal below 40%."
@@ -178,7 +305,7 @@ bosses:
           - "Move before Lightfire expires."
           - "Below 40%, Spirits of the Vale repeats abilities every 8 sec."
         avoid:
-          - "Lightfire beams, Lightfall and tank-facing cones."
+          - "Leave Lightfire before it forms; non-creators inside are hit immediately on creation."
         cooldowns:
           - "Save a group cooldown for the sub-40% sequence."
         reminder: "Top to full, move for Lightfire, cooldown below 40%."
@@ -187,7 +314,7 @@ bosses:
           - "Place Lightfire wide and keep movement clean below 40%."
           - "Priority: Lightwarden Ruia — Warden's Wrath."
         avoid:
-          - "Pulverizing Strikes cones, Lightfall and Lightfire beams."
+          - "Leave Lightfire before it forms; non-creators inside are hit immediately on creation."
         defensive:
           - "Use a personal below 40% or while waiting to be topped."
         reminder: "Kick Wrath, place beams wide, stay clean below 40%."
