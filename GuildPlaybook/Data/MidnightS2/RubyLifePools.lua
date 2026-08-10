@@ -118,8 +118,8 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Primal Juggernaut",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 188244,
+          ["displayID"] = 101209,
         },
         {
           ["name"] = "Flashfrost Earthshaper",
@@ -128,13 +128,13 @@ ns.RegisterDungeon({
         },
         {
           ["name"] = "Flashfrost Chillweaver",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 188067,
+          ["displayID"] = 107397,
         },
         {
           ["name"] = "Defier Draghar",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 187897,
+          ["displayID"] = 107106,
         },
       },
       ["roles"] = {
@@ -164,13 +164,13 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Blazebound Destroyer",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 190034,
+          ["displayID"] = 102505,
         },
         {
           ["name"] = "Primalist Cinderweaver",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 190207,
+          ["displayID"] = 102886,
         },
         {
           ["name"] = "Primalist Flamedancer",
@@ -179,13 +179,13 @@ ns.RegisterDungeon({
         },
         {
           ["name"] = "Thunderhead",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 197698,
+          ["displayID"] = 106435,
         },
         {
           ["name"] = "Flamegullet",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 197697,
+          ["displayID"] = 106023,
         },
       },
       ["roles"] = {

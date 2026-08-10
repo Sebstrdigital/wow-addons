@@ -82,13 +82,13 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Raj'kess the Spellstorm",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 267546,
+          ["displayID"] = 143575,
         },
         {
           ["name"] = "Agitated Voidscythe",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 263228,
+          ["displayID"] = 138723,
         },
       },
       ["roles"] = {
@@ -118,8 +118,8 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Watchful Harrower",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245950,
+          ["displayID"] = 141286,
         },
       },
       ["roles"] = {
@@ -143,13 +143,13 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Devouring Brutalizer",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 268184,
+          ["displayID"] = 142611,
         },
         {
           ["name"] = "Brutal Overseer",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 252053,
+          ["displayID"] = 137329,
         },
       },
       ["roles"] = {

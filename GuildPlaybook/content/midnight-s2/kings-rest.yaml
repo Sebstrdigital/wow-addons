@@ -14,9 +14,9 @@
 # across roles in the source.
 #
 # trashSegments[].npcs carries the mob names the documents call out, so the
-# sidecar can show a model once IDs exist. Every npcID/displayID here is null:
-# nothing in this repo sources trash NPC IDs, and a wrong displayID renders the
-# wrong creature in-game, so they are left empty rather than guessed.
+# sidecar can show a model once IDs exist. IDs are sourced from Mythic Dungeon
+# Tools' published dungeon data; Shadow-Borne Witch Doctor and Spectral Hex
+# Priest lack exact matches and remain null.
 #
 # Verified changes in v0.6 (the documents' own "VERIFIED UPDATE" line):
 # Wretched Discharge (Mchimba's Half-Finished Mummy add) is now a 5-second
@@ -120,12 +120,12 @@ trashSegments:
   - name: "Opening trash — before The Golden Serpent"
     after: null
     npcs:
-      # IDs unknown — no source in this repo covers trash NPCs, and /gp ids only
-      # captures instance/encounter IDs. Backfill without touching the schema.
+      # IDs sourced from Mythic Dungeon Tools' dungeon data. Shadow-Borne Witch
+      # Doctor and Spectral Hex Priest lack exact matches in MDT and remain null.
       - { name: "Shadow-Borne Witch Doctor", npcID: null, displayID: null }
-      - { name: "Animated Guardian", npcID: null, displayID: null }
-      - { name: "Shadow-Borne Champion", npcID: null, displayID: null }
-      - { name: "Minion of Zul", npcID: null, displayID: null }
+      - { name: "Animated Guardian", npcID: 133935, displayID: 83252 }
+      - { name: "Shadow-Borne Champion", npcID: 134158, displayID: 83364 }
+      - { name: "Minion of Zul", npcID: null, displayID: 76055 }
     roles:
       TANK:
         - "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast."
@@ -146,10 +146,10 @@ trashSegments:
   - name: "Trash — The Golden Serpent to Mchimba"
     after: "The Golden Serpent"
     npcs:
-      - { name: "Seneschal M'bara", npcID: null, displayID: null }
-      - { name: "Guard Captain Atu", npcID: null, displayID: null }
-      - { name: "King Timalji", npcID: null, displayID: null }
-      - { name: "Purification Construct", npcID: null, displayID: null }
+      - { name: "Seneschal M'bara", npcID: 134251, displayID: 83517 }
+      - { name: "Guard Captain Atu", npcID: 137473, displayID: 85270 }
+      - { name: "King Timalji", npcID: 137474, displayID: 85272 }
+      - { name: "Purification Construct", npcID: 134739, displayID: 83836 }
     roles:
       TANK:
         - "Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal."
@@ -170,10 +170,10 @@ trashSegments:
   - name: "Trash — Mchimba to The Council of Tribes"
     after: "Mchimba the Embalmer"
     npcs:
-      - { name: "Royal Berserker", npcID: null, displayID: null }
+      - { name: "Royal Berserker", npcID: 135167, displayID: 84112 }
       - { name: "Spectral Hex Priest", npcID: null, displayID: null }
-      - { name: "Spectral Shaman", npcID: null, displayID: null }
-      - { name: "Honored Raptor", npcID: null, displayID: null }
+      - { name: "Spectral Shaman", npcID: 135239, displayID: 84163 }
+      - { name: "Honored Raptor", npcID: 135192, displayID: 84133 }
     roles:
       TANK:
         - "Royal Berserker — Bloodthirsty Axe: Plan mitigation for heavy physical pressure."
@@ -194,8 +194,8 @@ trashSegments:
   - name: "Final trash — The Council of Tribes to Dazar"
     after: "The Council of Tribes"
     npcs:
-      - { name: "Shadow of Zul", npcID: null, displayID: null }
-      - { name: "Minion of Zul", npcID: null, displayID: null }
+      - { name: "Shadow of Zul", npcID: 138489, displayID: 85860 }
+      - { name: "Minion of Zul", npcID: null, displayID: 76055 }
     roles:
       TANK:
         - "Shadow of Zul — Shadow Barrage: Sustained tank magic damage."

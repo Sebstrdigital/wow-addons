@@ -85,17 +85,17 @@ ns.RegisterDungeon({
         {
           ["name"] = "Keen-Eyed Screecher",
           ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["displayID"] = 124212,
         },
         {
           ["name"] = "Spirit of Hunger",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245855,
+          ["displayID"] = 26857,
         },
         {
           ["name"] = "Territorial Matriarch",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 241808,
+          ["displayID"] = 14316,
         },
       },
       ["roles"] = {
@@ -125,23 +125,23 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "The Winter Squall",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 250478,
+          ["displayID"] = 138885,
         },
         {
           ["name"] = "Glacial Revenant",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 241876,
+          ["displayID"] = 103213,
         },
         {
           ["name"] = "Frigid Mauler",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 241872,
+          ["displayID"] = 141288,
         },
         {
           ["name"] = "Terra Rumbler",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 241911,
+          ["displayID"] = 35201,
         },
       },
       ["roles"] = {
@@ -173,18 +173,18 @@ ns.RegisterDungeon({
         },
         {
           ["name"] = "Bonded Beasttamer",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245145,
+          ["displayID"] = 129581,
         },
         {
           ["name"] = "Loyal Saberfang",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245190,
+          ["displayID"] = 124949,
         },
         {
           ["name"] = "Loa Speaker Nanea",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 244889,
+          ["displayID"] = 138584,
         },
       },
       ["roles"] = {

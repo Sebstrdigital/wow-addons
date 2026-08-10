@@ -33,9 +33,12 @@
 # Screecher/Striker naming discrepancy for post-launch confirmation — there is
 # no field for that in this schema, so it is only recorded here.
 #
-# trashSegments[].npcs carries the mob names the documents call out; every
-# npcID/displayID is null because nothing in this repo sources trash NPC IDs,
-# and a wrong displayID renders the wrong creature in-game.
+# trashSegments[].npcs carries the mob names the documents call out. IDs are
+# sourced from Mythic Dungeon Tools' published dungeon data. Keen-Eyed Screecher
+# is listed there as "Keen-Eyed Striker" — the same rename the guides flag above —
+# and has two creature entries sharing one model, so only displayID is set.
+# Grizzled Warbringer has two entries with *different* models, so it stays null
+# rather than guess which one the dungeon actually spawns.
 
 dungeon: "Den of Nalorakk"
 slug: den-of-nalorakk
@@ -100,11 +103,12 @@ trashSegments:
   - name: "Opening trash — The Foraging"
     after: null
     npcs:
-      # IDs unknown — no source in this repo covers trash NPCs, and /gp ids only
-      # captures instance/encounter IDs. Backfill without touching the schema.
-      - { name: "Keen-Eyed Screecher", npcID: null, displayID: null }
-      - { name: "Spirit of Hunger", npcID: null, displayID: null }
-      - { name: "Territorial Matriarch", npcID: null, displayID: null }
+      # IDs sourced from Mythic Dungeon Tools' dungeon data. Keen-Eyed Screecher
+      # is MDT's "Keen-Eyed Striker"; its two creature entries share one model,
+      # so the model renders but npcID is left null.
+      - { name: "Keen-Eyed Screecher", npcID: null, displayID: 124212 }
+      - { name: "Spirit of Hunger", npcID: 245855, displayID: 26857 }
+      - { name: "Territorial Matriarch", npcID: 241808, displayID: 14316 }
     roles:
       TANK:
         - "Keen-Eyed Screecher — Piercing Screech: Group it tightly; the cast damages and silences the party for 2 seconds."
@@ -125,10 +129,10 @@ trashSegments:
   - name: "Winter gauntlet — after The Hoardmonger"
     after: "The Hoardmonger"
     npcs:
-      - { name: "The Winter Squall", npcID: null, displayID: null }
-      - { name: "Glacial Revenant", npcID: null, displayID: null }
-      - { name: "Frigid Mauler", npcID: null, displayID: null }
-      - { name: "Terra Rumbler", npcID: null, displayID: null }
+      - { name: "The Winter Squall", npcID: 250478, displayID: 138885 }
+      - { name: "Glacial Revenant", npcID: 241876, displayID: 103213 }
+      - { name: "Frigid Mauler", npcID: 241872, displayID: 141288 }
+      - { name: "Terra Rumbler", npcID: 241911, displayID: 35201 }
     roles:
       TANK:
         - "The Winter Squall — Harsh Winds: Pull deliberately and keep the group near shelter; killing the Squall ends Harsh Winds."
@@ -147,9 +151,9 @@ trashSegments:
     after: "Sentinel of Winter"
     npcs:
       - { name: "Grizzled Warbringer", npcID: null, displayID: null }
-      - { name: "Bonded Beasttamer", npcID: null, displayID: null }
-      - { name: "Loyal Saberfang", npcID: null, displayID: null }
-      - { name: "Loa Speaker Nanea", npcID: null, displayID: null }
+      - { name: "Bonded Beasttamer", npcID: 245145, displayID: 129581 }
+      - { name: "Loyal Saberfang", npcID: 245190, displayID: 124949 }
+      - { name: "Loa Speaker Nanea", npcID: 244889, displayID: 138584 }
     roles:
       TANK:
         - "Grizzled Warbringer — Poison Spear Volley: Keep the area readable; impacts land after a 3-second travel time."

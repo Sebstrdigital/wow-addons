@@ -171,6 +171,96 @@ local function BuildTrashText(segment, role)
     return table.concat(out, "\n")
 end
 
+-- Trash calls are authored "Mob Name — advice", so a call belongs to the mob
+-- whose name it opens with. Authors mix the typographic apostrophe with the
+-- ASCII one, hence the fold.
+local CURLY_APOS, EM_DASH, EN_DASH = "\226\128\153", "\226\128\148", "\226\128\147"
+
+local function normalize(s)
+    return (s:gsub(CURLY_APOS, "'"):lower())
+end
+
+local function opensWithSeparator(rest)
+    if rest == "" then return true end
+    local t = rest:match("^%s*(.*)$") or rest
+    local c = t:sub(1, 1)
+    if c == ":" or c == "-" then return true end
+    local wide = t:sub(1, 3)
+    return wide == EM_DASH or wide == EN_DASH
+end
+
+local function trim(s)
+    return (s:match("^%s*(.-)%s*$"))
+end
+
+-- A call may name several mobs at once ("Frigid Mauler / Terra Rumbler — ..."),
+-- so walk the slash-separated head and collect every mob named there. Matching
+-- anchors on the mob names rather than on the first punctuation, because names
+-- like "Keen-Eyed Screecher" contain a hyphen of their own. The walk stops at
+-- the chunk carrying the separator, so a slash later in the sentence is inert.
+-- Longest name wins within a chunk, so a name that prefixes another does not
+-- steal the more specific mob's calls.
+local function NPCsForCall(call, npcs)
+    if type(call) ~= "string" then return nil end
+    local found, any = {}, false
+    local rest = normalize(call)
+
+    while true do
+        local head, tail = rest:match("^([^/]*)/(.*)$")
+        local chunk = trim(head or rest)
+        local exact, prefixed, prefixedLen = nil, nil, -1
+
+        for _, npc in ipairs(npcs or {}) do
+            local name = npc and npc.name
+            if type(name) == "string" and name ~= "" then
+                local n = normalize(name)
+                if chunk == n then
+                    exact = npc
+                elseif #n > prefixedLen and chunk:sub(1, #n) == n
+                       and opensWithSeparator(chunk:sub(#n + 1)) then
+                    prefixed, prefixedLen = npc, #n
+                end
+            end
+        end
+
+        if exact and tail then
+            -- A bare mob name followed by "/": the head continues.
+            found[exact], any = true, true
+            rest = tail
+        else
+            local hit = prefixed or exact
+            if hit then found[hit], any = true, true end
+            break
+        end
+    end
+
+    return any and found or nil
+end
+
+-- One mob inside a segment: only the calls that name it. Calls naming no mob
+-- stay on the segment view rather than being dropped here.
+local function BuildNPCText(segment, npc, role)
+    local out = {}
+    local mine = {}
+    for _, call in ipairs((segment.roles or {})[role] or {}) do
+        local named = NPCsForCall(call, segment.npcs)
+        if named and named[npc] then
+            mine[#mine + 1] = call
+        end
+    end
+
+    if #mine > 0 then
+        heading(out, npc.name, C[role])
+        bullets(mine, out)
+    else
+        out[#out + 1] = C.DIM .. "No " .. (ROLE_LABEL[role] or role) .. " call names "
+            .. tostring(npc.name) .. " on its own. Open the segment above for calls that "
+            .. "cover the whole pull." .. C.R
+    end
+
+    return table.concat(out, "\n")
+end
+
 -- ------------------------------------------------------------------
 -- Frame
 -- ------------------------------------------------------------------
@@ -180,6 +270,13 @@ local PANEL_W, PANEL_H, NAV_W = 600, 680, 160
 -- Nav rows size themselves to their wrapped label. Trash segment names run well
 -- past the column width, and truncating them made distinct entries read alike.
 local NAV_ROW_MIN, NAV_ROW_PAD = 30, 10
+
+-- Nav depth is carried by the label's left inset. Indentation alone marks trash
+-- as subordinate to the bosses; its NPCs sit one step further in.
+local INSET_TOP, INSET_TRASH, INSET_NPC = 2, 10, 22
+-- ASCII only: the default client font has no glyph for U+25BE/U+25B8 (they draw
+-- as empty boxes), the same gap that makes the generator rewrite "→" to ">".
+local GLYPH_OPEN, GLYPH_SHUT = "-", "+"
 
 local frame = CreateFrame("Frame", "GuildPlaybookFrame", UIParent, "BackdropTemplate")
 frame:SetSize(PANEL_W, PANEL_H)
@@ -244,7 +341,9 @@ end
 -- Navigation (Overview + bosses) ----------------------------------
 
 local navButtons = {}
-local selected = { kind = "overview", boss = nil, segment = nil }
+-- `expanded` is the one trash segment whose NPCs are listed (accordion). It
+-- lives in `selected` so the fresh-table resets below clear it implicitly.
+local selected = { kind = "overview", boss = nil, segment = nil, npc = nil, expanded = nil }
 local viewedDungeon = nil   -- dungeon shown in the panel (may differ from ns.currentDungeon while browsing)
 
 local function SortedDungeons()
@@ -254,15 +353,75 @@ local function SortedDungeons()
     return list
 end
 
-local nav = CreateFrame("Frame", nil, frame)
-nav:SetPoint("TOPLEFT", 14, -104)
-nav:SetPoint("BOTTOMLEFT", 14, 14)
-nav:SetWidth(NAV_W)
+-- The nav column scrolls: a dungeon with four trash segments overflows the
+-- available height once one of them is expanded, and the rows below would
+-- otherwise be unreachable.
+local navScroll = CreateFrame("ScrollFrame", nil, frame)
+navScroll:SetPoint("TOPLEFT", 14, -104)
+navScroll:SetPoint("BOTTOMLEFT", 14, 14)
+navScroll:SetWidth(NAV_W)
+
+local nav = CreateFrame("Frame", nil, navScroll)
+nav:SetSize(NAV_W, 1)
+navScroll:SetScrollChild(nav)
+
+local NAV_SCROLL_STEP = 28
+
+local function NavScrollRange()
+    local extent = (nav:GetHeight() or 0) - (navScroll:GetHeight() or 0)
+    return extent > 0 and extent or 0
+end
+
+local function SetNavScroll(value)
+    local range = NavScrollRange()
+    if value < 0 then value = 0 elseif value > range then value = range end
+    navScroll:SetVerticalScroll(value)
+    return value
+end
+
+navScroll:EnableMouseWheel(true)
+navScroll:SetScript("OnMouseWheel", function(self, delta)
+    if NavScrollRange() <= 0 then return end
+    SetNavScroll((self:GetVerticalScroll() or 0) - delta * NAV_SCROLL_STEP)
+end)
+
+-- Slim indicator living in the 10px gutter between the nav column and the
+-- content panel, so it never overlaps a label. Hidden when everything fits.
+local navBar = CreateFrame("Frame", nil, frame)
+navBar:SetWidth(4)
+navBar:SetPoint("TOPLEFT", navScroll, "TOPRIGHT", 3, 0)
+navBar:SetPoint("BOTTOMLEFT", navScroll, "BOTTOMRIGHT", 3, 0)
+navBar:Hide()
+
+local navBarTrack = navBar:CreateTexture(nil, "BACKGROUND")
+navBarTrack:SetAllPoints()
+navBarTrack:SetColorTexture(1, 1, 1, 0.07)
+
+local navBarThumb = navBar:CreateTexture(nil, "ARTWORK")
+navBarThumb:SetColorTexture(1, 0.82, 0, 0.45)
+
+local function UpdateNavBar()
+    local range = NavScrollRange()
+    if range <= 0 then
+        navBar:Hide()
+        return
+    end
+    local viewH = navScroll:GetHeight() or 0
+    local total = nav:GetHeight() or 1
+    local frac = viewH / total
+    if frac > 1 then frac = 1 end
+    local thumbH = math.max(20, viewH * frac)
+    local offset = (navScroll:GetVerticalScroll() or 0) / range * (viewH - thumbH)
+    navBarThumb:ClearAllPoints()
+    navBarThumb:SetPoint("TOPLEFT", navBar, "TOPLEFT", 0, -offset)
+    navBarThumb:SetSize(4, thumbH)
+    navBar:Show()
+end
 
 local function UpdateNavHighlight()
     for _, btn in ipairs(navButtons) do
         local isSelected = (btn.kind == selected.kind) and (btn.boss == selected.boss)
-                           and (btn.segment == selected.segment)
+                           and (btn.segment == selected.segment) and (btn.npc == selected.npc)
         btn:GetFontString():SetTextColor(isSelected and 1 or 0.82, isSelected and 0.82 or 0.82, isSelected and 0 or 0.82)
     end
 end
@@ -288,7 +447,24 @@ local function BuildNav(d)
         local function addTrash(afterBoss)
             for _, seg in ipairs(d.trashSegments or {}) do
                 if seg.after == afterBoss then
-                    entries[#entries + 1] = { kind = "trash", segment = seg, label = "~ " .. seg.name }
+                    local npcs = seg.npcs or {}
+                    -- A segment with no named mobs has nothing to expand into,
+                    -- so it gets no expander and stays a leaf.
+                    local open = (#npcs > 0) and (selected.expanded == seg)
+                    local label = seg.name
+                    if #npcs > 0 then
+                        label = label .. "  " .. (open and GLYPH_OPEN or GLYPH_SHUT)
+                    end
+                    entries[#entries + 1] = { kind = "trash", segment = seg,
+                                              label = label, inset = INSET_TRASH }
+                    if open then
+                        for _, npc in ipairs(npcs) do
+                            if type(npc.name) == "string" and npc.name ~= "" then
+                                entries[#entries + 1] = { kind = "npc", segment = seg, npc = npc,
+                                                          label = npc.name, inset = INSET_NPC }
+                            end
+                        end
+                    end
                 end
             end
         end
@@ -299,6 +475,7 @@ local function BuildNav(d)
         end
     end
     local prev
+    local total = 0
     for i, entry in ipairs(entries) do
         local btn = navButtons[i]
         if not btn then
@@ -306,10 +483,6 @@ local function BuildNav(d)
             btn:SetPoint("LEFT")
             btn:SetPoint("RIGHT")
             local fs = btn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            -- An explicit width (rather than a LEFT/RIGHT anchor pair) is what
-            -- makes GetStringHeight report the wrapped height right away.
-            fs:SetPoint("LEFT", 2, 0)
-            fs:SetWidth(NAV_W - 4)
             fs:SetJustifyH("LEFT")
             fs:SetWordWrap(true)
             btn:SetFontString(fs)
@@ -324,28 +497,82 @@ local function BuildNav(d)
         else
             btn:SetPoint("TOP", nav, "TOP", 0, 0)
         end
+        -- Indent by moving the label in, narrowing it to match: an explicit
+        -- width (rather than a LEFT/RIGHT anchor pair) is what makes
+        -- GetStringHeight report the wrapped height right away, so the width
+        -- has to absorb the inset or deep rows would clip.
+        local fs = btn:GetFontString()
+        local inset = entry.inset or INSET_TOP
+        fs:ClearAllPoints()
+        fs:SetPoint("LEFT", inset, 0)
+        fs:SetWidth(NAV_W - 2 - inset)
         btn:SetText(entry.label)
-        btn:SetHeight(math.max(NAV_ROW_MIN, btn:GetFontString():GetStringHeight() + NAV_ROW_PAD))
-        btn.kind, btn.boss, btn.segment = entry.kind, entry.boss, entry.segment
+        local rowH = math.max(NAV_ROW_MIN, fs:GetStringHeight() + NAV_ROW_PAD)
+        btn:SetHeight(rowH)
+        -- Offset from the top of the scroll child, used to scroll a row into view.
+        if i > 1 then total = total + 2 end
+        btn.navTop = total
+        total = total + rowH
+        btn.kind, btn.boss, btn.segment, btn.npc = entry.kind, entry.boss, entry.segment, entry.npc
         btn:SetScript("OnClick", function()
             if entry.kind == "dungeon" then
                 ns.safecall(ns.UI_SetDungeon, entry.dungeon)
             elseif entry.kind == "back" then
                 ns.safecall(ns.UI_SetDungeon, nil)
+            elseif entry.kind == "trash" then
+                -- Accordion: opening one segment shuts any other. Clicking the
+                -- open one again shuts it without dropping the selection.
+                local expandable = #(entry.segment.npcs or {}) > 0
+                selected = {
+                    kind = "trash", segment = entry.segment,
+                    expanded = (expandable and selected.expanded ~= entry.segment)
+                               and entry.segment or nil,
+                }
+                ns.safecall(ns.UI_Refresh)
             else
-                selected = { kind = entry.kind, boss = entry.boss, segment = entry.segment }
+                -- Only an NPC row keeps its parent segment open; every other
+                -- row collapses the accordion.
+                selected = {
+                    kind = entry.kind, boss = entry.boss, segment = entry.segment,
+                    npc = entry.npc,
+                    expanded = (entry.kind == "npc") and selected.expanded or nil,
+                }
                 ns.safecall(ns.UI_Refresh)
             end
         end)
         btn:Show()
         prev = btn
     end
+
+    nav:SetHeight(math.max(1, total))
+
+    -- Keep the reading position across a rebuild: clamp what we had, then pull
+    -- the selected row back into view only if the rebuild pushed it out. That
+    -- keeps an expand from scrolling to top while still revealing the row the
+    -- user just clicked.
+    local view = navScroll:GetHeight() or 0
+    local at = SetNavScroll(navScroll:GetVerticalScroll() or 0)
+    if view > 0 then
+        for _, btn in ipairs(navButtons) do
+            if btn:IsShown() and btn.kind == selected.kind and btn.boss == selected.boss
+               and btn.segment == selected.segment and btn.npc == selected.npc then
+                local top, bottom = btn.navTop or 0, (btn.navTop or 0) + (btn:GetHeight() or 0)
+                if top < at then
+                    at = SetNavScroll(top)
+                elseif bottom > at + view then
+                    at = SetNavScroll(bottom - view)
+                end
+                break
+            end
+        end
+    end
+    UpdateNavBar()
 end
 
 -- Content ---------------------------------------------------------
 
 local scroll = CreateFrame("ScrollFrame", "GuildPlaybookScroll", frame, "UIPanelScrollFrameTemplate")
-scroll:SetPoint("TOPLEFT", nav, "TOPRIGHT", 10, 0)
+scroll:SetPoint("TOPLEFT", navScroll, "TOPRIGHT", 10, 0)
 scroll:SetPoint("BOTTOMRIGHT", -32, 14)
 
 -- Only show the scrollbar when the content actually overflows.
@@ -420,6 +647,8 @@ local function UpdateSidecar()
     local subject
     if selected.kind == "boss" then
         subject = HasModel(selected.boss) and selected.boss or nil
+    elseif selected.kind == "npc" then
+        subject = HasModel(selected.npc) and selected.npc or nil
     elseif selected.kind == "trash" and selected.segment then
         subject = FirstModelledNPC(selected.segment)
     end
@@ -447,6 +676,9 @@ end
 function ns.UI_Refresh()
     local d = viewedDungeon
     UpdateRoleTabs()
+    -- Expanding a segment changes which rows exist, so the nav is rebuilt from
+    -- `selected` on every refresh rather than only when the dungeon changes.
+    BuildNav(d)
     UpdateNavHighlight()
     if not d then
         subtitle:SetText(C.DIM .. "Pick a dungeon" .. C.R)
@@ -457,6 +689,9 @@ function ns.UI_Refresh()
         if selected.kind == "boss" and selected.boss then
             sectionTitle:SetText(selected.boss.name)
             text:SetText(BuildBossText(selected.boss, ns.role))
+        elseif selected.kind == "npc" and selected.npc and selected.segment then
+            sectionTitle:SetText(selected.npc.name)
+            text:SetText(BuildNPCText(selected.segment, selected.npc, ns.role))
         elseif selected.kind == "trash" and selected.segment then
             sectionTitle:SetText(selected.segment.name)
             text:SetText(BuildTrashText(selected.segment, ns.role))
@@ -476,15 +711,11 @@ end
 function ns.UI_SetDungeon(d)
     viewedDungeon = d
     selected = { kind = "overview", boss = nil }
-    BuildNav(d)
     ns.UI_Refresh()
 end
 
 function ns.UI_SelectBoss(dungeon, boss)
-    if viewedDungeon ~= dungeon then
-        viewedDungeon = dungeon
-        BuildNav(dungeon)
-    end
+    viewedDungeon = dungeon
     selected = { kind = "boss", boss = boss }
     ns.UI_Refresh()
     frame:Show()

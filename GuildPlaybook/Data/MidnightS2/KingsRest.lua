@@ -106,18 +106,18 @@ ns.RegisterDungeon({
         },
         {
           ["name"] = "Animated Guardian",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 133935,
+          ["displayID"] = 83252,
         },
         {
           ["name"] = "Shadow-Borne Champion",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 134158,
+          ["displayID"] = 83364,
         },
         {
           ["name"] = "Minion of Zul",
           ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["displayID"] = 76055,
         },
       },
       ["roles"] = {
@@ -147,23 +147,23 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Seneschal M'bara",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 134251,
+          ["displayID"] = 83517,
         },
         {
           ["name"] = "Guard Captain Atu",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 137473,
+          ["displayID"] = 85270,
         },
         {
           ["name"] = "King Timalji",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 137474,
+          ["displayID"] = 85272,
         },
         {
           ["name"] = "Purification Construct",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 134739,
+          ["displayID"] = 83836,
         },
       },
       ["roles"] = {
@@ -193,8 +193,8 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Royal Berserker",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 135167,
+          ["displayID"] = 84112,
         },
         {
           ["name"] = "Spectral Hex Priest",
@@ -203,13 +203,13 @@ ns.RegisterDungeon({
         },
         {
           ["name"] = "Spectral Shaman",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 135239,
+          ["displayID"] = 84163,
         },
         {
           ["name"] = "Honored Raptor",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 135192,
+          ["displayID"] = 84133,
         },
       },
       ["roles"] = {
@@ -239,13 +239,13 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Shadow of Zul",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 138489,
+          ["displayID"] = 85860,
         },
         {
           ["name"] = "Minion of Zul",
           ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["displayID"] = 76055,
         },
       },
       ["roles"] = {

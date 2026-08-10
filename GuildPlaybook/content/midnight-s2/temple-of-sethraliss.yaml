@@ -139,11 +139,11 @@ trashSegments:
   - name: "Opening trash — before Adderis and Aspix"
     after: null
     npcs:
-      # IDs unknown — no source in this repo covers trash NPCs, and /gp ids only
-      # captures instance/encounter IDs. Backfill without touching the schema.
-      - { name: "Shrouded Fang", npcID: null, displayID: null }
-      - { name: "Sandfury Stonefist", npcID: null, displayID: null }
-      - { name: "Sandswept Hunter", npcID: null, displayID: null }
+      # IDs sourced from Mythic Dungeon Tools' dungeon data (all NPCs in this
+      # dungeon have matches in MDT).
+      - { name: "Shrouded Fang", npcID: 134602, displayID: 83782 }
+      - { name: "Sandfury Stonefist", npcID: 134991, displayID: 84207 }
+      - { name: "Sandswept Hunter", npcID: 134600, displayID: 83780 }
     roles:
       TANK:
         - "Shrouded Fang — Cheap Shot: Control and stop the ambush cast."
@@ -161,10 +161,10 @@ trashSegments:
   - name: "Relevant trash — between Adderis and Aspix & Merektha"
     after: "Adderis and Aspix"
     npcs:
-      - { name: "Dutiful Tamer", npcID: null, displayID: null }
-      - { name: "Sand-Sworn Rider", npcID: null, displayID: null }
-      - { name: "Barbed Krolusk", npcID: null, displayID: null }
-      - { name: "Swarming Krolusk", npcID: null, displayID: null }
+      - { name: "Dutiful Tamer", npcID: 139422, displayID: 84761 }
+      - { name: "Sand-Sworn Rider", npcID: 134629, displayID: 84761 }
+      - { name: "Barbed Krolusk", npcID: 134616, displayID: 83787 }
+      - { name: "Swarming Krolusk", npcID: 264785, displayID: 83787 }
     roles:
       TANK:
         - "Dutiful Tamer / Sand-Sworn Rider — Swarming Krolusks: Group the summons for cleave; summon health reduced."
@@ -179,7 +179,7 @@ trashSegments:
   - name: "Relevant trash — between Merektha & Galvazzt"
     after: "Merektha"
     npcs:
-      - { name: "Agitated Nimbus", npcID: null, displayID: null }
+      - { name: "Agitated Nimbus", npcID: 136076, displayID: 65631 }
     roles:
       TANK:
         - "Agitated Nimbus — Accumulate Charge: Assign kicks or purge; each stack is 8%."
@@ -194,8 +194,8 @@ trashSegments:
   - name: "Eyes gauntlet & final trash — before Avatar of Sethraliss"
     after: "Galvazzt"
     npcs:
-      - { name: "Temple Disruptor", npcID: null, displayID: null }
-      - { name: "Eye of Sethraliss", npcID: null, displayID: null }
+      - { name: "Temple Disruptor", npcID: 269227, displayID: 80961 }
+      - { name: "Eye of Sethraliss", npcID: 240681, displayID: 169 }
     roles:
       TANK:
         - "Temple Disruptor — Essence Disruption: Interrupt to keep the Eye from gaining energy."

@@ -117,18 +117,18 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Shrouded Fang",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 134602,
+          ["displayID"] = 83782,
         },
         {
           ["name"] = "Sandfury Stonefist",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 134991,
+          ["displayID"] = 84207,
         },
         {
           ["name"] = "Sandswept Hunter",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 134600,
+          ["displayID"] = 83780,
         },
       },
       ["roles"] = {
@@ -155,23 +155,23 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Dutiful Tamer",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 139422,
+          ["displayID"] = 84761,
         },
         {
           ["name"] = "Sand-Sworn Rider",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 134629,
+          ["displayID"] = 84761,
         },
         {
           ["name"] = "Barbed Krolusk",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 134616,
+          ["displayID"] = 83787,
         },
         {
           ["name"] = "Swarming Krolusk",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 264785,
+          ["displayID"] = 83787,
         },
       },
       ["roles"] = {
@@ -195,8 +195,8 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Agitated Nimbus",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 136076,
+          ["displayID"] = 65631,
         },
       },
       ["roles"] = {
@@ -220,13 +220,13 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Temple Disruptor",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 269227,
+          ["displayID"] = 80961,
         },
         {
           ["name"] = "Eye of Sethraliss",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 240681,
+          ["displayID"] = 169,
         },
       },
       ["roles"] = {

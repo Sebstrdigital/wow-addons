@@ -47,10 +47,10 @@
 # identically across all three role documents for this dungeon, so the per-role
 # bullets below combine that shared body text with the role-specific "Top
 # Priority Calls" one-liners from each document's page-1 cheat sheet.
-# npcID/displayID are null throughout: nothing in this repo sources trash NPC
-# IDs, and a wrong displayID renders the wrong creature in-game. "Domanaar
-# lieutenants" is named only as a category in the documents (no specific NPC),
-# so it appears as a role-bullet note rather than an npcs[] entry.
+# npcID/displayID are sourced from Mythic Dungeon Tools' published dungeon data
+# (all NPCs have matches). "Domanaar lieutenants" is named only as a category in
+# the documents (no specific NPC), so it appears as a role-bullet note rather
+# than an npcs[] entry.
 #
 # Still without a home in the schema: Enemy Forces values, miniboss buff
 # values, the opening-miniboss melee/caster choice mechanic, lieutenant casts
@@ -120,8 +120,8 @@ trashSegments:
   - name: "Opening trash — before Taz'Rah"
     after: null
     npcs:
-      - { name: "Raj'kess the Spellstorm", npcID: null, displayID: null }
-      - { name: "Agitated Voidscythe", npcID: null, displayID: null }
+      - { name: "Raj'kess the Spellstorm", npcID: 267546, displayID: 143575 }
+      - { name: "Agitated Voidscythe", npcID: 263228, displayID: 138723 }
     roles:
       TANK:
         - "Raj'kess the Spellstorm — Orb of Disruption: Destroy the orb immediately before Disrupting Blast; face the pack cleanly and call the kill."
@@ -142,7 +142,7 @@ trashSegments:
   - name: "Watchful Harrower trash — Taz'Rah to Atroxus"
     after: "Taz'Rah"
     npcs:
-      - { name: "Watchful Harrower", npcID: null, displayID: null }
+      - { name: "Watchful Harrower", npcID: 245950, displayID: 141286 }
     roles:
       TANK:
         - "Watchful Harrower — Requires Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss; confirm its final live ability package."
@@ -157,8 +157,8 @@ trashSegments:
   - name: "Domanaar lieutenants trash — Atroxus to Charonus"
     after: "Atroxus"
     npcs:
-      - { name: "Devouring Brutalizer", npcID: null, displayID: null }
-      - { name: "Brutal Overseer", npcID: null, displayID: null }
+      - { name: "Devouring Brutalizer", npcID: 268184, displayID: 142611 }
+      - { name: "Brutal Overseer", npcID: 252053, displayID: 137329 }
     roles:
       TANK:
         - "Devouring Brutalizer — Devour: Protect and help free the target before the cast completes; keep the trapped player reachable for the swap."

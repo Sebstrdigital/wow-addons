@@ -106,8 +106,8 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Ravenous Descendant",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 261553,
+          ["displayID"] = 146654,
         },
         {
           ["name"] = "Caustic Mist Totem",
@@ -116,8 +116,8 @@ ns.RegisterDungeon({
         },
         {
           ["name"] = "High Evolutionist",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 261557,
+          ["displayID"] = 146663,
         },
       },
       ["roles"] = {
@@ -144,18 +144,18 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Ascendant Serpent",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 261573,
+          ["displayID"] = 146299,
         },
         {
           ["name"] = "Blade of the Altar",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 271453,
+          ["displayID"] = 142336,
         },
         {
           ["name"] = "Primal Serpent",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 261560,
+          ["displayID"] = 146653,
         },
       },
       ["roles"] = {
@@ -188,18 +188,18 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Ritual Chieftain",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 270306,
+          ["displayID"] = 146680,
         },
         {
           ["name"] = "Venom Leech",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 261550,
+          ["displayID"] = 146598,
         },
         {
           ["name"] = "Rattling Writhe",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 262011,
+          ["displayID"] = 146664,
         },
       },
       ["roles"] = {

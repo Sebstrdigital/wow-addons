@@ -15,7 +15,9 @@ Copy the `GuildPlaybook` folder into `World of Warcraft/_retail_/Interface/AddOn
 
 ## Editing content
 
-1. Edit or add a YAML file under `content/<season>/` — one file per dungeon. Follow the structure of `content/midnight-s1/magisters-terrace.yaml`: a per-role dungeon overview plus one entry per boss with `job` / `avoid` / `defensive` (healers: `cooldowns`) / `reminder` lists per role and a shared `wipe` list. Optional per boss: `displayID` (or `npcID`) shows a 3D model of the boss next to the panel — both numbers are on the boss's Wowhead page (npc ID is in the URL, display ID under "Screenshots/Modelviewer" or via the wow.tools/MDT data).
+1. Edit or add a YAML file under `content/<season>/` — one file per dungeon. Follow the structure of `content/midnight-s2/ruby-life-pools.yaml`: a per-role dungeon overview plus one entry per boss with `job` / `avoid` / `defensive` (healers: `cooldowns`) / `reminder` lists per role and a shared `wipe` list. Optional per boss: `displayID` (or `npcID`) shows a 3D model of the boss next to the panel. Optional per dungeon: `trashSegments`, the named trash packs between bosses — each has a `name`, the boss it follows (`after`, or null before the first), per-role calls, and the `npcs` involved, which drive the same 3D model panel. Write trash calls as `Mob Name — advice` so the UI can attribute each call to a mob when one is selected.
+
+Both ID numbers come from [Mythic Dungeon Tools' dungeon data](https://github.com/Nnoggie/MythicDungeonTools) (`Midnight/<Dungeon>.lua`, where each enemy carries `id` and `displayId`), or from the boss's Wowhead page (npc ID is in the URL, display ID under "Screenshots/Modelviewer"). Leave an ID `null` rather than guessing — a wrong `displayID` renders the wrong creature in-game, and the panel simply hides when there is nothing to show.
 2. Run `python3 tools/generate.py` from the `GuildPlaybook` folder (needs PyYAML). It validates the YAML and writes `Data/<Season>/<Dungeon>.lua`.
 3. Add any **new** Data file to `GuildPlaybook.toc` (below `Core.lua`).
 4. `/reload` in-game.

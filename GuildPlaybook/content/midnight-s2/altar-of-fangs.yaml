@@ -23,9 +23,9 @@
 # Burst, Feeding Frenzy, Messy Eater, Regurgitate and Triple Shot.
 #
 # trashSegments[].npcs carries the mob names the documents call out, so the
-# sidecar can show a model once IDs exist. Every npcID/displayID here is null:
-# nothing in this repo sources trash NPC IDs, and a wrong displayID renders the
-# wrong creature in-game, so they are left empty rather than guessed.
+# sidecar can show a model once IDs exist. IDs are sourced from Mythic Dungeon
+# Tools' published dungeon data; Caustic Mist Totem lacks an exact match and
+# remains null.
 #
 # quicksheet.trash.ROUTE was updated to match the documents' own segment
 # headers exactly ("Entrance + Carnage Pit → Rav'i → The Writhing Coil →
@@ -144,11 +144,11 @@ trashSegments:
   - name: "Entrance + Carnage Pit → Rav'i"
     after: null
     npcs:
-      # IDs unknown — no source in this repo covers trash NPCs, and /gp ids only
-      # captures instance/encounter IDs. Backfill without touching the schema.
-      - { name: "Ravenous Descendant", npcID: null, displayID: null }
+      # IDs sourced from Mythic Dungeon Tools' dungeon data. Caustic Mist Totem
+      # lacks an exact match in MDT and remains null.
+      - { name: "Ravenous Descendant", npcID: 261553, displayID: 146654 }
       - { name: "Caustic Mist Totem", npcID: null, displayID: null }
-      - { name: "High Evolutionist", npcID: null, displayID: null }
+      - { name: "High Evolutionist", npcID: 261557, displayID: 146663 }
     roles:
       TANK:
         - "Ravenous Descendant — stacking attack-speed effect: Focus and control early; exact live spell name requires verification."
@@ -166,9 +166,9 @@ trashSegments:
   - name: "Rav'i → The Writhing Coil"
     after: "Rav'i"
     npcs:
-      - { name: "Ascendant Serpent", npcID: null, displayID: null }
-      - { name: "Blade of the Altar", npcID: null, displayID: null }
-      - { name: "Primal Serpent", npcID: null, displayID: null }
+      - { name: "Ascendant Serpent", npcID: 261573, displayID: 146299 }
+      - { name: "Blade of the Altar", npcID: 271453, displayID: 142336 }
+      - { name: "Primal Serpent", npcID: 261560, displayID: 146653 }
     roles:
       TANK:
         - "Ascendant Serpent — Infest: Kill the three Hatchlings; they die when the Serpent dies."
@@ -192,9 +192,9 @@ trashSegments:
   - name: "The Writhing Coil → Altar Ascent"
     after: "The Writhing Coil"
     npcs:
-      - { name: "Ritual Chieftain", npcID: null, displayID: null }
-      - { name: "Venom Leech", npcID: null, displayID: null }
-      - { name: "Rattling Writhe", npcID: null, displayID: null }
+      - { name: "Ritual Chieftain", npcID: 270306, displayID: 146680 }
+      - { name: "Venom Leech", npcID: 261550, displayID: 146598 }
+      - { name: "Rattling Writhe", npcID: 262011, displayID: 146664 }
     roles:
       TANK:
         - "Ritual Chieftain — Totemic Ritual: The latest PTR build fixed missed casts; stop it and handle spawned totems."

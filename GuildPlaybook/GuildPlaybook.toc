@@ -2,7 +2,7 @@
 ## Title: Stand as One's Playbook
 ## Notes: Guild-curated Mythic+ tactics, filtered to your role.
 ## Author: Sebastian & guild
-## Version: 0.5.1
+## Version: 0.5.2
 ## SavedVariables: GuildPlaybookDB
 ## IconTexture: Interface\AddOns\GuildPlaybook\Media\icon
 ## AddonCompartmentFunc: GuildPlaybook_OnAddonCompartmentClick
@@ -14,7 +14,6 @@ Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
 Core.lua
 MinimapButton.lua
-Data\MidnightS1\MagistersTerrace.lua
 Data\MidnightS2\AltarOfFangs.lua
 Data\MidnightS2\DenOfNalorakk.lua
 Data\MidnightS2\KingsRest.lua

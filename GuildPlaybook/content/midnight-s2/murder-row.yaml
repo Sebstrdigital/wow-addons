@@ -25,9 +25,8 @@
 #
 # trashSegments[].npcs carries the mob names the documents call out
 # (Bribed Captain, Bribed Guard, Warehouse Worker, Felmaster Lucsei,
-# Corrupted Warlock, Defiled Golem). Every npcID/displayID here is null:
-# nothing in this repo sources trash NPC IDs, and a wrong displayID renders
-# the wrong creature in-game, so they are left empty rather than guessed.
+# Corrupted Warlock, Defiled Golem). IDs are sourced from Mythic Dungeon
+# Tools' published dungeon data (all NPCs in this dungeon have matches).
 #
 # Corrected against the 0.9 draft this file was previously transcribed from:
 # - Destabilized (Kystia Manaheart) is 15 sec, not 20 — the documents' own
@@ -140,8 +139,8 @@ trashSegments:
   - name: "Opening trash — before Kystia Manaheart"
     after: null
     npcs:
-      - { name: "Bribed Captain", npcID: null, displayID: null }
-      - { name: "Bribed Guard", npcID: null, displayID: null }
+      - { name: "Bribed Captain", npcID: 252529, displayID: 137450 }
+      - { name: "Bribed Guard", npcID: 236071, displayID: 126157 }
     roles:
       TANK:
         - "Bribed Captain / Bribed Guard — live cast list: use visible danger cues and stop assigned casts; exact late-PTR cast priority requires live verification."
@@ -159,7 +158,7 @@ trashSegments:
   - name: "Kystia → Zaen trash"
     after: "Kystia Manaheart"
     npcs:
-      - { name: "Warehouse Worker", npcID: null, displayID: null }
+      - { name: "Warehouse Worker", npcID: 236893, displayID: 136834 }
     roles:
       TANK:
         - "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%."
@@ -177,7 +176,7 @@ trashSegments:
   - name: "Zaen → Xathuux trash"
     after: "Zaen Bladesorrow"
     npcs:
-      - { name: "Felmaster Lucsei", npcID: null, displayID: null }
+      - { name: "Felmaster Lucsei", npcID: 236905, displayID: 138787 }
     roles:
       TANK:
         - "Felmaster Lucsei — Blade Dance: priority stop or move clear; never stack avoidable damage into it."
@@ -192,8 +191,8 @@ trashSegments:
   - name: "Xathuux → Lithiel trash"
     after: "Xathuux the Annihilator"
     npcs:
-      - { name: "Corrupted Warlock", npcID: null, displayID: null }
-      - { name: "Defiled Golem", npcID: null, displayID: null }
+      - { name: "Corrupted Warlock", npcID: 235265, displayID: 124763 }
+      - { name: "Defiled Golem", npcID: 235322, displayID: 137564 }
     roles:
       TANK:
         - "Corrupted Warlock — Curse of Doom: highest interrupt priority."

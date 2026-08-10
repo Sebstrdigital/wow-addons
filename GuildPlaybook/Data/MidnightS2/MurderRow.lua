@@ -120,13 +120,13 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Bribed Captain",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 252529,
+          ["displayID"] = 137450,
         },
         {
           ["name"] = "Bribed Guard",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 236071,
+          ["displayID"] = 126157,
         },
       },
       ["roles"] = {
@@ -153,8 +153,8 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Warehouse Worker",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 236893,
+          ["displayID"] = 136834,
         },
       },
       ["roles"] = {
@@ -181,8 +181,8 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Felmaster Lucsei",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 236905,
+          ["displayID"] = 138787,
         },
       },
       ["roles"] = {
@@ -206,13 +206,13 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Corrupted Warlock",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 235265,
+          ["displayID"] = 124763,
         },
         {
           ["name"] = "Defiled Golem",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 235322,
+          ["displayID"] = 137564,
         },
       },
       ["roles"] = {

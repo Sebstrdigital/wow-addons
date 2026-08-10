@@ -90,18 +90,18 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Radiant Spellsower",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245336,
+          ["displayID"] = 127945,
         },
         {
           ["name"] = "Virid Grovekeeper",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245346,
+          ["displayID"] = 127946,
         },
         {
           ["name"] = "Sporeblight Belcher",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 254850,
+          ["displayID"] = 126462,
         },
       },
       ["roles"] = {
@@ -128,18 +128,18 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Underbrush Stalker",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245339,
+          ["displayID"] = 127942,
         },
         {
           ["name"] = "Thorny Saptor",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245473,
+          ["displayID"] = 122805,
         },
         {
           ["name"] = "Spineshield Beetle",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245527,
+          ["displayID"] = 110392,
         },
       },
       ["roles"] = {
@@ -166,18 +166,18 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Luminous Thornmaw",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 246871,
+          ["displayID"] = 126929,
         },
         {
           ["name"] = "Overgrown Hydra",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245513,
+          ["displayID"] = 142839,
         },
         {
           ["name"] = "Lightgorged Lasher",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 245345,
+          ["displayID"] = 125875,
         },
       },
       ["roles"] = {
@@ -204,13 +204,13 @@ ns.RegisterDungeon({
       ["npcs"] = {
         {
           ["name"] = "Potatoad Matriarch",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 249756,
+          ["displayID"] = 136026,
         },
         {
           ["name"] = "Sporeblight Belcher",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["npcID"] = 254850,
+          ["displayID"] = 126462,
         },
       },
       ["roles"] = {

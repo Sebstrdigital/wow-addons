@@ -11,9 +11,9 @@
 # purpose; do not clean them out until the guides are re-verified on live.
 #
 # trashSegments[].npcs carries the mob names the documents call out, so the
-# sidecar can show a model once IDs exist. Every npcID/displayID here is null:
-# nothing in this repo sources trash NPC IDs, and a wrong displayID renders the
-# wrong creature in-game, so they are left empty rather than guessed.
+# sidecar can show a model once IDs exist. IDs are sourced from Mythic Dungeon
+# Tools' published dungeon data; Flashfrost Earthshaper and Primalist Flamedancer
+# lack exact matches and remain null.
 #
 # Still without a home in the schema: the pre-season release dates (Patch 12.1
 # on 11 Aug, M+ Season 2 on 18 Aug), the "Sources cross-checked" line, and the
@@ -102,12 +102,12 @@ trashSegments:
   - name: "Opening trash — before Melidrussa"
     after: null
     npcs:
-      # IDs unknown — no source in this repo covers trash NPCs, and /gp ids only
-      # captures instance/encounter IDs. Backfill without touching the schema.
-      - { name: "Primal Juggernaut", npcID: null, displayID: null }
+      # IDs sourced from Mythic Dungeon Tools' dungeon data. Flashfrost Earthshaper
+      # and Primalist Flamedancer lack exact matches in MDT and remain null.
+      - { name: "Primal Juggernaut", npcID: 188244, displayID: 101209 }
       - { name: "Flashfrost Earthshaper", npcID: null, displayID: null }
-      - { name: "Flashfrost Chillweaver", npcID: null, displayID: null }
-      - { name: "Defier Draghar", npcID: null, displayID: null }
+      - { name: "Flashfrost Chillweaver", npcID: 188067, displayID: 107397 }
+      - { name: "Defier Draghar", npcID: 187897, displayID: 107106 }
     roles:
       TANK:
         - "Primal Juggernaut — Crushing Smash: Mitigate, face away and sidestep Excavating Blast."
@@ -128,11 +128,11 @@ trashSegments:
   - name: "Ruby Overlook trash — between bosses 1 & 2"
     after: "Melidrussa Chillworn"
     npcs:
-      - { name: "Blazebound Destroyer", npcID: null, displayID: null }
-      - { name: "Primalist Cinderweaver", npcID: null, displayID: null }
+      - { name: "Blazebound Destroyer", npcID: 190034, displayID: 102505 }
+      - { name: "Primalist Cinderweaver", npcID: 190207, displayID: 102886 }
       - { name: "Primalist Flamedancer", npcID: null, displayID: null }
-      - { name: "Thunderhead", npcID: null, displayID: null }
-      - { name: "Flamegullet", npcID: null, displayID: null }
+      - { name: "Thunderhead", npcID: 197698, displayID: 106435 }
+      - { name: "Flamegullet", npcID: 197697, displayID: 106023 }
     roles:
       TANK:
         - "Blazebound Destroyer — Inferno: Keep the pack stable and leave before Burnout finishes."
