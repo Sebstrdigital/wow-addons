@@ -32,6 +32,26 @@ function ns.safecall(fn, ...)
     end
 end
 
+-- How MDT turns an addon-message sender into its preset-cache key, copied from
+-- its OnCommReceived (MDT's Modules/Transmission.lua): a sender on our own realm
+-- arrives with no realm attached, so the player's realm is filled back in. The
+-- one-click import in UI.lua has to agree with this exactly - the chat link it
+-- fires looks the preset up under this key - and /gp commtest reports it.
+function ns.MdtSenderKey(sender)
+    -- Raw CHAT_MSG_ADDON senders keep the realm attached ("Vizzo-Caelestrasz"),
+    -- a form UnitFullName cannot resolve. MDT never sees that form: AceComm
+    -- ambiguates the sender first, stripping the suffix for same-realm senders.
+    -- Replicate that step, then re-derive the way MDT does.
+    local name, realm = UnitFullName(Ambiguate(sender or "", "none"))
+    if not name then return nil end
+    if not realm or #realm < 3 then
+        local _, playerRealm = UnitFullName("player")
+        realm = playerRealm
+    end
+    if not realm or realm == "" then return nil end
+    return name .. "-" .. realm
+end
+
 -- ------------------------------------------------------------------
 -- State
 -- ------------------------------------------------------------------
@@ -71,6 +91,9 @@ local function EnterDungeon(d)
         ns.safecall(ns.UI_SetDungeon, d)
         if d then
             print("|cff69ccf0Guild Playbook:|r loaded playbook for " .. d.dungeon .. ". /gp to toggle.")
+            if (GuildPlaybookDB and GuildPlaybookDB.autoOpen) ~= false then
+                ns.safecall(ns.UI_Show)
+            end
         end
     end
 end
@@ -108,6 +131,7 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2)
     if event == "ADDON_LOADED" and arg1 == ADDON then
         GuildPlaybookDB = GuildPlaybookDB or {}
         GuildPlaybookDB.point = GuildPlaybookDB.point or { "CENTER", 250, 0 }
+        if GuildPlaybookDB.autoOpen == nil then GuildPlaybookDB.autoOpen = true end
         local n = 0
         for _ in pairs(ns.dungeons) do n = n + 1 end
         print(("|cff69ccf0Guild Playbook|r v%s loaded — %d dungeon(s), UI %s. /gp to toggle.")
@@ -128,10 +152,87 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2)
         end
     elseif event == "ENCOUNTER_END" then
         if ns.currentDungeon then
-            ns.safecall(ns.UI_SelectOverview)
+            ns.safecall(ns.UI_SelectDefault)
         end
     end
 end)
+
+-- ------------------------------------------------------------------
+-- Self-whisper loopback check (/gp commtest)
+-- ------------------------------------------------------------------
+-- The one-click MDT import in UI.lua rests on two assumptions: an addon
+-- message whispered to yourself comes back, and UnitFullName resolves the
+-- sender it arrives with. MDT keys its preset cache on the second one, so a
+-- failure there is silent and looks like the import "just not working". This
+-- checks both without MDT in the picture.
+
+local COMMTEST_PREFIX = "GPlaybookPing"   -- 13 chars; the cap is 16
+local commTestFrame
+local commTestSentAt
+
+local function CommTestReport(line)
+    print("|cff69ccf0GP commtest:|r " .. line)
+end
+
+local function StartCommTest()
+    if commTestSentAt then
+        CommTestReport("a test is already running.")
+        return
+    end
+    local name, realm = UnitFullName("player")
+    if not name or not realm or realm == "" then
+        CommTestReport("cannot resolve your own name - aborted.")
+        return
+    end
+    local target = name .. "-" .. realm
+    -- What the import's chat link will encode, built the way MDT's send path
+    -- does. The point of the test is whether the received sender derives to it.
+    local expected = (UnitFullName(name) or name) .. "-" .. realm
+
+    if not commTestFrame then
+        commTestFrame = CreateFrame("Frame")
+        commTestFrame:SetScript("OnEvent", function(_, _, prefix, _, distribution, sender)
+            if prefix ~= COMMTEST_PREFIX or not commTestSentAt then return end
+            local elapsed = (GetTimePreciseSec() - commTestSentAt) * 1000
+            commTestSentAt = nil
+            commTestFrame:UnregisterEvent("CHAT_MSG_ADDON")
+            CommTestReport(("loopback OK (%.0fms, %s)"):format(elapsed, tostring(distribution)))
+            -- The half that fails silently: MDT files the preset under this key,
+            -- and our link looks it up under `expected`. A same-realm sender
+            -- arrives without a realm, so this is where a mismatch shows up.
+            local key = ns.MdtSenderKey(sender)
+            if not key then
+                CommTestReport(("|cffff4040sender %q does not resolve via UnitFullName|r - MDT import would fail.")
+                    :format(tostring(sender)))
+            elseif key == expected then
+                CommTestReport(("sender %q -> cache key %s (matches the import link)"):format(tostring(sender), key))
+            else
+                CommTestReport(("|cffff4040cache key mismatch|r: sender %q -> %s, but the import link encodes %s.")
+                    :format(tostring(sender), key, expected))
+            end
+        end)
+    end
+
+    -- 0=success, 1=already registered, 2=invalid, 3=too many prefixes (cap 64).
+    -- Without this a full prefix table would look identical to a dead loopback.
+    local registered = C_ChatInfo.RegisterAddonMessagePrefix(COMMTEST_PREFIX)
+    if type(registered) == "number" and registered > 1 then
+        CommTestReport(("|cffff4040prefix registration failed (code %d)|r - not a loopback failure.")
+            :format(registered))
+        return
+    end
+    commTestFrame:RegisterEvent("CHAT_MSG_ADDON")
+    commTestSentAt = GetTimePreciseSec()
+    C_ChatInfo.SendAddonMessage(COMMTEST_PREFIX, "ping", "WHISPER", target)
+    CommTestReport("whispered a ping to " .. target .. " - waiting 5s.")
+
+    C_Timer.After(5, function()
+        if not commTestSentAt then return end
+        commTestSentAt = nil
+        commTestFrame:UnregisterEvent("CHAT_MSG_ADDON")
+        CommTestReport("|cffff4040NO loopback after 5s|r - one-click MDT import will fall back to the copy-box.")
+    end)
+end
 
 -- ------------------------------------------------------------------
 -- Slash command + addon compartment
@@ -143,8 +244,10 @@ local function Usage()
     print("  /gp tank|healer|dps   force a role view")
     print("  /gp auto        follow your assigned role again")
     print("  /gp ids         toggle ID capture mode (prints instance/encounter IDs)")
+    print("  /gp autoopen    toggle auto-open when you enter a covered dungeon")
     print("  /gp list        list loaded dungeons")
     print("  /gp minimap     show/hide the minimap button")
+    print("  /gp commtest    check the self-whisper the MDT import relies on")
 end
 
 SLASH_GUILDPLAYBOOK1, SLASH_GUILDPLAYBOOK2 = "/gp", "/guildplaybook"
@@ -181,12 +284,18 @@ SlashCmdList.GUILDPLAYBOOK = function(msg)
         ns.captureIDs = not ns.captureIDs
         print("|cff69ccf0Guild Playbook:|r ID capture " .. (ns.captureIDs and "ON — enter the dungeon and pull bosses; IDs print to chat." or "off."))
         if ns.captureIDs then CheckZone() end
+    elseif msg == "autoopen" then
+        GuildPlaybookDB.autoOpen = not (GuildPlaybookDB.autoOpen ~= false)
+        print("|cff69ccf0Guild Playbook:|r auto-open " .. (GuildPlaybookDB.autoOpen and "ON — the playbook opens automatically when you enter a covered dungeon." or "off."))
+        ns.safecall(ns.UI_SyncAutoOpen)
     elseif msg == "minimap" then
         if ns.ToggleMinimapButton then
             ns.ToggleMinimapButton()
         else
             print("|cff69ccf0Guild Playbook:|r minimap button unavailable (libraries failed to load).")
         end
+    elseif msg == "commtest" then
+        StartCommTest()
     elseif msg == "list" then
         for slug, d in pairs(ns.dungeons) do
             print(("  %s (%s, instanceID=%s)"):format(d.dungeon, d.season, tostring(d.instanceID)))

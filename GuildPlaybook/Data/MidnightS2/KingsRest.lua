@@ -9,6 +9,12 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "0.6",
   ["instanceID"] = nil,
+  ["mdtRoutes"] = {
+    {
+      ["name"] = "Echo#12882 - keystone.guru (Jul 2026)",
+      ["string"] = "!~MDT2~XZPNU9pAGMa7IYDfSrUtctpjD5opRLQ5IgRFbKUf43gNyRtIu9l1shuLnlxGp177LxA70/5/5d6FSgUPmUze931+u8/uk9/HjucxegoRDxjd1MKWywiLWg4BIaBBfTY4dmLBqqNqQDvDk5m+19NrAnrCbn7EvHTA2l/AFfxmUPFu7bL1xijXt0t7lmGh4Vmhe+4Q3I7bbQKYRVhEEKpXFyKo0OE/xV7ZMOvbZrFs7KBhjcRcTFq7pR2jqFpvS8augpnvalv485iwhffHzC1M2QjNHTcK/MAFLBgGR2DRBeyDE01QO2XLKKl9FYuGqVCvhUO/4kCMd4I5w98AqxMR+DwmBHNwGfVwGNBA6atx4DXrbNfaiyu9XvPAvnBIDL/s0Sj/kaAbpOkp7S6d1VMZbQ7Z47Oq+74Jvp+k+xmky0lxVLLgPt1P69rtwuLSyrwutSmBCYPM1LA1IsxJlJWPVL9tQrIi0eoM1IT7RYmWJVqS0xuwIJka8v2FG5TS9HmJkv9DluKtSZQvfJ/X51A6pT0qRpp8oZ/N5B4FTnHEzUktX7hbWlhcWV7NrQ2ey1nX9zN21/tIe6WeDYl+bly/kNpLidZlatb2xvWM60E+/8TzIL/5xHHTjaMIqGipe0AnDx+fYhWHCyCoBRTCywrnQYeGqsGvPzyM1GLaAUZVjHMHAkDdcudZgwNRIVZ/g0RNlSRx4vsclOjIC3yVq5iIS60aekFy6EcAXUY81GhDJw6IkqP3k+IRCyh4fxpupEII3v5lcugSh3O1WLZGnRDs0+DqitmqTcJm1VGrchE5/Oov",
+    },
+  },
   ["quicksheet"] = {
     ["trash"] = {
       ["TANK"] = "Shadow-Borne Witch Doctor — Shadow Bolt Volley: Interrupt; this is the must-stop cast.; Seneschal M'bara — Induce Regeneration: Interrupt or purge the heal.; Spectral Shaman — Healing Tide Totem: Kill the totem immediately.; Shadow of Zul — Dark Revelation: Two targets move 20+ yards away; this now comes before Pool.",

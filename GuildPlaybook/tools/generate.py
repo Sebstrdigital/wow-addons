@@ -31,7 +31,9 @@ ROLE_SECTIONS = ("job", "avoid", "defensive", "cooldowns", "reminder")
 TOP_LEVEL_KEYS = (
     "dungeon", "slug", "season", "patch", "sourceVersion", "instanceID",
     "quicksheet", "overview", "bosses", "minibosses", "trashSegments",
+    "mdtRoutes",
 )
+MDT_ROUTE_KEYS = ("name", "string")
 SEGMENT_KEYS = ("name", "after", "npcs", "roles")
 
 
@@ -149,6 +151,33 @@ def validate_trash_segments(doc, path):
                     fail(f"{where} {role}: every call must be a non-empty string (got {call!r})")
 
 
+def validate_mdt_routes(doc, path):
+    routes = doc.get("mdtRoutes")
+    if routes is None:
+        return
+    if not isinstance(routes, list):
+        fail(f"{path}: mdtRoutes must be a list")
+    for i, route in enumerate(routes, 1):
+        where = f"{path}: mdtRoutes #{i}"
+        if not isinstance(route, dict):
+            fail(f"{where}: must be a mapping")
+        for key in route:
+            if key not in MDT_ROUTE_KEYS:
+                fail(f"{where}: unknown key '{key}' (use {'/'.join(MDT_ROUTE_KEYS)})")
+        name = route.get("name")
+        if not isinstance(name, str) or not name.strip():
+            fail(f"{where}: 'name' must be a non-empty string")
+        string = route.get("string")
+        if not isinstance(string, str) or not string.strip():
+            fail(f"{where} ({name!r}): 'string' must be a non-empty string")
+        # MDT's own export alphabet is printable ASCII. lua_str() rewrites
+        # "→" to ">" for prose, which would silently corrupt a route string
+        # containing one — reject non-ASCII/control characters here instead
+        # of teaching lua_str a data-specific exception.
+        elif not all(0x20 <= ord(c) <= 0x7E for c in string):
+            fail(f"{where} ({name!r}): 'string' must be printable ASCII (MDT export strings are ASCII-only)")
+
+
 def validate(doc, path):
     if not isinstance(doc, dict):
         fail(f"{path}: document must be a mapping (got {type(doc).__name__})")
@@ -162,6 +191,7 @@ def validate(doc, path):
     validate_overview(doc.get("overview") or {}, path)
     validate_quicksheet(doc, path)
     validate_trash_segments(doc, path)
+    validate_mdt_routes(doc, path)
     for i, boss in enumerate(doc["bosses"] + doc.get("minibosses", []), 1):
         where = f"{path}: boss/miniboss #{i}"
         if "name" not in boss:

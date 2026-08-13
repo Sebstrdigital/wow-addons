@@ -9,6 +9,12 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "0.6",
   ["instanceID"] = nil,
+  ["mdtRoutes"] = {
+    {
+      ["name"] = "Echo#12882 - keystone.guru (Jul 2026)",
+      ["string"] = "!~MDT2~VVLLbtNAFGVsNw5tEG36IGwQOyhSoyQ2abNCIXGaNBEJRaq6dew7wWhsV55xlWaVCRHd8Q/UiQQLfoLf4A9YEwmJDeMqVM4srLn3nDPH5+p+65i27XtnEFDH9x5Lbs/yiR/0TAKMQcvD/k3HDJlfi7uON1h0V3B7qNQZDFnjtNN7SkvHfv8DWIxOoqp9LSO0aOgFu6BpzxZVxv+++lPu7LejQZVMay8LeuNAKx/mi+JaaRyUjgp57U6Fb89S9ev5kx/ff+4LlVHUS/kjQdb1/KFRFJKyKAp6Xq+Fjt0+vSidN6vOcNg+Ni5NEsJX4yIkhH6eI46kKZJkRb79KhwZtzGEkQYYz+TJWmrZiesKKBNZXbveym7v7D7ai9Y+5oq5Uq6QWtFpMJd4SuaqwtPqHaJBRbww3+BKmu+tczXDU3ca3Ndglh4nnDTIcGWDy4IvpcfrXMlwOWFRAQGgGJAzEyQlhBjfPEz8TSV+OcvRpmBtfYozJgLF/CjLpc2paN9fts1ibDBbmcPmRE1vTTcyD3a3OYp2OdpJxIrH8mUlftsKgwA81hNDRt1l8S7sE7gEgnrggXtVpdQZeK4A6PjtklIPvQH4nlie3ItjBuCKvbrXokDE6ogl5KgdOJh1MaYgVCe2g7FjhYRdSTXXdqImDgDe+8RGrT4MQocIOXrzv3niOx7Yv1tWACYD+/VV1LSISalwU+ue6YJx5oxGviFg4rZrpnClLDDp6B8=",
+    },
+  },
   ["quicksheet"] = {
     ["trash"] = {
       ["TANK"] = "Primal Juggernaut — Crushing Smash: Mitigate, face away and sidestep Excavating Blast.; Flashfrost Earthshaper — Tectonic Slam: Call a hard stop; avoid overlapping dangerous casters.; Blazebound Destroyer — Inferno: Keep the pack stable and leave before Burnout finishes.",

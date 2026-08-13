@@ -9,6 +9,12 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "1.6",
   ["instanceID"] = nil,
+  ["mdtRoutes"] = {
+    {
+      ["name"] = "Echo#12882 - keystone.guru (Jul 2026)",
+      ["string"] = "!~MDT2~VZK/b9NAFMc522kilQIDA93YKgYs6nMTe0IhcX40FQkqKvPZfhdcnW3wnaskE5ciIYEQfwMJIPgLGJAQA/8C/wAbOxEDC2eaRun43vt8vk+ne58OSBimyRFkPEqTbS0eBClLswFhIAR0E5rODkgu0kbRjZLhon9hHo6MpoCRaD3sH97kVjv1jyEQ/HReD1/oSFu0bMcnZHdnURfy790/379+KVdf19lzb89yTLd128auaXt72C4KXHVNa2WGjgN27cz8pu9Mfkxedc7MqokV7OyaNc+2sWmpmD3HrK1Mv4bvYHq+89ebz2T7pzIbNsYFaplV5VmmrUIs16w28ijsuc6joS+ejka9tndCWA4fvSc5Y/zlO32q6d7/R7coxUCpIfWS1D8gWdFkRZ8aJUMaJWksmYJw4T2SWxWJNqZIK0u0pmOYb0p0edXD4Cphtik3VhD1Mcy21ojCm185RZpx9UKWC7NrsrSGqaAbt9YQVyW9Xc0LohfkWQaJGKi3of6yOMx9BifA0AASiMd1zqNhEqsBf/ZgiTTzZAhpov77elsAxOoSLnU5MPXZ6mwk6mURFX1KOShpP4wojYKcibHWiMNo3qEZwOOUhajrwzCPmNLR/fPmfholEP7uBhkQAeG98bwTMMK5WlZuJiQG7yiaTFJPjVncaxC1lYuM8Mk/",
+    },
+  },
   ["quicksheet"] = {
     ["trash"] = {
       ["TANK"] = "OPENING: Control Shrouded Fang — Cheap Shot; face Sandfury Stonefist — Ground Pound away.; POSITION: Keep charge lines, Burrow paths and beam lanes clear of the party.; DEFENSIVE: Plan for Overload, Serpentstorm, Consume Charge and Guardian pressure.",

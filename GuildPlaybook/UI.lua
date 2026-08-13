@@ -278,6 +278,11 @@ local INSET_TOP, INSET_TRASH, INSET_NPC = 2, 10, 22
 -- as empty boxes), the same gap that makes the generator rewrite "→" to ">".
 local GLYPH_OPEN, GLYPH_SHUT = "-", "+"
 
+-- MDT Route sits below the nav rows as a chrome button, not a row — same
+-- fixed height as a role tab. It grows past that only for the (currently
+-- unused) multi-route case, where the label wraps rather than clipping.
+local ROUTE_BTN_H, ROUTE_BTN_GAP = 26, 4
+
 local frame = CreateFrame("Frame", "GuildPlaybookFrame", UIParent, "BackdropTemplate")
 frame:SetSize(PANEL_W, PANEL_H)
 frame:SetFrameStrata("MEDIUM")
@@ -310,6 +315,17 @@ subtitle:SetText("")
 local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
 close:SetPoint("TOPRIGHT", -6, -6)
 
+-- Shared button chrome ----------------------------------------------
+-- Blizzard's standard clicky button (backdrop, border, hover/press states),
+-- as opposed to a nav row's flat highlighted-text look. Used by the role
+-- tabs and by anything else that should read as an action rather than a
+-- section to browse into.
+local function CreateChromeButton(parent, width, height)
+    local btn = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+    btn:SetSize(width, height)
+    return btn
+end
+
 -- Role tabs -------------------------------------------------------
 
 local roleButtons = {}
@@ -321,8 +337,7 @@ end
 
 local lastRoleBtn
 for _, role in ipairs({ "TANK", "HEALER", "DPS" }) do
-    local btn = CreateFrame("Button", nil, frame, "UIPanelButtonTemplate")
-    btn:SetSize(85, 26)
+    local btn = CreateChromeButton(frame, 85, 26)
     if lastRoleBtn then
         btn:SetPoint("LEFT", lastRoleBtn, "RIGHT", 4, 0)
     else
@@ -338,9 +353,275 @@ for _, role in ipairs({ "TANK", "HEALER", "DPS" }) do
     lastRoleBtn = btn
 end
 
+-- Auto-open setting -------------------------------------------------
+-- Sits in the free space right of the role tabs, on the same row.
+
+local autoOpenCheck = CreateFrame("CheckButton", nil, frame, "UICheckButtonTemplate")
+autoOpenCheck:SetPoint("LEFT", lastRoleBtn, "RIGHT", 20, 0)
+local autoOpenLabel = autoOpenCheck:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+autoOpenLabel:SetPoint("LEFT", autoOpenCheck, "RIGHT", 4, 0)
+autoOpenLabel:SetText("Auto-open on dungeon entry")
+autoOpenCheck:HookScript("OnClick", function(self)
+    GuildPlaybookDB.autoOpen = self:GetChecked() and true or false
+end)
+
+-- Reflects the saved setting onto the checkbox. Called on frame show and from
+-- the /gp autoopen slash handler, so the box stays in sync if that's flipped
+-- while the panel is already open.
+function ns.UI_SyncAutoOpen()
+    autoOpenCheck:SetChecked((GuildPlaybookDB and GuildPlaybookDB.autoOpen) ~= false)
+end
+
+frame:HookScript("OnShow", ns.UI_SyncAutoOpen)
+
+-- MDT route copy-box ------------------------------------------------
+-- The manual hand-off, used whenever the one-click import below can't run:
+-- WoW has no clipboard-write API, so the route string is handed off by
+-- selecting it in an EditBox and telling the player to press Ctrl+C. Defined
+-- ahead of the nav section because the nav's "MDT Route" entry calls into it.
+
+local mdtCopyBox
+
+local function EnsureMdtCopyBox()
+    if mdtCopyBox then return mdtCopyBox end
+
+    local box = CreateFrame("Frame", "GuildPlaybookMdtCopyFrame", UIParent, "BackdropTemplate")
+    box:SetSize(480, 220)
+    box:SetPoint("CENTER")
+    box:SetFrameStrata("DIALOG")
+    box:SetMovable(true)
+    box:EnableMouse(true)
+    box:RegisterForDrag("LeftButton")
+    box:SetClampedToScreen(true)
+    box:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true, tileSize = 32, edgeSize = 24,
+        insets = { left = 6, right = 6, top = 6, bottom = 6 },
+    })
+    box:SetScript("OnDragStart", box.StartMoving)
+    box:SetScript("OnDragStop", box.StopMovingOrSizing)
+
+    local boxTitle = box:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    boxTitle:SetPoint("TOPLEFT", 16, -14)
+    box.title = boxTitle
+
+    local closeBtn = CreateFrame("Button", nil, box, "UIPanelCloseButton")
+    closeBtn:SetPoint("TOPRIGHT", -6, -6)
+    closeBtn:SetScript("OnClick", function() box:Hide() end)
+
+    local hint = box:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    hint:SetPoint("TOPLEFT", boxTitle, "BOTTOMLEFT", 0, -4)
+    hint:SetText("Ctrl+C to copy, then paste in MDT > Import.")
+
+    local editScroll = CreateFrame("ScrollFrame", nil, box, "UIPanelScrollFrameTemplate")
+    editScroll:SetPoint("TOPLEFT", hint, "BOTTOMLEFT", 0, -8)
+    editScroll:SetPoint("BOTTOMRIGHT", -32, 14)
+
+    local edit = CreateFrame("EditBox", nil, editScroll)
+    edit:SetMultiLine(true)
+    edit:SetFontObject("ChatFontNormal")
+    edit:SetWidth(420)
+    edit:SetAutoFocus(false)
+    -- Route strings run several KB; the template's default cap would
+    -- silently truncate them (same reasoning as MDT's own multi-line editors).
+    edit:SetMaxLetters(0)
+    edit:SetScript("OnEscapePressed", function()
+        edit:ClearFocus()
+        box:Hide()
+    end)
+    editScroll:SetScrollChild(edit)
+    box.edit = edit
+
+    -- Belt-and-suspenders: however the box gets hidden (Escape, close button,
+    -- or a future caller), a hidden box should never be left holding focus.
+    box:SetScript("OnHide", function() edit:ClearFocus() end)
+    box:Hide()
+
+    mdtCopyBox = box
+    return box
+end
+
+local function OpenMdtCopyBox(route)
+    local box = EnsureMdtCopyBox()
+    box.title:SetText(route.name)
+    box.edit:SetText(route.string)
+    box:Show()
+    box.edit:SetFocus()
+    box.edit:HighlightText()
+end
+
+-- Opens MDT's own interface. Used on the copy-box path, where the route string
+-- still has to be pasted by hand.
+local function OpenMDT()
+    if _G.MythicDungeonToolsAPI and _G.MythicDungeonToolsAPI.ShowInterface then
+        _G.MythicDungeonToolsAPI:ShowInterface()
+    else
+        print("|cff69ccf0Guild Playbook:|r Mythic Dungeon Tools isn't installed - copy the route string below and paste it once it is.")
+    end
+end
+
+-- One-click MDT import ----------------------------------------------
+-- MDT still exposes no import call, but it does cache every preset that arrives
+-- on its own addon channel and imports it when the matching chat link is
+-- clicked (MDT's Modules/Transmission.lua, OnCommReceived + HandleChatLink).
+-- So we whisper the route to ourselves through MDT's public SendCommMessage,
+-- wait for the loopback to land, then fire the link MDT itself would have put
+-- in chat. Only public API plus the global SetItemRef; no MDT internals.
+--
+-- Only MDT's newer CBOR exports survive that trip. Legacy "!" strings are
+-- print-encoded, while MDT decodes channel traffic with the addon-channel
+-- alphabet, so those still get the copy-box.
+
+local MDT2_MARKER = "!~MDT2~"   -- MDT's encodingPrefix
+local IMPORT_TIMEOUT = 5        -- seconds to wait for our own whisper to return
+
+-- Mirror of MDT's StringToTable new-format branch. Pure Blizzard APIs, so it
+-- works before MDT's load-on-demand UI (which owns the real decoder) is up.
+local function DecodeRoute(routeString)
+    if type(routeString) ~= "string" then return nil end
+    if routeString:sub(1, #MDT2_MARKER) ~= MDT2_MARKER then return nil end
+    local ok, preset = pcall(function()
+        local decoded = C_EncodingUtil.DecodeBase64(routeString:sub(#MDT2_MARKER + 1))
+        if not decoded then return nil end
+        local raw = C_EncodingUtil.DecompressString(decoded, Enum.CompressionMethod.Deflate)
+        if not raw then return nil end
+        return C_EncodingUtil.DeserializeCBOR(raw)
+    end)
+    if not ok or type(preset) ~= "table" then return nil end
+    -- The same structural checks MDT runs in ValidateImportPreset before it will
+    -- cache anything. Failing them there drops the preset silently, which would
+    -- surface here as the import hanging until the timeout and look like MDT's
+    -- fault. The dungeon-membership half of that check is covered in
+    -- StartMdtRoute, which requires GetDungeonName to return an actual name.
+    if type(preset.text) ~= "string" or type(preset.value) ~= "table" then return nil end
+    local value = preset.value
+    if not value.currentDungeonIdx or not value.currentPull or not value.currentSublevel then return nil end
+    if type(value.pulls) ~= "table" then return nil end
+    return preset
+end
+
+-- MDT keys its cache on the sender as UnitFullName resolves it, which respects
+-- the real casing of a name, while UnitFullName("player") always capitalises the
+-- first letter. Re-resolving by name is the same correction MDT applies on its
+-- own send path, and skipping it breaks players whose name is lower-case.
+local function PlayerCacheName()
+    local name, realm = UnitFullName("player")
+    if not name or not realm or realm == "" then return nil end
+    return (UnitFullName(name) or name), realm
+end
+
+local importWatcher
+local pendingImport
+
+local function StopWatching()
+    pendingImport = nil
+    if importWatcher then importWatcher:UnregisterEvent("CHAT_MSG_ADDON") end
+end
+
+-- Called once the whole payload has come back to us. MDT reports a cache miss
+-- through its bug-report window, so the link is only ever fired after delivery
+-- is confirmed - never on a speculative timer.
+local function FireImportLink(pending)
+    StopWatching()
+    -- One frame of slack: our handler and AceComm's both run off CHAT_MSG_ADDON
+    -- in an unspecified order, and MDT only caches once AceComm has reassembled.
+    C_Timer.After(0, function()
+        ns.safecall(SetItemRef, pending.link, pending.text, "LeftButton", DEFAULT_CHAT_FRAME)
+    end)
+end
+
+local function EnsureImportWatcher()
+    if importWatcher then return importWatcher end
+    importWatcher = CreateFrame("Frame")
+    importWatcher:SetScript("OnEvent", function(_, _, prefix, message, distribution, sender)
+        local pending = pendingImport
+        if not pending then return end
+        if prefix ~= pending.commPrefix or distribution ~= "WHISPER" then return end
+        -- Derive the sender exactly as MDT does rather than comparing the raw
+        -- string: a self-whisper is always same-realm, so the realm arrives
+        -- missing and Ambiguate cannot put back what was never there. This
+        -- doubles as the real precondition - it passes only when MDT is about
+        -- to file the preset under the key our link already encodes.
+        -- Case-sensitive on purpose: MDT's cache lookup is, so a casing
+        -- mismatch must miss here (timeout, copy-box) rather than fire a link
+        -- MDT cannot resolve.
+        local key = ns.MdtSenderKey(sender)
+        if key ~= pending.fullName then return end
+        -- AceComm tags every chunk of a split message except the last; anything
+        -- that isn't a "first" or "next" marker means the payload is complete.
+        local control = message:sub(1, 1)
+        if control == "\001" or control == "\002" then return end
+        FireImportLink(pending)
+    end)
+    return importWatcher
+end
+
+local function OpenMdtCopyBoxFallback(route)
+    ns.safecall(OpenMDT)
+    ns.safecall(OpenMdtCopyBox, route)
+end
+
+local function AbandonImport(token, route)
+    if not pendingImport or pendingImport.token ~= token then return end
+    StopWatching()
+    print("|cff69ccf0Guild Playbook:|r MDT didn't pick the route up - copy the string below instead.")
+    OpenMdtCopyBoxFallback(route)
+end
+
+-- Click target for the nav's "MDT Route" entry. Attempts the one-click import
+-- and falls back to the copy-box whenever any precondition is missing, so the
+-- entry always does something useful.
+local function StartMdtRoute(route, forceCopyBox)
+    local api = _G.MythicDungeonToolsAPI
+    local preset = (not forceCopyBox) and DecodeRoute(route.string) or nil
+    local ready = preset and api and api.SendCommMessage and api.GetPresetCommPrefix
+        and api.GetDungeonName
+        and not InCombatLockdown()  -- MDT refuses to import while in combat
+        -- One whisper at a time: AceComm spools reassembly per prefix +
+        -- distribution + sender, so a second send would corrupt the first.
+        and not pendingImport
+
+    if ready then
+        local name, realm = PlayerCacheName()
+        -- Also loads MDT's on-demand UI, so the preset is cached live rather
+        -- than parked in MDT's pending-comm buffer.
+        local dungeon = name and api:GetDungeonName(preset.value.currentDungeonIdx, true)
+        -- MDT builds the cache key as "<dungeon>: <preset name>" and reads it
+        -- back out of the first [...] in the link text, so a name carrying the
+        -- link's own punctuation would not round-trip.
+        if dungeon and not (dungeon .. preset.text):find("[%[%]|]") then
+            local sender = name .. "+" .. realm
+            local token = {}
+            pendingImport = {
+                token = token,
+                commPrefix = api:GetPresetCommPrefix(),
+                fullName = name .. "-" .. realm,
+                link = "garrmission:mdt-" .. sender,
+                text = "|Hgarrmission:mdt-" .. sender .. "|h["
+                    .. dungeon .. ": " .. preset.text .. "]|h",
+            }
+            EnsureImportWatcher():RegisterEvent("CHAT_MSG_ADDON")
+            -- NORMAL rather than MDT's own BULK: this is a button the player is
+            -- waiting on, and ~1 KB fits inside ChatThrottleLib's burst anyway.
+            api:SendCommMessage(pendingImport.commPrefix, route.string, "WHISPER",
+                name .. "-" .. realm, "NORMAL")
+            C_Timer.After(IMPORT_TIMEOUT, function() AbandonImport(token, route) end)
+            return
+        end
+    end
+
+    OpenMdtCopyBoxFallback(route)
+end
+
 -- Navigation (Overview + bosses) ----------------------------------
 
 local navButtons = {}
+-- MDT Route lives below the nav rows as its own pooled set of chrome buttons
+-- (see CreateChromeButton) rather than being one more `navButtons` entry —
+-- it never participates in `selected`, and its styling can't be bolted onto
+-- a plain nav-row button after the fact.
+local mdtRouteButtons = {}
 -- `expanded` is the one trash segment whose NPCs are listed (accordion). It
 -- lives in `selected` so the fresh-table resets below clear it implicitly.
 local selected = { kind = "overview", boss = nil, segment = nil, npc = nil, expanded = nil }
@@ -428,6 +709,7 @@ end
 
 local function BuildNav(d)
     for _, btn in ipairs(navButtons) do btn:Hide() end
+    for _, btn in ipairs(mdtRouteButtons) do btn:Hide() end
     local entries = {}
     if not d then
         for _, dungeon in ipairs(SortedDungeons()) do
@@ -542,6 +824,51 @@ local function BuildNav(d)
         end)
         btn:Show()
         prev = btn
+    end
+
+    -- MDT Route sits below the regular entries as chrome buttons instead of
+    -- another `navButtons` row (see mdtRouteButtons above). No button at all
+    -- for a dungeon with no route data.
+    if d then
+        local routes = d.mdtRoutes or {}
+        for i, route in ipairs(routes) do
+            local btn = mdtRouteButtons[i]
+            if not btn then
+                btn = CreateChromeButton(nav, NAV_W - 2, ROUTE_BTN_H)
+                mdtRouteButtons[i] = btn
+            end
+            local label = (#routes > 1) and ("MDT Route: " .. route.name) or "MDT Route"
+            btn:SetText(label)
+            -- The common case (one route, short label) stays a single line at
+            -- the fixed role-tab height; a long multi-route label wraps and
+            -- grows the button instead of clipping.
+            local fs = btn:GetFontString()
+            fs:SetWordWrap(true)
+            -- Explicit width, not anchors: that is what makes GetStringHeight
+            -- report the wrapped height right away (same rule as the nav rows).
+            fs:SetWidth(NAV_W - 2)
+            local btnH = math.max(ROUTE_BTN_H, fs:GetStringHeight() + 8)
+            btn:SetHeight(btnH)
+            btn:ClearAllPoints()
+            btn:SetPoint("LEFT")
+            btn:SetPoint("RIGHT")
+            if prev then
+                total = total + ROUTE_BTN_GAP
+                btn:SetPoint("TOP", prev, "BOTTOM", 0, -ROUTE_BTN_GAP)
+            else
+                btn:SetPoint("TOP", nav, "TOP", 0, 0)
+            end
+            total = total + btnH
+            btn:SetScript("OnClick", function()
+                -- Action, not a page: imports into MDT, or opens the copy-box
+                -- when that isn't possible. Shift-click always takes the
+                -- copy-box, as an escape hatch. `selected` is untouched, so
+                -- the content pane and nav highlight don't change.
+                ns.safecall(StartMdtRoute, route, IsShiftKeyDown())
+            end)
+            btn:Show()
+            prev = btn
+        end
     end
 
     nav:SetHeight(math.max(1, total))
@@ -708,9 +1035,20 @@ function ns.UI_Refresh()
     UpdateSidecar()
 end
 
+-- Quick Sheet (all roles) is the default landing section — it's the one page
+-- every role reads before a pull, and again once a fight is over. Dungeons
+-- without quicksheet data fall back to Overview & Trash rather than
+-- defaulting into a nav entry that doesn't exist.
+local function DefaultSelected(d)
+    if d and d.quicksheet then
+        return { kind = "quicksheet" }
+    end
+    return { kind = "overview", boss = nil }
+end
+
 function ns.UI_SetDungeon(d)
     viewedDungeon = d
-    selected = { kind = "overview", boss = nil }
+    selected = DefaultSelected(d)
     ns.UI_Refresh()
 end
 
@@ -718,23 +1056,36 @@ function ns.UI_SelectBoss(dungeon, boss)
     viewedDungeon = dungeon
     selected = { kind = "boss", boss = boss }
     ns.UI_Refresh()
-    frame:Show()
+    -- Selection updates regardless, so the right boss is showing whenever the
+    -- user opens the panel manually; auto-open off also suppresses this popup.
+    if (GuildPlaybookDB and GuildPlaybookDB.autoOpen) ~= false then
+        ns.UI_Show()
+    end
 end
 
-function ns.UI_SelectOverview()
-    selected = { kind = "overview", boss = nil }
+-- Fired on ENCOUNTER_END: same landing rule as opening the dungeon, since a
+-- boss fight ending is functionally a fresh look at the run.
+function ns.UI_SelectDefault()
+    selected = DefaultSelected(viewedDungeon)
     ns.UI_Refresh()
+end
+
+-- Shared show path for the toggle and for auto-open on dungeon entry: restores
+-- the saved position and refreshes before revealing the frame.
+function ns.UI_Show()
+    if frame:IsShown() then return end
+    local p = GuildPlaybookDB and GuildPlaybookDB.point or { "CENTER", 250, 0 }
+    frame:ClearAllPoints()
+    frame:SetPoint(p[1], UIParent, p[1], p[2], p[3])
+    ns.UI_Refresh()
+    frame:Show()
 end
 
 function ns.UI_Toggle()
     if frame:IsShown() then
         frame:Hide()
     else
-        local p = GuildPlaybookDB and GuildPlaybookDB.point or { "CENTER", 250, 0 }
-        frame:ClearAllPoints()
-        frame:SetPoint(p[1], UIParent, p[1], p[2], p[3])
-        ns.UI_Refresh()
-        frame:Show()
+        ns.UI_Show()
     end
 end
 
