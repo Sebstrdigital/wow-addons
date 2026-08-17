@@ -4,6 +4,11 @@ local ADDON, ns = ...
 -- Colors (match the PDF playbook convention)
 -- ------------------------------------------------------------------
 
+-- The client's fonts have no bold cut, and a FontString can't change weight
+-- part-way through its own text, so emphasis inside a call is carried by
+-- brightness instead: LEAD is the "who and what" up to the colon, CALL is the
+-- instruction after it, set a step darker so the lead reads as the heavier of
+-- the two.
 local C = {
     TANK   = "|cff4a9eff",
     HEALER = "|cff3fd47f",
@@ -11,6 +16,8 @@ local C = {
     WIPE   = "|cffff4040",
     HEAD   = "|cffffd100",
     BODY   = "|cffe8e8e8",
+    LEAD   = "|cffffffff",
+    CALL   = "|cffb9b9b9",
     DIM    = "|cff9d9d9d",
     R      = "|r",
 }
@@ -27,9 +34,73 @@ local function bullets(lines, out, color)
     end
 end
 
+-- Section headings need clearly more air above them than the body's own line
+-- spacing, or they read as part of the block above rather than as a label for
+-- the block below. Two blank lines above, none below: the heading should sit
+-- tight against what it labels.
 local function heading(out, text, color)
-    if #out > 0 then out[#out + 1] = " " end
+    if #out > 0 then
+        out[#out + 1] = " "
+        out[#out + 1] = " "
+    end
     out[#out + 1] = (color or C.HEAD) .. text .. C.R
+end
+
+-- Quick sheet trash calls are authored as one string per role holding several
+-- separate mob calls, joined with ".; " (each call keeps its own full stop).
+-- They are a list wearing a paragraph's clothing, so split them back apart and
+-- render one bullet per call. Splitting on ".; " rather than "; " matters:
+-- plenty of individual calls use a bare semicolon inside their own sentence
+-- ("Interrupt; this is the must-stop cast").
+local function splitCalls(line)
+    local calls = {}
+    local rest = line
+    while true do
+        local at = rest:find(".; ", 1, true)
+        if not at then break end
+        calls[#calls + 1] = rest:sub(1, at - 1)
+        rest = rest:sub(at + 3)
+    end
+    calls[#calls + 1] = (rest:gsub("%.$", ""))
+    return calls
+end
+
+-- Calls read "Target — Ability: what to do about it". The part up to the colon
+-- names the thing on screen and is what the eye hunts for, so it gets the
+-- brighter colour and the instruction gets the darker one.
+--
+-- The colon has to be an actual label separator, not one that happens to fall
+-- mid-sentence, so only a colon near the start of the line and ahead of any
+-- sentence-ending punctuation counts.
+local LEAD_MAX = 64
+
+local function emphasiseCall(line)
+    local at = line:find(": ", 1, true)
+    if not at or at > LEAD_MAX then return C.CALL .. line .. C.R end
+    if line:sub(1, at):find("[%.!%?]") then return C.CALL .. line .. C.R end
+    return C.LEAD .. line:sub(1, at - 1) .. ":" .. C.R .. " " .. C.CALL .. line:sub(at + 2) .. C.R
+end
+
+local function callBullets(calls, out)
+    for _, call in ipairs(calls) do
+        out[#out + 1] = C.CALL .. "• " .. C.R .. emphasiseCall(call)
+    end
+end
+
+-- One role's quick-sheet entry. A single call stays on the label's own line;
+-- several get the label as a lead-in with a bullet each, so the reader scans a
+-- list instead of parsing a run-on paragraph. A blank line before each role
+-- keeps three stacked roles from reading as one continuous list.
+local function roleBlock(out, role, line, first)
+    local color = C[role] or C.HEAD
+    local calls = splitCalls(line)
+    if not first then out[#out + 1] = " " end
+    if #calls == 1 then
+        out[#out + 1] = color .. role .. ":|r " .. emphasiseCall(calls[1])
+    else
+        out[#out + 1] = color .. role .. C.R
+        callBullets(calls, out)
+    end
 end
 
 -- All-roles quick sheet: every role's one-liners, so each role knows the others' jobs.
@@ -38,11 +109,12 @@ local function BuildQuicksheetText(d)
     local qs = d.quicksheet or {}
     if qs.trash then
         heading(out, "Priority trash calls")
+        local first = true
         for _, role in ipairs({ "TANK", "HEALER", "DPS", "ROUTE" }) do
             local line = qs.trash[role]
             if line then
-                local color = C[role] or C.HEAD
-                out[#out + 1] = color .. role .. ":|r " .. C.BODY .. line .. C.R
+                roleBlock(out, role, line, first)
+                first = false
             end
         end
     end
@@ -53,12 +125,15 @@ local function BuildQuicksheetText(d)
             if boss.sheet then
                 n = n + 1
                 heading(out, n .. "  " .. boss.name)
+                local firstRole = true
                 for _, role in ipairs({ "TANK", "HEALER", "DPS" }) do
                     if boss.sheet[role] then
-                        out[#out + 1] = (C[role] or C.HEAD) .. role .. ":|r " .. C.BODY .. boss.sheet[role] .. C.R
+                        roleBlock(out, role, boss.sheet[role], firstRole)
+                        firstRole = false
                     end
                 end
                 if boss.sheet.WIPE then
+                    out[#out + 1] = " "
                     out[#out + 1] = C.WIPE .. "WIPE:|r " .. C.WIPE .. boss.sheet.WIPE .. C.R
                 end
             end
@@ -86,21 +161,24 @@ local function BuildOverviewText(d, role)
         end
     end
 
+    -- Headings stay gold throughout. Red is spent only on the blocks that
+    -- describe how the group dies, so it still means something when it appears;
+    -- tinting every heading by role turned the page into four competing hues.
     if role == "TANK" and o.tank then
-        heading(out, "Dangerous tank damage", C.TANK)
+        heading(out, "Dangerous tank damage")
         bullets(o.tank.damage, out)
         heading(out, "Pull warnings", C.WIPE)
         bullets(o.tank.pullWarnings, out)
     elseif role == "HEALER" and o.healer then
-        heading(out, "Dispel first", C.HEALER)
+        heading(out, "Dispel first")
         bullets(o.healer.dispels, out)
-        heading(out, "Biggest healing pressure", C.HEALER)
+        heading(out, "Biggest healing pressure")
         bullets(o.healer.pressure, out)
         heading(out, "Pull warnings", C.WIPE)
         bullets(o.healer.pullWarnings, out)
     elseif role == "DPS" and o.dps then
         if o.dps.purges then
-            heading(out, "Purge and control", C.DPS)
+            heading(out, "Purge and control")
             bullets(o.dps.purges, out)
         end
         if o.dps.defensives then
@@ -133,15 +211,15 @@ local function BuildBossText(boss, role)
         out[#out + 1] = (C[role] or C.HEAD) .. body.reminder .. C.R
     end
     if body then
-        heading(out, "Your job", C[role])
+        heading(out, "Your job")
         bullets(body.job, out)
         if body.avoid then
-            heading(out, "Avoid", C[role])
+            heading(out, "Avoid")
             bullets(body.avoid, out)
         end
         local def = body.defensive or body.cooldowns
         if def then
-            heading(out, role == "HEALER" and "Cooldowns" or "Defensives", C[role])
+            heading(out, role == "HEALER" and "Cooldowns" or "Defensives")
             bullets(def, out)
         end
     else
@@ -162,7 +240,7 @@ local function BuildTrashText(segment, role)
     local out = {}
 
     if calls and #calls > 0 then
-        heading(out, "Your calls", C[role])
+        heading(out, "Your calls")
         bullets(calls, out)
     else
         out[#out + 1] = C.DIM .. "No " .. (ROLE_LABEL[role] or role) .. " calls for this trash." .. C.R
@@ -250,7 +328,7 @@ local function BuildNPCText(segment, npc, role)
     end
 
     if #mine > 0 then
-        heading(out, npc.name, C[role])
+        heading(out, npc.name)
         bullets(mine, out)
     else
         out[#out + 1] = C.DIM .. "No " .. (ROLE_LABEL[role] or role) .. " call names "
@@ -915,15 +993,19 @@ local content = CreateFrame("Frame", nil, scroll)
 content:SetSize(PANEL_W - NAV_W - 60, 1)
 scroll:SetScrollChild(content)
 
+-- Long call text at this size needs a shorter measure than the panel is wide,
+-- and more leading than the 3px default, or every section reads as one block.
+local TEXT_INSET, TEXT_MAX_W = 4, 520
+
 local text = content:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-text:SetPoint("TOPLEFT")
-text:SetWidth(PANEL_W - NAV_W - 60)
+text:SetPoint("TOPLEFT", TEXT_INSET, 0)
+text:SetWidth(math.min(PANEL_W - NAV_W - 60 - TEXT_INSET, TEXT_MAX_W))
 text:SetJustifyH("LEFT")
-text:SetSpacing(3)
+text:SetSpacing(6)
 text:SetWordWrap(true)
 
 local sectionTitle = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-sectionTitle:SetPoint("BOTTOMLEFT", scroll, "TOPLEFT", 0, 6)
+sectionTitle:SetPoint("BOTTOMLEFT", scroll, "TOPLEFT", TEXT_INSET, 6)
 sectionTitle:SetText("")
 
 -- Model side-cart: shows the boss model when the selected boss has a
@@ -1023,10 +1105,10 @@ function ns.UI_Refresh()
             sectionTitle:SetText(selected.segment.name)
             text:SetText(BuildTrashText(selected.segment, ns.role))
         elseif selected.kind == "quicksheet" then
-            sectionTitle:SetText("Quick sheet — all roles")
+            sectionTitle:SetText("Quick sheet (all roles)")
             text:SetText(BuildQuicksheetText(d))
         else
-            sectionTitle:SetText("Dungeon overview")
+            sectionTitle:SetText("Overview & Trash")
             text:SetText(BuildOverviewText(d, ns.role))
         end
     end
