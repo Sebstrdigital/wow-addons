@@ -757,8 +757,9 @@ local navButtons = {}
 -- it never participates in `selected`, and its styling can't be bolted onto
 -- a plain nav-row button after the fact.
 local mdtRouteButtons = {}
--- `expanded` is the one trash segment whose NPCs are listed (accordion). It
--- lives in `selected` so the fresh-table resets below clear it implicitly.
+-- `expanded` is the one accordion parent whose children are listed — a trash
+-- segment or a boss/miniboss with adds. It lives in `selected` so the
+-- fresh-table resets below clear it implicitly.
 local selected = { kind = "overview", boss = nil, segment = nil, npc = nil, expanded = nil }
 local viewedDungeon = nil   -- dungeon shown in the panel (may differ from ns.currentDungeon while browsing)
 
@@ -856,8 +857,27 @@ local function BuildNav(d)
             entries[#entries + 1] = { kind = "quicksheet", label = "Quick sheet (all roles)" }
         end
         entries[#entries + 1] = { kind = "overview", label = "Overview & Trash" }
+        -- A boss (or miniboss) may share its pull with named adds. Same
+        -- accordion shape as a trash segment: a leaf row when there's
+        -- nothing to expand into, an expander + child NPC rows otherwise.
+        local function addBoss(boss, label)
+            local adds = boss.adds or {}
+            local open = (#adds > 0) and (selected.expanded == boss)
+            if #adds > 0 then
+                label = label .. "  " .. (open and GLYPH_OPEN or GLYPH_SHUT)
+            end
+            entries[#entries + 1] = { kind = "boss", boss = boss, label = label }
+            if open then
+                for _, add in ipairs(adds) do
+                    if type(add.name) == "string" and add.name ~= "" then
+                        entries[#entries + 1] = { kind = "npc", boss = boss, npc = add,
+                                                  label = add.name, inset = INSET_NPC }
+                    end
+                end
+            end
+        end
         for _, mb in ipairs(d.minibosses or {}) do
-            entries[#entries + 1] = { kind = "boss", boss = mb, label = "* " .. mb.name }
+            addBoss(mb, "* " .. mb.name)
         end
         -- Trash segments sit in dungeon order: after == nil before the first
         -- boss, otherwise straight after the boss they name.
@@ -887,7 +907,7 @@ local function BuildNav(d)
         end
         addTrash(nil)
         for i, boss in ipairs(d.bosses or {}) do
-            entries[#entries + 1] = { kind = "boss", boss = boss, label = i .. ". " .. boss.name }
+            addBoss(boss, i .. ". " .. boss.name)
             addTrash(boss.name)
         end
     end
@@ -946,9 +966,18 @@ local function BuildNav(d)
                                and entry.segment or nil,
                 }
                 ns.safecall(ns.UI_Refresh)
+            elseif entry.kind == "boss" and #(entry.boss.adds or {}) > 0 then
+                -- Same accordion as trash: clicking the open boss again shuts
+                -- it without dropping the selection. The boss is selected
+                -- either way, so its own text and model keep showing.
+                selected = {
+                    kind = "boss", boss = entry.boss,
+                    expanded = (selected.expanded ~= entry.boss) and entry.boss or nil,
+                }
+                ns.safecall(ns.UI_Refresh)
             else
-                -- Only an NPC row keeps its parent segment open; every other
-                -- row collapses the accordion.
+                -- Only an NPC row keeps its parent (segment or boss) open;
+                -- every other row collapses the accordion.
                 selected = {
                     kind = entry.kind, boss = entry.boss, segment = entry.segment,
                     npc = entry.npc,
@@ -1175,6 +1204,11 @@ function ns.UI_Refresh()
         elseif selected.kind == "npc" and selected.npc and selected.segment then
             sectionTitle:SetText(selected.npc.name)
             text:SetText(BuildNPCText(selected.segment, selected.npc, ns.role))
+        elseif selected.kind == "npc" and selected.npc and selected.boss then
+            -- An add under a boss, not a trash NPC: adds carry no calls of
+            -- their own, so fall back to the boss's own playbook text.
+            sectionTitle:SetText(selected.npc.name)
+            text:SetText(BuildBossText(selected.boss, ns.role))
         elseif selected.kind == "trash" and selected.segment then
             sectionTitle:SetText(selected.segment.name)
             text:SetText(BuildTrashText(selected.segment, ns.role))
