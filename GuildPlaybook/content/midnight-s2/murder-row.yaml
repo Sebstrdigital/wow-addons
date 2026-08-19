@@ -72,7 +72,7 @@ overview:
     - { spell: "Curse of Doom", note: "Corrupted Warlock (trash) — highest interrupt priority; kick before [Dark Pact]." }
     - { spell: "Dark Pact", note: "Corrupted Warlock (trash) — interrupt or purge the defensive if it lands." }
     - { spell: "Blade Dance", note: "Felmaster Lucsei (trash) — priority stop or move clear; never stack avoidable damage into it." }
-    - { spell: "Mirror Image — Felstorm", note: "Kystia Manaheart — assign one interrupt to each image; both casts must be stopped (two interrupts per image on Mythic/Mythic+)." }
+    - { spell: "Felstorm", note: "Kystia Manaheart — assign one interrupt to each image; both casts must be stopped (two interrupts per image on Mythic/Mythic+)." }
     - { spell: "Chaos Bolt", note: "Lithiel Cinderfury — interrupt when assigned; adds before boss; do not turn the boss unpredictably." }
   killPriority:
     - "Corrupted Warlock and Defiled Golem — kill first among trash."

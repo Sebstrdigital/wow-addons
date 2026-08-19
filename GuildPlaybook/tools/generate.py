@@ -46,7 +46,7 @@ def fail(msg):
     sys.exit(f"error: {msg}")
 
 
-def validate_overview(o, path):
+def validate_overview(o, path, abilities):
     def want_str_list(val, name):
         if val is None:
             return
@@ -60,6 +60,15 @@ def validate_overview(o, path):
     if ints is not None:
         if not isinstance(ints, list) or not all(isinstance(x, dict) and isinstance(x.get("spell"), str) for x in ints):
             fail(f"{path}: overview.interrupts must be a list of {{spell, note}} entries")
+        # interrupts[].spell is a bare ability name, not "[Ability Name]"
+        # markup, so it never passes through validate_ability_refs' bracket
+        # scan below. Without this check a bad name here silently ships with
+        # no tooltip instead of failing the build.
+        for i, it in enumerate(ints):
+            spell = it.get("spell")
+            if spell not in abilities:
+                fail(f"{path}: overview.interrupts[{i}].spell: unknown ability '{spell}' — "
+                     f"add '{spell}' to content/abilities.yaml")
     want_str_list(o.get("killPriority"), "killPriority")
     for role, keys in (("tank", ("damage", "pullWarnings")),
                        ("healer", ("dispels", "pressure", "pullWarnings")),
@@ -277,7 +286,7 @@ def validate(doc, path, abilities):
         if key not in TOP_LEVEL_KEYS:
             fail(f"{path}: unknown top-level key '{key}' "
                  f"(valid: {', '.join(TOP_LEVEL_KEYS)})")
-    validate_overview(doc.get("overview") or {}, path)
+    validate_overview(doc.get("overview") or {}, path, abilities)
     validate_quicksheet(doc, path)
     validate_trash_segments(doc, path)
     validate_mdt_routes(doc, path)

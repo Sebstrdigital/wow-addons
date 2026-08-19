@@ -26,24 +26,24 @@ ns.RegisterDungeon({
   ["overview"] = {
     ["interrupts"] = {
       {
-        ["spell"] = "Charged Dust Devil — Healing Surge",
-        ["note"] = "interrupt first",
+        ["spell"] = "Healing Surge",
+        ["note"] = "Charged Dust Devil — interrupt first",
       },
       {
-        ["spell"] = "Agitated Nimbus — Accumulate Charge",
-        ["note"] = "interrupt first; assign kicks, purge the buff if it lands — each stack is 8%",
+        ["spell"] = "Accumulate Charge",
+        ["note"] = "Agitated Nimbus — interrupt first; assign kicks, purge the buff if it lands — each stack is 8%",
       },
       {
-        ["spell"] = "Shrouded Fang — Poisoned Cheap Shot",
-        ["note"] = "control the reworked ambush window",
+        ["spell"] = "Poisoned Cheap Shot",
+        ["note"] = "Shrouded Fang — control the reworked ambush window",
       },
       {
-        ["spell"] = "Imbued Stormcaller — Shock",
-        ["note"] = "interrupt after Nimbus coverage",
+        ["spell"] = "Shock",
+        ["note"] = "Imbued Stormcaller — interrupt after Nimbus coverage",
       },
       {
-        ["spell"] = "Twisted Hexxer — Flame Shock",
-        ["note"] = "interrupt / priority",
+        ["spell"] = "Flame Shock",
+        ["note"] = "Twisted Hexxer — interrupt / priority",
       },
     },
     ["killPriority"] = {

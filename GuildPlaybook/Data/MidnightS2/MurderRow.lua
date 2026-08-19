@@ -37,7 +37,7 @@ ns.RegisterDungeon({
         ["note"] = "Felmaster Lucsei (trash) — priority stop or move clear; never stack avoidable damage into it.",
       },
       {
-        ["spell"] = "Mirror Image — Felstorm",
+        ["spell"] = "Felstorm",
         ["note"] = "Kystia Manaheart — assign one interrupt to each image; both casts must be stopped (two interrupts per image on Mythic/Mythic+).",
       },
       {

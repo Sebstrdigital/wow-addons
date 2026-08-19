@@ -44,21 +44,33 @@ local GOLD = "|cffdfa55a"
 -- before this call. WoW's |r doesn't pop a color stack, it just reverts to
 -- the FontString's base color, so without re-asserting it, any text after
 -- an inline ability mention would lose its role/lead/call tint.
+--
+-- Renders a single known ability name (no brackets) as gold text - a
+-- clickable, hoverable spell link when ns.ABILITIES resolves it, gold and
+-- inert otherwise. Shared by the "[Name]" markup path below and by any
+-- structured field (e.g. overview.interrupts[].spell) that is already known
+-- to be an ability name and so skips markup brackets entirely.
+local function RenderKnownAbility(name, resumeColor)
+    if type(name) ~= "string" then return name end
+    resumeColor = resumeColor or ""
+    local a = ns.ABILITIES and ns.ABILITIES[name]
+    local id
+    if type(a) == "number" then
+        id = a
+    elseif type(a) == "table" then
+        id = a.spellID
+    end
+    local rendered = (type(id) == "number" and id > 0)
+        and (GOLD .. "|Hspell:" .. id .. "|h" .. name .. "|h")
+        or (GOLD .. name)
+    return rendered .. C.R .. resumeColor
+end
+
 local function RenderAbilityLinks(s, resumeColor)
     if type(s) ~= "string" then return s end
     resumeColor = resumeColor or ""
     return (s:gsub("%[([^%[%]]+)%]", function(name)
-        local a = ns.ABILITIES and ns.ABILITIES[name]
-        local id
-        if type(a) == "number" then
-            id = a
-        elseif type(a) == "table" then
-            id = a.spellID
-        end
-        local rendered = (type(id) == "number" and id > 0)
-            and (GOLD .. "|Hspell:" .. id .. "|h" .. name .. "|h")
-            or (GOLD .. name)
-        return rendered .. C.R .. resumeColor
+        return RenderKnownAbility(name, resumeColor)
     end))
 end
 
@@ -191,7 +203,10 @@ local function BuildOverviewText(d, role)
 
     heading(out, "Interrupt first")
     for i, it in ipairs(o.interrupts or {}) do
-        out[#out + 1] = C.BODY .. i .. ". " .. RenderAbilityLinks(it.spell, C.BODY)
+        -- it.spell is a structured field - always a bare ability name, never
+        -- markup - so it's resolved by direct lookup. it.note is prose and
+        -- may itself carry "[Ability]" markup, so it stays on that path.
+        out[#out + 1] = C.BODY .. i .. ". " .. RenderKnownAbility(it.spell, C.BODY)
             .. (it.note and (C.DIM .. " — " .. RenderAbilityLinks(it.note, C.DIM)) or "") .. C.R
     end
 

@@ -1,7 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
 import { loadDungeons, loadMdtData, loadAbilities, mapUrlFor } from "../../lib/content.js";
-import { renderAbilityMarkup } from "../../lib/markup.js";
+import { renderAbilityMarkup, renderKnownAbility } from "../../lib/markup.js";
 import RoutePanel from "../../components/RoutePanel.astro";
 
 export function getStaticPaths() {
@@ -20,7 +20,13 @@ function overviewSections(o, role) {
   const s = [];
   s.push({
     title: "Interrupt first", cls: "gold",
-    items: (o.interrupts ?? []).map((it, i) => `${i + 1}. ${it.spell}${it.note ? ` — ${it.note}` : ""}`),
+    // it.spell is a structured field - always a bare ability name, never
+    // markup - so it's resolved by direct lookup and pre-rendered to HTML
+    // here (hence `raw: true` below). it.note is prose and may itself carry
+    // "[Ability]" markup, so it stays on the mk() path.
+    raw: true,
+    items: (o.interrupts ?? []).map((it, i) =>
+      `${i + 1}. ${renderKnownAbility(it.spell, abilities)}${it.note ? ` — ${mk(it.note)}` : ""}`),
   });
   if (role !== "HEALER") {
     s.push({ title: "Kill first", cls: "gold", items: (o.killPriority ?? []).map((n, i) => `${i + 1}. ${n}`) });
@@ -103,7 +109,7 @@ function bossSections(boss, role) {
       {overviewSections(d.overview ?? {}, role).map((sec) => (
         <div>
           <h3 class={sec.cls}>{sec.title}</h3>
-          <ul>{sec.items.map((it) => <li set:html={mk(it)} />)}</ul>
+          <ul>{sec.items.map((it) => <li set:html={sec.raw ? it : mk(it)} />)}</ul>
         </div>
       ))}
     </div>
