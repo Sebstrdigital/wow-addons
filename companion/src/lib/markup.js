@@ -27,9 +27,12 @@ export function renderKnownAbility(name, abilities) {
   if (typeof name !== "string" || !name) return "";
   const label = escapeHtml(name);
   const spellID = abilities?.get(name);
+  // Bracketed + link-blue means "this has a real tooltip", matching the addon.
+  // An unresolved ability keeps plain gold and no brackets, because there is
+  // nothing to hover — the two states must stay tellable apart.
   return typeof spellID === "number"
-    ? `<a href="https://www.wowhead.com/spell=${spellID}" target="_blank" rel="noopener" class="ability-link">${label}</a>`
-    : `<span class="ability-link">${label}</span>`;
+    ? `<a href="https://www.wowhead.com/spell=${spellID}" target="_blank" rel="noopener" class="ability-link">[${label}]</a>`
+    : `<span class="ability-unresolved">${label}</span>`;
 }
 
 export function renderAbilityMarkup(text, abilities) {

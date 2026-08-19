@@ -38,6 +38,13 @@ local ROLE_LABEL = { TANK = "Tank", HEALER = "Healer", DPS = "DPS" }
 -- renders in gold, brackets stripped, but inert. The generator is supposed
 -- to guarantee every markup resolves, but a content typo or a stale table
 -- must never surface as a dead link or a UI error.
+-- Two states, deliberately distinguishable. LINK is Blizzard's own spell-link
+-- blue and gets square brackets, so a bracketed word always means "hover this
+-- for the real tooltip" - it stays legible inside red wipe text and orange
+-- role headings, where guild gold was too close to the surrounding color to
+-- read as marked at all. GOLD marks an ability we could not resolve to a
+-- spellID: still called out, but no brackets, because there is nothing to hover.
+local LINK = "|cff71d5ff"
 local GOLD = "|cffdfa55a"
 
 -- `resumeColor` is the color code the surrounding text was already in
@@ -45,9 +52,8 @@ local GOLD = "|cffdfa55a"
 -- the FontString's base color, so without re-asserting it, any text after
 -- an inline ability mention would lose its role/lead/call tint.
 --
--- Renders a single known ability name (no brackets) as gold text - a
--- clickable, hoverable spell link when ns.ABILITIES resolves it, gold and
--- inert otherwise. Shared by the "[Name]" markup path below and by any
+-- Renders a single known ability name: a bracketed, hoverable spell link in
+-- link-blue when ns.ABILITIES resolves it, plain gold and inert otherwise. Shared by the "[Name]" markup path below and by any
 -- structured field (e.g. overview.interrupts[].spell) that is already known
 -- to be an ability name and so skips markup brackets entirely.
 local function RenderKnownAbility(name, resumeColor)
@@ -61,7 +67,7 @@ local function RenderKnownAbility(name, resumeColor)
         id = a.spellID
     end
     local rendered = (type(id) == "number" and id > 0)
-        and (GOLD .. "|Hspell:" .. id .. "|h" .. name .. "|h")
+        and (LINK .. "|Hspell:" .. id .. "|h[" .. name .. "]|h")
         or (GOLD .. name)
     return rendered .. C.R .. resumeColor
 end
@@ -207,7 +213,7 @@ local function BuildOverviewText(d, role)
         -- markup - so it's resolved by direct lookup. it.note is prose and
         -- may itself carry "[Ability]" markup, so it stays on that path.
         out[#out + 1] = C.BODY .. i .. ". " .. RenderKnownAbility(it.spell, C.BODY)
-            .. (it.note and (C.DIM .. " — " .. RenderAbilityLinks(it.note, C.DIM)) or "") .. C.R
+            .. (it.note and (C.BODY .. " — " .. RenderAbilityLinks(it.note, C.BODY)) or "") .. C.R
     end
 
     if role ~= "HEALER" then
@@ -385,7 +391,8 @@ local function BuildNPCText(segment, npc, role)
     end
 
     if #mine > 0 then
-        heading(out, npc.name)
+        -- No heading here: the section title above the body already names the
+        -- mob, and printing it twice reads as a duplicated title.
         bullets(mine, out)
     else
         out[#out + 1] = C.DIM .. "No " .. (ROLE_LABEL[role] or role) .. " call names "
@@ -1079,10 +1086,12 @@ local content = CreateFrame("Frame", nil, scroll)
 content:SetSize(PANEL_W - NAV_W - 60, 1)
 scroll:SetScrollChild(content)
 
--- Spell links rendered by RenderAbilityLinks live in the `text` FontString
--- below, which is a region of this frame - hyperlink hit-testing and the
--- OnHyperlink* scripts belong on the frame that owns the region, not on the
--- FontString itself (FontStrings don't take mouse scripts).
+-- Spell links rendered by RenderAbilityLinks live in the body FontStrings
+-- below, which are regions of this frame - hyperlink hit-testing and the
+-- OnHyperlink* scripts belong on the frame that owns the regions, not on the
+-- FontStrings themselves (FontStrings don't take mouse scripts). This holds
+-- for every FontString in the pool: they are all created by content, so one
+-- pair of scripts on content serves all of them.
 content:EnableMouse(true)
 content:SetHyperlinksEnabled(true)
 content:SetScript("OnHyperlinkEnter", function(self, link)
@@ -1100,12 +1109,68 @@ end)
 -- and more leading than the 3px default, or every section reads as one block.
 local TEXT_INSET, TEXT_MAX_W = 4, 520
 
-local text = content:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-text:SetPoint("TOPLEFT", TEXT_INSET, 0)
-text:SetWidth(math.min(PANEL_W - NAV_W - 60 - TEXT_INSET, TEXT_MAX_W))
-text:SetJustifyH("LEFT")
-text:SetSpacing(6)
-text:SetWordWrap(true)
+-- WoW renders at most 9 hyperlinks per FontString; past that the link and its
+-- color are both silently dropped and the raw "[Brackets]" show through. A
+-- full playbook page carries well over 9 ability links, so the body cannot be
+-- one FontString. Each authored line is given its own FontString instead - a
+-- single line practically never holds more than three links - and they are
+-- stacked to look exactly like the single block they replace.
+local TEXT_W = math.min(PANEL_W - NAV_W - 60 - TEXT_INSET, TEXT_MAX_W)
+-- Same 6px as SetSpacing: the gap between two FontStrings has to match the
+-- leading inside one, or wrapped lines and authored lines space differently.
+local LINE_GAP = 6
+
+local bodyLines = {}
+
+local function AcquireBodyLine(i)
+    local fs = bodyLines[i]
+    if not fs then
+        fs = content:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        -- Explicit width, no anchor-derived sizing: that is what makes
+        -- GetStringHeight report the wrapped height immediately after SetText,
+        -- which the stacking below depends on.
+        fs:SetWidth(TEXT_W)
+        fs:SetJustifyH("LEFT")
+        fs:SetSpacing(LINE_GAP)
+        fs:SetWordWrap(true)
+        bodyLines[i] = fs
+    end
+    return fs
+end
+
+-- Splits the built page on newlines, lays one FontString out per line, hides
+-- the leftovers from a longer previous page, and returns the stacked height.
+-- Every Build*Text function emits self-contained lines (each opens its own
+-- color and closes with |r), so splitting them apart cannot strand a color.
+local function SetBodyText(s)
+    s = tostring(s or "")
+    local y, n, from = 0, 0, 1
+    -- find/plain rather than gmatch: a gmatch pattern loose enough to keep
+    -- empty lines also fires one extra empty match past the end of the string,
+    -- which would add a phantom spacer line to every page.
+    while true do
+        local at = s:find("\n", from, true)
+        local line = at and s:sub(from, at - 1) or s:sub(from)
+        n = n + 1
+        local fs = AcquireBodyLine(n)
+        -- Blank lines are the section spacers; an empty string measures as
+        -- nothing, so give it a space to keep the gap.
+        fs:SetText(line ~= "" and line or " ")
+        fs:ClearAllPoints()
+        -- Anchored to content rather than chained to the previous line: the
+        -- offsets are then plain arithmetic we can also sum for the height.
+        fs:SetPoint("TOPLEFT", content, "TOPLEFT", TEXT_INSET, -y)
+        fs:Show()
+        y = y + fs:GetStringHeight() + LINE_GAP
+        if not at then break end
+        from = at + 1
+    end
+    for i = n + 1, #bodyLines do
+        bodyLines[i]:Hide()
+    end
+    -- The last line contributes no trailing gap.
+    return y - LINE_GAP
+end
 
 local sectionTitle = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 sectionTitle:SetPoint("BOTTOMLEFT", scroll, "TOPLEFT", TEXT_INSET, 6)
@@ -1187,6 +1252,7 @@ end
 
 function ns.UI_Refresh()
     local d = viewedDungeon
+    local bodyHeight = 0
     UpdateRoleTabs()
     -- Expanding a segment changes which rows exist, so the nav is rebuilt from
     -- `selected` on every refresh rather than only when the dungeon changes.
@@ -1195,32 +1261,32 @@ function ns.UI_Refresh()
     if not d then
         subtitle:SetText(C.DIM .. "Pick a dungeon" .. C.R)
         sectionTitle:SetText("Playbooks")
-        text:SetText(C.DIM .. "Select a dungeon on the left.\n\nThe playbook loads automatically when you enter a covered dungeon." .. C.R)
+        bodyHeight = SetBodyText(C.DIM .. "Select a dungeon on the left.\n\nThe playbook loads automatically when you enter a covered dungeon." .. C.R)
     else
         subtitle:SetText(d.dungeon .. C.DIM .. "  —  " .. (d.season or "") .. C.R)
         if selected.kind == "boss" and selected.boss then
             sectionTitle:SetText(selected.boss.name)
-            text:SetText(BuildBossText(selected.boss, ns.role))
+            bodyHeight = SetBodyText(BuildBossText(selected.boss, ns.role))
         elseif selected.kind == "npc" and selected.npc and selected.segment then
             sectionTitle:SetText(selected.npc.name)
-            text:SetText(BuildNPCText(selected.segment, selected.npc, ns.role))
+            bodyHeight = SetBodyText(BuildNPCText(selected.segment, selected.npc, ns.role))
         elseif selected.kind == "npc" and selected.npc and selected.boss then
             -- An add under a boss, not a trash NPC: adds carry no calls of
             -- their own, so fall back to the boss's own playbook text.
             sectionTitle:SetText(selected.npc.name)
-            text:SetText(BuildBossText(selected.boss, ns.role))
+            bodyHeight = SetBodyText(BuildBossText(selected.boss, ns.role))
         elseif selected.kind == "trash" and selected.segment then
             sectionTitle:SetText(selected.segment.name)
-            text:SetText(BuildTrashText(selected.segment, ns.role))
+            bodyHeight = SetBodyText(BuildTrashText(selected.segment, ns.role))
         elseif selected.kind == "quicksheet" then
             sectionTitle:SetText("Quick sheet (all roles)")
-            text:SetText(BuildQuicksheetText(d))
+            bodyHeight = SetBodyText(BuildQuicksheetText(d))
         else
             sectionTitle:SetText("Overview & Trash")
-            text:SetText(BuildOverviewText(d, ns.role))
+            bodyHeight = SetBodyText(BuildOverviewText(d, ns.role))
         end
     end
-    content:SetHeight(text:GetStringHeight() + 20)
+    content:SetHeight(bodyHeight + 20)
     scroll:SetVerticalScroll(0)
     UpdateSidecar()
 end
