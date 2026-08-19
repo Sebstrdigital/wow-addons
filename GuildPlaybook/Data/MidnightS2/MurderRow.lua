@@ -9,18 +9,24 @@ ns.RegisterDungeon({
   ["patch"] = "12.1.0",
   ["sourceVersion"] = "1.0",
   ["instanceID"] = nil,
+  ["mdtRoutes"] = {
+    {
+      ["name"] = "elitzur - keystone.guru (Aug 2026, 101.4% forces)",
+      ["string"] = "!~MDT2~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",
+    },
+  },
   ["quicksheet"] = {
     ["trash"] = {
-      ["TANK"] = "Felmaster Lucsei — Blade Dance: Priority stop or move clear; never stack avoidable damage into it.; Corrupted Warlock — Curse of Doom: Highest interrupt priority; avoid combining with Defiled Golem danger without a planned stop.; Corrupted Warlock — Dark Pact: Interrupt or purge the defensive if it lands.; Defiled Golem — Defiled Slam: Leave the impact and use mitigation if targeted.",
-      ["HEALER"] = "Felmaster Lucsei — Blade Dance: Priority stop or move clear; never stack avoidable damage into it.; Corrupted Warlock — Curse of Doom: Plan around it — it is the group's highest interrupt priority.; Corrupted Warlock — Dark Pact: Interrupt or purge the defensive if it lands.; Defiled Golem — Defiled Slam: Leave the impact and use mitigation if targeted.",
-      ["DPS"] = "Felmaster Lucsei — Blade Dance: Priority stop or move clear; never stack avoidable damage into it.; Corrupted Warlock — Curse of Doom: Assigned interrupt priority — stop it before Dark Pact.; Corrupted Warlock — Dark Pact: Interrupt or purge the defensive if it lands.; Defiled Golem — Defiled Slam: Leave the impact and use mitigation if targeted.",
+      ["TANK"] = "Felmaster Lucsei — [Blade Dance]: Priority stop or move clear; never stack avoidable damage into it.; Corrupted Warlock — [Curse of Doom]: Highest interrupt priority; avoid combining with Defiled Golem danger without a planned stop.; Corrupted Warlock — [Dark Pact]: Interrupt or purge the defensive if it lands.; Defiled Golem — [Defiled Slam]: Leave the impact and use mitigation if targeted.",
+      ["HEALER"] = "Felmaster Lucsei — [Blade Dance]: Priority stop or move clear; never stack avoidable damage into it.; Corrupted Warlock — [Curse of Doom]: Plan around it — it is the group's highest interrupt priority.; Corrupted Warlock — [Dark Pact]: Interrupt or purge the defensive if it lands.; Defiled Golem — [Defiled Slam]: Leave the impact and use mitigation if targeted.",
+      ["DPS"] = "Felmaster Lucsei — [Blade Dance]: Priority stop or move clear; never stack avoidable damage into it.; Corrupted Warlock — [Curse of Doom]: Assigned interrupt priority — stop it before [Dark Pact].; Corrupted Warlock — [Dark Pact]: Interrupt or purge the defensive if it lands.; Defiled Golem — [Defiled Slam]: Leave the impact and use mitigation if targeted.",
     },
   },
   ["overview"] = {
     ["interrupts"] = {
       {
         ["spell"] = "Curse of Doom",
-        ["note"] = "Corrupted Warlock (trash) — highest interrupt priority; kick before Dark Pact.",
+        ["note"] = "Corrupted Warlock (trash) — highest interrupt priority; kick before [Dark Pact].",
       },
       {
         ["spell"] = "Dark Pact",
@@ -41,59 +47,59 @@ ns.RegisterDungeon({
     },
     ["killPriority"] = {
       "Corrupted Warlock and Defiled Golem — kill first among trash.",
-      "Nibbles — bring to 20% without wasting burst on Kystia's Felshield, then swap to Mirror Images.",
-      "Mirror Images — both Felstorm casts must be stopped before bursting Kystia in Destabilized.",
-      "Lithiel's summoned demons — hard swap and cleave; prioritise empowered demons before Malefic Wave.",
+      "Nibbles — bring to 20% without wasting burst on Kystia's [Felshield], then swap to Mirror Images.",
+      "Mirror Images — both [Felstorm] casts must be stopped before bursting Kystia in [Destabilized].",
+      "Lithiel's summoned demons — hard swap and cleave; prioritise empowered demons before [Malefic Wave].",
     },
     ["tank"] = {
       ["damage"] = {
-        "Chaos Barrage (Kystia Manaheart) — active mitigation; keep nearby players clear of the jump where positioning allows.",
-        "Envenom (Zaen Bladesorrow) — mitigate the tank hit and call for Heartstop Poison removal.",
-        "Legion Strike (Xathuux the Annihilator) — active mitigation; keep the frontal away from allies.",
+        "[Chaos Barrage] (Kystia Manaheart) — active mitigation; keep nearby players clear of the jump where positioning allows.",
+        "[Envenom] (Zaen Bladesorrow) — mitigate the tank hit and call for [Heartstop Poison] removal.",
+        "[Legion Strike] (Xathuux the Annihilator) — active mitigation; keep the frontal away from allies.",
         "Vilefiend pressure (Lithiel Cinderfury) — cover Vilefiend and stacked add pressure.",
-        "Felmaster Lucsei — Blade Dance (trash): priority stop or move clear; never stack avoidable damage into it.",
-        "Defiled Golem — Defiled Slam (trash): leave the impact and use mitigation if targeted.",
+        "Felmaster Lucsei — [Blade Dance] (trash): priority stop or move clear; never stack avoidable damage into it.",
+        "Defiled Golem — [Defiled Slam] (trash): leave the impact and use mitigation if targeted.",
       },
       ["pullWarnings"] = {
         "Avoid combining Corrupted Warlock and Defiled Golem danger without a planned stop.",
-        "Corrupted Warlock — Curse of Doom: highest interrupt priority; kick before Dark Pact. Hold the pack still for the live split-damage visual.",
-        "Corrupted Warlock — Dark Pact: interrupt or purge the defensive if it lands; keep control of the pack while the shield is down.",
+        "Corrupted Warlock — [Curse of Doom]: highest interrupt priority; kick before [Dark Pact]. Hold the pack still for the live split-damage visual.",
+        "Corrupted Warlock — [Dark Pact]: interrupt or purge the defensive if it lands; keep control of the pack while the shield is down.",
         "Bribed Captain / Bribed Guard — live cast list: use visible danger cues and stop assigned casts; exact late-PTR cast priority requires live verification.",
         "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
       },
     },
     ["healer"] = {
       ["dispels"] = {
-        "Heartstop Poison (Zaen Bladesorrow) — remove quickly when supported; otherwise use a personal and focused healing.",
-        "Corroding Spittle (Kystia Manaheart) — remove the stacking Magic effect when available and stabilise the target.",
-        "Corrupted Warlock — Dark Pact (trash): interrupt or purge the defensive if it lands; call the shield if your spec cannot purge.",
-        "Corrupted Warlock — Curse of Doom (trash): prepare for split damage; follow the live stack visual.",
+        "[Heartstop Poison] (Zaen Bladesorrow) — remove quickly when supported; otherwise use a personal and focused healing.",
+        "[Corroding Spittle] (Kystia Manaheart) — remove the stacking Magic effect when available and stabilise the target.",
+        "Corrupted Warlock — [Dark Pact] (trash): interrupt or purge the defensive if it lands; call the shield if your spec cannot purge.",
+        "Corrupted Warlock — [Curse of Doom] (trash): prepare for split damage; follow the live stack visual.",
       },
       ["pressure"] = {
-        "Destabilized (Kystia Manaheart) — sustain heavy party damage for the 15-sec window while the group bursts Kystia.",
-        "Killing Spree (Zaen Bladesorrow) — top the group before the sequence and use a cooldown if players are uneven.",
-        "Demonic Rage (Xathuux the Annihilator) — use a planned group cooldown and personals.",
+        "[Destabilized] (Kystia Manaheart) — sustain heavy party damage for the 15-sec window while the group bursts Kystia.",
+        "[Killing Spree] (Zaen Bladesorrow) — top the group before the sequence and use a cooldown if players are uneven.",
+        "[Demonic Rage] (Xathuux the Annihilator) — use a planned group cooldown and personals.",
         "Post-gateway Fire damage (Lithiel Cinderfury) — take the gateway immediately while maintaining healing range; heal lingering Fire damage after.",
-        "Felmaster Lucsei — Blade Dance (trash): priority stop or move clear; never stack avoidable damage into it. Pre-heal the group hit and damage-over-time effect if the stop is missed.",
-        "Defiled Golem — Defiled Slam (trash): prepare a direct tank heal.",
+        "Felmaster Lucsei — [Blade Dance] (trash): priority stop or move clear; never stack avoidable damage into it. Pre-heal the group hit and damage-over-time effect if the stop is missed.",
+        "Defiled Golem — [Defiled Slam] (trash): prepare a direct tank heal.",
       },
       ["pullWarnings"] = {
-        "Prepare a response for Felmaster Lucsei — Blade Dance.",
+        "Prepare a response for Felmaster Lucsei — [Blade Dance].",
         "Bribed Captain / Bribed Guard — live cast list: use visible danger cues; exact late-PTR cast priority requires live verification.",
         "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
       },
     },
     ["dps"] = {
       ["purges"] = {
-        "Corrupted Warlock — Dark Pact: purge or break the shield; live-verify its dispel type.",
+        "Corrupted Warlock — [Dark Pact]: purge or break the shield; live-verify its dispel type.",
       },
       ["defensives"] = {
-        "Felmaster Lucsei — Blade Dance: priority stop or move clear; never stack avoidable damage into it. Prioritise Lucsei and use a personal defensive if caught.",
-        "Corrupted Warlock — Curse of Doom: highest interrupt priority; follow the live split visual and do not guess the stack count if the kick is missed.",
-        "Defiled Golem — Defiled Slam: leave the impact and use mitigation if targeted; stop it if the live build allows, otherwise use a defensive.",
-        "Heartstop Poison (Zaen Bladesorrow): use a personal if targeted and allow the healer to remove it.",
-        "Demonic Rage (Xathuux the Annihilator): use a personal and keep dealing damage if safe.",
-        "Use personals for Killing Spree and add-heavy overlaps.",
+        "Felmaster Lucsei — [Blade Dance]: priority stop or move clear; never stack avoidable damage into it. Prioritise Lucsei and use a personal defensive if caught.",
+        "Corrupted Warlock — [Curse of Doom]: highest interrupt priority; follow the live split visual and do not guess the stack count if the kick is missed.",
+        "Defiled Golem — [Defiled Slam]: leave the impact and use mitigation if targeted; stop it if the live build allows, otherwise use a defensive.",
+        "[Heartstop Poison] (Zaen Bladesorrow): use a personal if targeted and allow the healer to remove it.",
+        "[Demonic Rage] (Xathuux the Annihilator): use a personal and keep dealing damage if safe.",
+        "Use personals for [Killing Spree] and add-heavy overlaps.",
       },
       ["pullWarnings"] = {
         "Exact trash kick and stop ranking needs live verification.",
@@ -102,12 +108,12 @@ ns.RegisterDungeon({
       },
     },
     ["tip"] = {
-      "Tank: Position, mitigation and pace — face trash and bosses away, plan mitigation for Chaos Barrage/Envenom/Legion Strike without overlapping every cooldown, and avoid combining Corrupted Warlock and Defiled Golem danger without a planned stop.",
-      "Healer: Dispels and cooldowns — prioritise Heartstop Poison and Corroding Spittle when removable, plan around Curse of Doom, and cover Kystia's 15-sec Destabilized pulse and Xathuux's Demonic Rage.",
-      "DPS: Interrupts and burst — assign both Mirror Image — Felstorm casts, stop Curse of Doom and Chaos Bolt, and save damage for Destabilized and Lithiel's empowered demons.",
-      "Version 1.0, reviewed and verified 9 August 2026 against Blizzard PTR/launch notes, Wowhead, Wowhead Dungeon Journal data and Icy Veins; Syndicate Guild cross-checked only. Destabilized corrected from 20 sec to 15 sec; no other verified gameplay changes since 27 July 2026.",
+      "Tank: Position, mitigation and pace — face trash and bosses away, plan mitigation for [Chaos Barrage]/[Envenom]/[Legion Strike] without overlapping every cooldown, and avoid combining Corrupted Warlock and Defiled Golem danger without a planned stop.",
+      "Healer: Dispels and cooldowns — prioritise [Heartstop Poison] and [Corroding Spittle] when removable, plan around [Curse of Doom], and cover Kystia's 15-sec [Destabilized] pulse and Xathuux's [Demonic Rage].",
+      "DPS: Interrupts and burst — assign both Mirror Image — [Felstorm] casts, stop [Curse of Doom] and [Chaos Bolt], and save damage for [Destabilized] and Lithiel's empowered demons.",
+      "Version 1.0, reviewed and verified 9 August 2026 against Blizzard PTR/launch notes, Wowhead, Wowhead Dungeon Journal data and Icy Veins; Syndicate Guild cross-checked only. [Destabilized] corrected from 20 sec to 15 sec; no other verified gameplay changes since 27 July 2026.",
       "Pre-launch verified for Midnight Season 2, Patch 12.1 PTR. Patch 12.1 launches 11 August; Mythic+ Season 2 opens 18 August 2026.",
-      "Requires live verification: the 34:00 PTR timer, Burning Steps duration, opening/Warehouse Worker live cast priority, and any late PTR tuning.",
+      "Requires live verification: the 34:00 PTR timer, [Burning Steps] duration, opening/Warehouse Worker live cast priority, and any late PTR tuning.",
       "Tank: Plan Zaen cover and Xathuux movement space before each fight.",
       "Healer: Keep movement tools available so mechanics do not stop healing.",
       "DPS: Mechanic execution is worth more than boss uptime.",
@@ -160,18 +166,18 @@ ns.RegisterDungeon({
       ["roles"] = {
         ["TANK"] = {
           "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
-          "Freight — do not destroy cover needed for Zaen's Murder in a Row.",
-          "Heartstop Poison — use dispel/personal support when encountered.",
+          "Freight — do not destroy cover needed for Zaen's [Murder in a Row].",
+          "[Heartstop Poison] — use dispel/personal support when encountered.",
         },
         ["HEALER"] = {
           "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
-          "Freight — do not destroy cover needed for Zaen's Murder in a Row.",
-          "Heartstop Poison — use dispel/personal support when encountered.",
+          "Freight — do not destroy cover needed for Zaen's [Murder in a Row].",
+          "[Heartstop Poison] — use dispel/personal support when encountered.",
         },
         ["DPS"] = {
           "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
-          "Freight — do not destroy cover needed for Zaen's Murder in a Row.",
-          "Heartstop Poison — use dispel/personal support when encountered.",
+          "Freight — do not destroy cover needed for Zaen's [Murder in a Row].",
+          "[Heartstop Poison] — use dispel/personal support when encountered.",
         },
       },
     },
@@ -187,15 +193,15 @@ ns.RegisterDungeon({
       },
       ["roles"] = {
         ["TANK"] = {
-          "Felmaster Lucsei — Blade Dance: priority stop or move clear; never stack avoidable damage into it.",
+          "Felmaster Lucsei — [Blade Dance]: priority stop or move clear; never stack avoidable damage into it.",
           "Pack control — stagger stops and avoid pulling through unsafe ground.",
         },
         ["HEALER"] = {
-          "Felmaster Lucsei — Blade Dance: priority stop or move clear; never stack avoidable damage into it.",
+          "Felmaster Lucsei — [Blade Dance]: priority stop or move clear; never stack avoidable damage into it.",
           "Pack control — stagger stops and avoid pulling through unsafe ground.",
         },
         ["DPS"] = {
-          "Felmaster Lucsei — Blade Dance: priority stop or move clear; never stack avoidable damage into it.",
+          "Felmaster Lucsei — [Blade Dance]: priority stop or move clear; never stack avoidable damage into it.",
           "Pack control — stagger stops and avoid pulling through unsafe ground.",
         },
       },
@@ -217,19 +223,19 @@ ns.RegisterDungeon({
       },
       ["roles"] = {
         ["TANK"] = {
-          "Corrupted Warlock — Curse of Doom: highest interrupt priority.",
-          "Corrupted Warlock — Dark Pact: interrupt or purge the defensive if it lands.",
-          "Defiled Golem — Defiled Slam: leave the impact and use mitigation if targeted.",
+          "Corrupted Warlock — [Curse of Doom]: highest interrupt priority.",
+          "Corrupted Warlock — [Dark Pact]: interrupt or purge the defensive if it lands.",
+          "Defiled Golem — [Defiled Slam]: leave the impact and use mitigation if targeted.",
         },
         ["HEALER"] = {
-          "Corrupted Warlock — Curse of Doom: highest interrupt priority.",
-          "Corrupted Warlock — Dark Pact: interrupt or purge the defensive if it lands.",
-          "Defiled Golem — Defiled Slam: leave the impact and use mitigation if targeted.",
+          "Corrupted Warlock — [Curse of Doom]: highest interrupt priority.",
+          "Corrupted Warlock — [Dark Pact]: interrupt or purge the defensive if it lands.",
+          "Defiled Golem — [Defiled Slam]: leave the impact and use mitigation if targeted.",
         },
         ["DPS"] = {
-          "Corrupted Warlock — Curse of Doom: highest interrupt priority.",
-          "Corrupted Warlock — Dark Pact: interrupt or purge the defensive if it lands.",
-          "Defiled Golem — Defiled Slam: leave the impact and use mitigation if targeted.",
+          "Corrupted Warlock — [Curse of Doom]: highest interrupt priority.",
+          "Corrupted Warlock — [Dark Pact]: interrupt or purge the defensive if it lands.",
+          "Defiled Golem — [Defiled Slam]: leave the impact and use mitigation if targeted.",
         },
       },
     },
@@ -239,59 +245,59 @@ ns.RegisterDungeon({
       ["name"] = "Kystia Manaheart",
       ["sheet"] = {
         ["TANK"] = "Nibbles 20% > kick images twice > burst Kystia.",
-        ["HEALER"] = "Pre-heal Destabilized; images cannot free-cast.",
+        ["HEALER"] = "Pre-heal [Destabilized]; images cannot free-cast.",
         ["DPS"] = "Nibbles 20% > kick images twice > burst boss.",
-        ["WIPE"] = "Missed Felstorm interrupts or failed healing during Destabilized can end the pull.",
+        ["WIPE"] = "Missed [Felstorm] interrupts or failed healing during [Destabilized] can end the pull.",
       },
       ["encounterID"] = nil,
       ["npcID"] = 252458,
       ["displayID"] = 124578,
       ["wipe"] = {
-        "Missed Felstorm interrupts or failed healing during Destabilized can end the pull.",
-        "Felstorm overlaps Destabilized.",
+        "Missed [Felstorm] interrupts or failed healing during [Destabilized] can end the pull.",
+        "[Felstorm] overlaps [Destabilized].",
         "Slow swaps allow several Felstorms together.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
             "Hold Kystia steady while the group drains Nibbles to 20%; keep her positioned away from Nibbles.",
-            "Kick Mirror Image — Felstorm; both images must be stopped.",
+            "Kick Mirror Image — [Felstorm]; both images must be stopped.",
           },
           ["avoid"] = {
-            "Fel Nova and Nibbles' Fel Spray.",
-            "Move out after the Fel Nova teleport and avoid the knockback.",
+            "[Fel Nova] and Nibbles' [Fel Spray].",
+            "Move out after the [Fel Nova] teleport and avoid the knockback.",
           },
           ["defensive"] = {
-            "Mitigate Chaos Barrage; keep nearby players clear of the jump where positioning allows.",
+            "Mitigate [Chaos Barrage]; keep nearby players clear of the jump where positioning allows.",
           },
           ["reminder"] = "Nibbles 20% > kick images twice > burst Kystia.",
         },
         ["HEALER"] = {
           ["job"] = {
-            "Track and dispel Corroding Spittle; stabilise the target.",
-            "Pre-heal Destabilized; sustain heavy party damage for the 15-sec window while the group bursts Kystia.",
-            "Help stop Mirror Image — Felstorm if your toolkit allows; heal only unavoidable residue.",
+            "Track and dispel [Corroding Spittle]; stabilise the target.",
+            "Pre-heal [Destabilized]; sustain heavy party damage for the 15-sec window while the group bursts Kystia.",
+            "Help stop Mirror Image — [Felstorm] if your toolkit allows; heal only unavoidable residue.",
           },
           ["avoid"] = {
-            "Fel Nova and Nibbles' Fel Spray; prepare spot healing after mistakes.",
+            "[Fel Nova] and Nibbles' [Fel Spray]; prepare spot healing after mistakes.",
           },
           ["cooldowns"] = {
             "Use a healing cooldown if an image remains active.",
           },
-          ["reminder"] = "Pre-heal Destabilized; images cannot free-cast.",
+          ["reminder"] = "Pre-heal [Destabilized]; images cannot free-cast.",
         },
         ["DPS"] = {
           ["job"] = {
-            "Push Nibbles below 20% without wasting burst on Kystia's Felshield, then swap to images and burst Kystia.",
-            "Mirror Image — Felstorm: assign one interrupt to each image; two interrupts required on Mythic/Mythic+.",
+            "Push Nibbles below 20% without wasting burst on Kystia's [Felshield], then swap to images and burst Kystia.",
+            "Mirror Image — [Felstorm]: assign one interrupt to each image; two interrupts required on Mythic/Mythic+.",
           },
           ["avoid"] = {
-            "Fel Nova and Fel Spray — leave the cone and teleport impact.",
+            "[Fel Nova] and [Fel Spray] — leave the cone and teleport impact.",
             "Melee save mobility.",
             "Ranged own far kicks.",
           },
           ["defensive"] = {
-            "Personal during Destabilized if images remain; otherwise commit offensive cooldowns during the 15-sec window.",
+            "Personal during [Destabilized] if images remain; otherwise commit offensive cooldowns during the 15-sec window.",
           },
           ["reminder"] = "Nibbles 20% > kick images twice > burst boss.",
         },
@@ -300,61 +306,61 @@ ns.RegisterDungeon({
     {
       ["name"] = "Zaen Bladesorrow",
       ["sheet"] = {
-        ["TANK"] = "Preserve one box > defensive on Envenom > hide.",
+        ["TANK"] = "Preserve one box > defensive on [Envenom] > hide.",
         ["HEALER"] = "Cover first > heal Spree > protect tank.",
         ["DPS"] = "Bomb away > hide at 100 > reconnect.",
-        ["WIPE"] = "Destroyed or missed freight cover makes Murder in a Row lethal.",
+        ["WIPE"] = "Destroyed or missed freight cover makes [Murder in a Row] lethal.",
       },
       ["encounterID"] = nil,
       ["npcID"] = 234649,
       ["displayID"] = 124592,
       ["wipe"] = {
-        "Destroyed or missed freight cover makes Murder in a Row lethal.",
+        "Destroyed or missed freight cover makes [Murder in a Row] lethal.",
         "Missing cover applies heavy damage and a long bleed.",
-        "Destroying all safe freight before 100 energy leaves no safe cover for Murder in a Row.",
+        "Destroying all safe freight before 100 energy leaves no safe cover for [Murder in a Row].",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
             "Keep Zaen near safe Forbidden Freight.",
-            "Call Envenom and mitigate the tank hit; call for Heartstop Poison removal.",
-            "Re-engage cleanly after the Killing Spree cover sequence; keep Zaen positioned away from the group.",
+            "Call [Envenom] and mitigate the tank hit; call for [Heartstop Poison] removal.",
+            "Re-engage cleanly after the [Killing Spree] cover sequence; keep Zaen positioned away from the group.",
           },
           ["avoid"] = {
-            "Hide behind intact freight for Murder in a Row at 100 energy.",
-            "Keep Fire Bomb away from planned cover.",
+            "Hide behind intact freight for [Murder in a Row] at 100 energy.",
+            "Keep [Fire Bomb] away from planned cover.",
           },
           ["defensive"] = {
-            "Major defensive for Envenom while maximum health is reduced.",
+            "Major defensive for [Envenom] while maximum health is reduced.",
           },
-          ["reminder"] = "Preserve one box > defensive on Envenom > hide.",
+          ["reminder"] = "Preserve one box > defensive on [Envenom] > hide.",
         },
         ["HEALER"] = {
           ["job"] = {
-            "Track Envenom and Heartstop Poison; dispel promptly when supported, otherwise commit focused healing.",
+            "Track [Envenom] and [Heartstop Poison]; dispel promptly when supported, otherwise commit focused healing.",
             "Reach cover early; keep line-of-sight considerations in mind.",
-            "Top the group before Killing Spree and use a cooldown if players are uneven; stabilise the tank after.",
+            "Top the group before [Killing Spree] and use a cooldown if players are uneven; stabilise the tank after.",
           },
           ["avoid"] = {
-            "Same-Day Delivery, Fire Bomb and exploding freight.",
+            "[Same-Day Delivery], [Fire Bomb] and exploding freight.",
           },
           ["cooldowns"] = {
-            "Group cooldown for Killing Spree; external for Envenom.",
+            "Group cooldown for [Killing Spree]; external for [Envenom].",
           },
           ["reminder"] = "Cover first > heal Spree > protect tank.",
         },
         ["DPS"] = {
           ["job"] = {
-            "Pre-position by cover and place Fire Bomb away from freight still needed.",
+            "Pre-position by cover and place [Fire Bomb] away from freight still needed.",
             "No boss kick priority; execute cover and bomb placement.",
           },
           ["avoid"] = {
-            "Stop damage and hide behind intact freight for Murder in a Row at 100 energy.",
+            "Stop damage and hide behind intact freight for [Murder in a Row] at 100 energy.",
             "Melee leave early.",
             "Ranged place bombs wide.",
           },
           ["defensive"] = {
-            "Personal for Heartstop Poison if targeted (let the healer finish the removal), Killing Spree, or a late cover move.",
+            "Personal for [Heartstop Poison] if targeted (let the healer finish the removal), [Killing Spree], or a late cover move.",
           },
           ["reminder"] = "Bomb away > hide at 100 > reconnect.",
         },
@@ -366,43 +372,43 @@ ns.RegisterDungeon({
         ["TANK"] = "Front away > edge-kite Rage > preserve room.",
         ["HEALER"] = "External before Strike > cooldown for Rage.",
         ["DPS"] = "Behind boss > dodge axe > burst Rage.",
-        ["WIPE"] = "Demonic Rage plus Burning Steps punishes poor spacing and late defensives.",
+        ["WIPE"] = "[Demonic Rage] plus [Burning Steps] punishes poor spacing and late defensives.",
       },
       ["encounterID"] = nil,
       ["npcID"] = 234647,
       ["displayID"] = 140268,
       ["wipe"] = {
-        "Demonic Rage plus Burning Steps punishes poor spacing and late defensives.",
-        "Legion Strike hits the group and applies 80% healing reduction.",
+        "[Demonic Rage] plus [Burning Steps] punishes poor spacing and late defensives.",
+        "[Legion Strike] hits the group and applies 80% healing reduction.",
         "A Strike clip applies 80% healing reduction for 12 seconds; several players taking it becomes difficult to heal.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
-            "Face Legion Strike away and use active mitigation.",
-            "Edge-kite Demonic Rage; keep control of boss position during the damage spike.",
-            "Burning Steps last 120 seconds on PTR — move deliberately and preserve safe floor.",
+            "Face [Legion Strike] away and use active mitigation.",
+            "Edge-kite [Demonic Rage]; keep control of boss position during the damage spike.",
+            "[Burning Steps] last 120 seconds on PTR — move deliberately and preserve safe floor.",
           },
           ["avoid"] = {
-            "Axe Toss, persistent axe zones and pointing Legion Strike at allies.",
+            "[Axe Toss], persistent axe zones and pointing [Legion Strike] at allies.",
           },
           ["defensive"] = {
-            "Mitigate Legion Strike.",
+            "Mitigate [Legion Strike].",
             "Major defensive for Rage's faster melees.",
           },
           ["reminder"] = "Front away > edge-kite Rage > preserve room.",
         },
         ["HEALER"] = {
           ["job"] = {
-            "Pre-heal the tank before Legion Strike and watch for overlap with avoidable damage.",
-            "Prepare for Demonic Rage.",
-            "Keep moving and heal without standing in Burning Steps; do not cast from unsafe ground.",
+            "Pre-heal the tank before [Legion Strike] and watch for overlap with avoidable damage.",
+            "Prepare for [Demonic Rage].",
+            "Keep moving and heal without standing in [Burning Steps]; do not cast from unsafe ground.",
           },
           ["avoid"] = {
-            "Axe Toss, persistent axes and the boss front.",
+            "[Axe Toss], persistent axes and the boss front.",
           },
           ["cooldowns"] = {
-            "External before Legion Strike.",
+            "External before [Legion Strike].",
             "Group cooldown for Rage.",
           },
           ["reminder"] = "External before Strike > cooldown for Rage.",
@@ -413,11 +419,11 @@ ns.RegisterDungeon({
             "No boss interrupt; prioritise safe Rage uptime.",
           },
           ["avoid"] = {
-            "Axe Toss and Legion Strike — never cross the frontal.",
-            "Move out immediately for Burning Steps and keep safe space for later.",
+            "[Axe Toss] and [Legion Strike] — never cross the frontal.",
+            "Move out immediately for [Burning Steps] and keep safe space for later.",
           },
           ["defensive"] = {
-            "Personal during Demonic Rage; keep dealing damage if safe.",
+            "Personal during [Demonic Rage]; keep dealing damage if safe.",
           },
           ["reminder"] = "Behind boss > dodge axe > burst Rage.",
         },
@@ -443,12 +449,12 @@ ns.RegisterDungeon({
         ["TANK"] = {
           ["job"] = {
             "Pick up demons quickly for clean cleave.",
-            "Help kick Chaos Bolt when assigned; do not turn the boss unpredictably.",
-            "Kill adds before Malefic Wave.",
+            "Help kick [Chaos Bolt] when assigned; do not turn the boss unpredictably.",
+            "Kill adds before [Malefic Wave].",
             "Use the gateway promptly, then re-establish boss position.",
           },
           ["avoid"] = {
-            "Spread 6+ yards for Fingers of the Legion without dragging the boss through allies.",
+            "Spread 6+ yards for [Fingers of the Legion] without dragging the boss through allies.",
             "Keep Infernal aura away.",
           },
           ["defensive"] = {
@@ -461,7 +467,7 @@ ns.RegisterDungeon({
             "Pre-position by the gateway.",
             "Track add damage and help control empowered demons during pressure.",
             "Top before crossing; heal lingering Fire damage after.",
-            "Prepare a spot heal if Chaos Bolt lands.",
+            "Prepare a spot heal if [Chaos Bolt] lands.",
             "Take the gateway immediately while maintaining healing range.",
           },
           ["avoid"] = {
@@ -469,7 +475,7 @@ ns.RegisterDungeon({
             "Avoid Infernal aura.",
           },
           ["cooldowns"] = {
-            "Cooldown if demons survive into Malefic Wave.",
+            "Cooldown if demons survive into [Malefic Wave].",
           },
           ["reminder"] = "Top > spread > gateway > recover.",
         },
@@ -477,11 +483,11 @@ ns.RegisterDungeon({
           ["job"] = {
             "Kill Imps, Vilefiend and Infernal before the wave.",
             "Hard swap onto summoned demons and cleave; prioritise empowered demons.",
-            "Chaos Bolt: maintain an interrupt rotation; adds before boss for cleave priority.",
+            "[Chaos Bolt]: maintain an interrupt rotation; adds before boss for cleave priority.",
             "Pre-position for the gateway; take it immediately.",
           },
           ["avoid"] = {
-            "Spread at least 6 yd for Fingers of the Legion and avoid clipping allies.",
+            "Spread at least 6 yd for [Fingers of the Legion] and avoid clipping allies.",
             "Melee avoid Infernal aura.",
           },
           ["defensive"] = {

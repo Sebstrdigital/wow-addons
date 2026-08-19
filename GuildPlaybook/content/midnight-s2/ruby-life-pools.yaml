@@ -12,8 +12,9 @@
 #
 # trashSegments[].npcs carries the mob names the documents call out, so the
 # sidecar can show a model once IDs exist. IDs are sourced from Mythic Dungeon
-# Tools' published dungeon data; Flashfrost Earthshaper and Primalist Flamedancer
-# lack exact matches and remain null.
+# Tools' published dungeon data. "Flashfrost Earthshaper" was a name
+# conflation — the real mob is Deepstone Earthshaper (npcID 187969), now
+# matched. Primalist Flamedancer still lacks an exact match and remains null.
 #
 # Still without a home in the schema: the pre-season release dates (Patch 12.1
 # on 11 Aug, M+ Season 2 on 18 Aug), the "Sources cross-checked" line, and the
@@ -28,73 +29,72 @@ sourceVersion: "0.6"
 instanceID: null   # capture with /gp ids
 
 mdtRoutes:
-  - name: "Echo#12882 - keystone.guru (Jul 2026)"
-    string: "!~MDT2~VVLLbtNAFGVsNw5tEG36IGwQOyhSoyQ2abNCIXGaNBEJRaq6dew7wWhsV55xlWaVCRHd8Q/UiQQLfoLf4A9YEwmJDeMqVM4srLn3nDPH5+p+65i27XtnEFDH9x5Lbs/yiR/0TAKMQcvD/k3HDJlfi7uON1h0V3B7qNQZDFnjtNN7SkvHfv8DWIxOoqp9LSO0aOgFu6BpzxZVxv+++lPu7LejQZVMay8LeuNAKx/mi+JaaRyUjgp57U6Fb89S9ev5kx/ff+4LlVHUS/kjQdb1/KFRFJKyKAp6Xq+Fjt0+vSidN6vOcNg+Ni5NEsJX4yIkhH6eI46kKZJkRb79KhwZtzGEkQYYz+TJWmrZiesKKBNZXbveym7v7D7ai9Y+5oq5Uq6QWtFpMJd4SuaqwtPqHaJBRbww3+BKmu+tczXDU3ca3Ndglh4nnDTIcGWDy4IvpcfrXMlwOWFRAQGgGJAzEyQlhBjfPEz8TSV+OcvRpmBtfYozJgLF/CjLpc2paN9fts1ibDBbmcPmRE1vTTcyD3a3OYp2OdpJxIrH8mUlftsKgwA81hNDRt1l8S7sE7gEgnrggXtVpdQZeK4A6PjtklIPvQH4nlie3ItjBuCKvbrXokDE6ogl5KgdOJh1MaYgVCe2g7FjhYRdSTXXdqImDgDe+8RGrT4MQocIOXrzv3niOx7Yv1tWACYD+/VV1LSISalwU+ue6YJx5oxGviFg4rZrpnClLDDp6B8="
+  - name: "elitzur - keystone.guru (Aug 2026, 100.2% forces)"
+    string: "!~MDT2~nZdLb9tGEMdDiiIlWm78Suvj5tSiiFk+RfLQg2vLruO0ceEESE8BJS4l1hSp8iHbvTRUEjhAv0CvdvNoi360Hqt7Z1e24gAFujQBAfsTd+Y/O7szK73bTbo/4F6evbrY9M/qHDfdUenz6XQz+vWvjq2rirazYThtxQDQFJuAqrjsYComgG0yw5atWzBsOwxDMGwrbQJ6FXAUHcBq3wA0xaoKplUdDLcKzBZnGFXAUMztDUO3WYYqNYR9bTODZisugGZVAYseHNWtAiYVVY1qAIdad+0bgK7o7GAQ0SsHbACrsmeBasygaaR4rryxwBaIXobJMnRnZtr/DuEQ6IpBAgOt/2opf79vKaZi0zNJge4LIxg63UvoLwY7OBRsh+wLI5hwZqAC7DbDEAqeBGjTfWeFtmIRc5VhCI2L9jxaJ6zgznqeSsQYARowcWCZisMODq1h06kAsJO05+lkc1jBoneE0a4GRNRQqWgl0MEPOxi0HjV6J7GCSpMI5W8yg23N+hgtHlbQFIfUp1MB4HK1ZvVfAWZ9zLFJ4hnBsmegkYSwgkbKTrcdhqFJ7wod8mEwAzEnQHsrK9i071eDG+hcBWqQhLOCTVqybrsVwFJnCbdoBIxAmxsB+2Iznm76Lzsa3APEKZnHTR88eHz4CI2KKELa3fkU6D9QR5rWVmxu+uSzr7wwR72Bl/ZxhsI4T9CxBwbesXeKgjQZouMBjkbZ3F539Jmsobhg3z3Mvd4RiPh+hLN7qEvc5Ukae35yzUk/HaEuHoSxj0ZhFHkpyhKUenEf+6jnxfDJcnQc5oOkyNHAG4dxH7ygYTLGypVyGy5hUDahaxj89cVZ8+BsdVYg5GcBP33y8+FROJq7DeNxmH2RDdKk8FGYoVGSZWE3wqgLL4dhf5CjFP9YhCmGFIQ5CSFIUpSM8nDoRWjk5WkSESt4l8SK/DjDH/qEgL1xEvpX5vOw4EqBg74BFW9CVF9e2xYVgUJEFt+FaO4hH49w7BPpJEagi1PkkZylOMApjnv47n0/DIKwV0T56dr2McZHtzpjLyrw79/1ihSm5NsFZDWJ9/yT9c/3MhzB3w0I99n+5esD0OV2c4yHoHJrPw2D/GEQZDjPnnVITNkvb7iS4182uRov1M4aHF8T64Iw4WqdXhIl6U4QGDgI3nElzz+XGmJt0pSEF5LYbNSfr6vr2roultzlVDLRxRfS/Atia+DXCyUnT8Raa8K/n+nC3DcLJb9Y8vJEqLcmNXluFHSpUU2ecHJrIjSvuacvBLmUWqV4TQRUb38QRhC8XT4jS6qLH69MOL5VSktnsDZBbtblsjk3dYnU8qs7C61FqdGUV0tuadKQ5o6Iq9drJbd8trS2envlo0/uzFU8jQgf4BgPTzfhZPXjIaQ7+5ObNBr8uSAJbzmxJoiCJDa4Zk0sJfkPToQUCwLkVxQhg5IsLLxowNM6l8TFc15aAdPVsvHwcusOCzitYxxx2zk+yb/BUZj/VKRP02j0VNsa+uFv3wYpxoMk8u8nYYz9f76+Ym6vi/tFGMGWc1tF6O+rWXLQ+T4+Odnf/Rc="
 
-# All-roles quick sheet (from the Tank/Healer/DPS cheat sheets' page-1 cards)
 quicksheet:
   trash:
-    TANK: "Primal Juggernaut — Crushing Smash: Mitigate, face away and sidestep Excavating Blast.; Flashfrost Earthshaper — Tectonic Slam: Call a hard stop; avoid overlapping dangerous casters.; Blazebound Destroyer — Inferno: Keep the pack stable and leave before Burnout finishes."
-    HEALER: "Primal Juggernaut — Crushing Smash: Watch the tank and keep moving for Excavating Blast.; Flashfrost Earthshaper — Tectonic Slam: Help stop it; prepare group healing if it completes.; Blazebound Destroyer — Inferno: Prepare group healing for the hit and follow-up damage."
-    DPS: "Flashfrost Chillweaver — Ice Shield: Interrupt first or purge; kill the Chillweaver quickly.; Flashfrost Earthshaper — Tectonic Slam: Use a stun or other hard stop.; Primalist Cinderweaver — Cinderbolt: Interrupt; purge or control Burning Ambition."
+    TANK: "Primal Juggernaut — [Crushing Smash]: Mitigate, face away and sidestep [Excavating Blast].; Deepstone Earthshaper — [Tectonic Strike]: Call a hard stop; avoid overlapping dangerous casters.; Blazebound Destroyer — [Inferno]: Keep the pack stable and leave before [Burnout] finishes."
+    HEALER: "Primal Juggernaut — [Crushing Smash]: Watch the tank and keep moving for [Excavating Blast].; Deepstone Earthshaper — [Tectonic Strike]: Help stop it; prepare group healing if it completes.; Blazebound Destroyer — [Inferno]: Prepare group healing for the hit and follow-up damage."
+    DPS: "Flashfrost Chillweaver — [Ice Shield]: Interrupt first or purge; kill the Chillweaver quickly.; Deepstone Earthshaper — [Tectonic Strike]: Use a stun or other hard stop.; Primalist Cinderweaver — [Cinderbolt]: Interrupt; purge or control [Burning Ambition]."
 
 overview:
   interrupts:
     - { spell: "Ice Shield", note: "Flashfrost Chillweaver — interrupt first or purge; kill the Chillweaver quickly." }
-    - { spell: "Tectonic Slam", note: "Flashfrost Earthshaper — use a stun or other hard stop." }
+    - { spell: "Tectonic Strike", note: "Deepstone Earthshaper — use a stun or other hard stop." }
     - { spell: "Frigid Shard", note: "Melidrussa Chillworn — kick as assigned." }
-    - { spell: "Cinderbolt", note: "Primalist Cinderweaver — interrupt; purge or control Burning Ambition." }
-    - { spell: "Roaring Blaze", note: "Kokia Blazehoof — kick; Firestorm add before Kokia." }
-    - { spell: "Flame Dance", note: "Primalist Flamedancer — hard stop it; leave Blaze of Glory on death." }
+    - { spell: "Cinderbolt", note: "Primalist Cinderweaver — interrupt; purge or control [Burning Ambition]." }
+    - { spell: "Blaze Volley", note: "Blazebound Firestorm — kick; kill the add before Kokia." }
+    - { spell: "Flame Dance", note: "Primalist Flamedancer — hard stop it; leave [Blaze of Glory] on death." }
   killPriority:
     - "Flashfrost Chillweaver — kill it quickly among the opening trash."
     - "Defier Draghar — the first miniboss must die to open Melidrussa's door."
-    - "Whelps and Ice Bulwark before the boss (Melidrussa Chillworn)."
+    - "Whelps and [Ice Bulwark] before the boss (Melidrussa Chillworn)."
     - "Blazebound Firestorm add before Kokia."
     - "Kyrakka whenever she is targetable; no routine boss kick on Erkhart."
   tank:
     damage:
-      - "Crushing Smash (Primal Juggernaut) — mitigate, face away and sidestep Excavating Blast."
-      - "Steel Barrage (Defier Draghar) — mitigate the channel; bait Blazing Rush toward a wall."
-      - "Thunder Jaw (Thunderhead) — mitigate and preserve a safe knockback lane."
-      - "Fire Maw (Flamegullet) — mitigate and face away; its damage-ramp stacks are now capped."
-      - "Searing Blows (Kokia Blazehoof) — always cover; request help if the bleed becomes unsafe."
+      - "[Crushing Smash] (Primal Juggernaut) — mitigate, face away and sidestep [Excavating Blast]."
+      - "[Steel Barrage] (Defier Draghar) — mitigate the channel; bait [Blazing Rush] toward a wall."
+      - "[Thunder Jaw] (Thunderhead) — mitigate and preserve a safe knockback lane."
+      - "[Fire Maw] (Flamegullet) — mitigate and face away; its damage-ramp stacks are now capped."
+      - "[Searing Blows] (Kokia Blazehoof) — always cover; request help if the bleed becomes unsafe."
     pullWarnings:
       - "Plan controlled pulls around eggs and grounded dragon patrols."
       - "Face frontals away; protect knockback lanes."
       - "The first miniboss must die to open Melidrussa's door."
-      - "Call a hard stop for Tectonic Slam; avoid overlapping dangerous casters."
+      - "Call a hard stop for [Tectonic Strike]; avoid overlapping dangerous casters."
       - "PTR route, count and the final-trash package require live verification."
   healer:
     dispels:
-      - "Rolling Thunder (Thunderhead) — stagger dispels; heal the second target before expiration."
+      - "[Rolling Thunder] (Thunderhead) — stagger dispels; heal the second target before expiration."
     pressure:
-      - "Inferno (Blazebound Destroyer / Kokia Blazehoof) — prepare group healing for the hit and follow-up damage."
-      - "Molten Blood (Flamegullet) — prepare sustained group healing below 50%; the ramp is capped."
-      - "Frost Overload (Melidrussa Chillworn) — Chillstorm ticks more slowly but lasts longer; recover after Frost Overload."
-      - "Inferno Spit (Kyrakka and Erkhart Stormvein) — top targets before expiration; prioritise marked players and anyone trapped by fire."
+      - "[Inferno] (Blazebound Destroyer / Kokia Blazehoof) — prepare group healing for the hit and follow-up damage."
+      - "[Molten Blood] (Flamegullet) — prepare sustained group healing below 50%; the ramp is capped."
+      - "[Frost Overload] (Melidrussa Chillworn) — [Chillstorm] ticks more slowly but lasts longer; recover after [Frost Overload]."
+      - "[Inferno Spit] (Kyrakka and Erkhart Stormvein) — top targets before expiration; prioritise marked players and anyone trapped by fire."
     pullWarnings:
-      - "Plan for Inferno, Molten Blood, Frost Overload and Inferno Spit."
+      - "Plan for [Inferno], [Molten Blood], [Frost Overload] and [Inferno Spit]."
       - "Tank damage overlaps group pressure on Kokia."
       - "The first miniboss must die to open Melidrussa's door."
-      - "Help stop Tectonic Slam; prepare group healing if it completes."
+      - "Help stop [Tectonic Strike]; prepare group healing if it completes."
       - "PTR dispels and the final-trash damage events require live verification."
   dps:
     purges:
-      - "Burning Ambition (Primalist Cinderweaver) — purge or control it after kicking Cinderbolt."
-      - "Ice Shield (Flashfrost Chillweaver) — interrupt first, or purge the shield if the kick is missed."
+      - "[Burning Ambition] (Primalist Cinderweaver) — purge or control it after kicking [Cinderbolt]."
+      - "[Ice Shield] (Flashfrost Chillweaver) — interrupt first, or purge the shield if the kick is missed."
     defensives:
-      - "Use a personal for Chillstorm or Frost Overload (Melidrussa Chillworn)."
-      - "Use a personal for Inferno, especially after a missed cast (Kokia Blazehoof)."
-      - "Use a personal for Inferno Spit expiration or a bad overlap (Kyrakka and Erkhart Stormvein)."
-      - "Use a personal for Rolling Thunder if needed (Thunderhead, trash)."
+      - "Use a personal for [Chillstorm] or [Frost Overload] (Melidrussa Chillworn)."
+      - "Use a personal for [Inferno], especially after a missed cast (Kokia Blazehoof)."
+      - "Use a personal for [Inferno Spit] expiration or a bad overlap (Kyrakka and Erkhart Stormvein)."
+      - "Use a personal for [Rolling Thunder] if needed (Thunderhead, trash)."
     pullWarnings:
-      - "Prioritise Ice Shield, Tectonic Slam and Roaring Blaze."
+      - "Prioritise [Ice Shield], [Tectonic Strike] and [Blaze Volley]."
       - "Switch immediately to boss adds and shields."
       - "Hard stops matter as much as interrupts."
-      - "Primal Juggernaut — Excavating Blast: sidestep the impact and puddle."
-      - "Blazebound Destroyer — Burnout: run out before the death explosion."
-      - "Thunderhead — Storm Breath: sidestep the frontal and personal Rolling Thunder if needed."
+      - "Primal Juggernaut — [Excavating Blast]: sidestep the impact and puddle."
+      - "Blazebound Destroyer — [Burnout]: run out before the death explosion."
+      - "Thunderhead — [Storm Breath]: sidestep the frontal and personal [Rolling Thunder] if needed."
       - "PTR route and the final-trash priority list require live verification."
   tip:
     - "Version 0.6, verified 9 August 2026 against Blizzard PTR/launch notes, Wowhead, Method and Icy Veins. No gameplay change found after 27 July."
@@ -106,28 +106,30 @@ trashSegments:
   - name: "Opening trash — before Melidrussa"
     after: null
     npcs:
-      # IDs sourced from Mythic Dungeon Tools' dungeon data. Flashfrost Earthshaper
-      # and Primalist Flamedancer lack exact matches in MDT and remain null.
+      # IDs sourced from Mythic Dungeon Tools' dungeon data. "Flashfrost
+      # Earthshaper" was a name conflation for Deepstone Earthshaper, now
+      # matched. Primalist Flamedancer still lacks an exact match in MDT and
+      # remains null.
       - { name: "Primal Juggernaut", npcID: 188244, displayID: 101209 }
-      - { name: "Flashfrost Earthshaper", npcID: null, displayID: null }
+      - { name: "Deepstone Earthshaper", npcID: 187969, displayID: 102955 }
       - { name: "Flashfrost Chillweaver", npcID: 188067, displayID: 107397 }
       - { name: "Defier Draghar", npcID: 187897, displayID: 107106 }
     roles:
       TANK:
-        - "Primal Juggernaut — Crushing Smash: Mitigate, face away and sidestep Excavating Blast."
-        - "Flashfrost Earthshaper — Tectonic Slam: Call a hard stop; avoid overlapping dangerous casters."
-        - "Flashfrost Chillweaver — Ice Shield: Assign an interrupt or purge; keep the pack controlled."
-        - "Defier Draghar — Steel Barrage: Mitigate the channel. This miniboss must die to open Melidrussa's door."
+        - "Primal Juggernaut — [Crushing Smash]: Mitigate, face away and sidestep [Excavating Blast]."
+        - "Deepstone Earthshaper — [Tectonic Strike]: Call a hard stop; avoid overlapping dangerous casters."
+        - "Flashfrost Chillweaver — [Ice Shield]: Assign an interrupt or purge; keep the pack controlled."
+        - "Defier Draghar — [Steel Barrage]: Mitigate the channel. This miniboss must die to open Melidrussa's door."
       HEALER:
-        - "Primal Juggernaut — Crushing Smash: Watch the tank and keep moving for Excavating Blast."
-        - "Flashfrost Earthshaper — Tectonic Slam: Help stop it; prepare group healing if it completes."
-        - "Flashfrost Chillweaver — Ice Shield: Call the interrupt or purge before the shield grows."
-        - "Defier Draghar — Steel Barrage: Focus the tank through the channel; the miniboss opens Melidrussa's door."
+        - "Primal Juggernaut — [Crushing Smash]: Watch the tank and keep moving for [Excavating Blast]."
+        - "Deepstone Earthshaper — [Tectonic Strike]: Help stop it; prepare group healing if it completes."
+        - "Flashfrost Chillweaver — [Ice Shield]: Call the interrupt or purge before the shield grows."
+        - "Defier Draghar — [Steel Barrage]: Focus the tank through the channel; the miniboss opens Melidrussa's door."
       DPS:
-        - "Flashfrost Chillweaver — Ice Shield: Interrupt first or purge; kill the Chillweaver quickly."
-        - "Flashfrost Earthshaper — Tectonic Slam: Use a stun or other hard stop."
-        - "Primal Juggernaut — Excavating Blast: Sidestep the impact and puddle."
-        - "Defier Draghar — Blazing Rush: Bait toward a wall, dodge, then kill him to open the boss door."
+        - "Flashfrost Chillweaver — [Ice Shield]: Interrupt first or purge; kill the Chillweaver quickly."
+        - "Deepstone Earthshaper — [Tectonic Strike]: Use a stun or other hard stop."
+        - "Primal Juggernaut — [Excavating Blast]: Sidestep the impact and puddle."
+        - "Defier Draghar — [Blazing Rush]: Bait toward a wall, dodge, then kill him to open the boss door."
 
   - name: "Ruby Overlook trash — between bosses 1 & 2"
     after: "Melidrussa Chillworn"
@@ -139,20 +141,20 @@ trashSegments:
       - { name: "Flamegullet", npcID: 197697, displayID: 106023 }
     roles:
       TANK:
-        - "Blazebound Destroyer — Inferno: Keep the pack stable and leave before Burnout finishes."
-        - "Primalist Flamedancer — Flame Dance: Call a hard stop; move out of Blaze of Glory on death."
-        - "Thunderhead — Thunder Jaw: Mitigate and preserve a safe knockback lane."
-        - "Flamegullet — Fire Maw: Mitigate and face away; its damage-ramp stacks are now capped."
+        - "Blazebound Destroyer — [Inferno]: Keep the pack stable and leave before [Burnout] finishes."
+        - "Primalist Flamedancer — [Flame Dance]: Call a hard stop; move out of [Blaze of Glory] on death."
+        - "Thunderhead — [Thunder Jaw]: Mitigate and preserve a safe knockback lane."
+        - "Flamegullet — [Fire Maw]: Mitigate and face away; its damage-ramp stacks are now capped."
       HEALER:
-        - "Blazebound Destroyer — Inferno: Prepare group healing for the hit and follow-up damage."
-        - "Blazebound Destroyer — Living Bomb: Track the target and leave before Burnout."
-        - "Thunderhead — Rolling Thunder: Stagger dispels; heal the second target before expiration."
-        - "Flamegullet — Molten Blood: Prepare sustained group healing below 50%; the ramp is capped."
+        - "Blazebound Destroyer — [Inferno]: Prepare group healing for the hit and follow-up damage."
+        - "Blazebound Destroyer — [Living Bomb]: Track the target and leave before [Burnout]."
+        - "Thunderhead — [Rolling Thunder]: Stagger dispels; heal the second target before expiration."
+        - "Flamegullet — [Molten Blood]: Prepare sustained group healing below 50%; the ramp is capped."
       DPS:
-        - "Primalist Cinderweaver — Cinderbolt: Interrupt; purge or control Burning Ambition."
-        - "Primalist Flamedancer — Flame Dance: Hard stop it; leave Blaze of Glory on death."
-        - "Blazebound Destroyer — Burnout: Run out before the death explosion."
-        - "Thunderhead — Storm Breath: Sidestep the frontal and personal Rolling Thunder if needed."
+        - "Primalist Cinderweaver — [Cinderbolt]: Interrupt; purge or control [Burning Ambition]."
+        - "Primalist Flamedancer — [Flame Dance]: Hard stop it; leave [Blaze of Glory] on death."
+        - "Blazebound Destroyer — [Burnout]: Run out before the death explosion."
+        - "Thunderhead — [Storm Breath]: Sidestep the frontal and personal [Rolling Thunder] if needed."
 
   - name: "Final approach — between bosses 2 & 3"
     after: "Kokia Blazehoof"
@@ -172,100 +174,102 @@ trashSegments:
 bosses:
   - name: "Melidrussa Chillworn"
     sheet:
-      TANK: "Kick Frigid Shard. Collect whelps at 66% and 33%, then help break Ice Bulwark. Kick. Gather whelps. Break the shield."
-      HEALER: "Top before Chillstorm and the 66%/33% shield phases; help damage Ice Bulwark when safe. Top first. Keep the escape lane clear."
-      DPS: "Place Hailbombs together; swap immediately to whelps and Ice Bulwark. Place ice. Kick. Burn the shield."
-      WIPE: "Loose whelps or slow Ice Bulwark damage overwhelms the group."
+      TANK: "Kick [Frigid Shard]. Collect whelps at 66% and 33%, then help break [Ice Bulwark]. Kick. Gather whelps. Break the shield."
+      HEALER: "Top before [Chillstorm] and the 66%/33% shield phases; help damage [Ice Bulwark] when safe. Top first. Keep the escape lane clear."
+      DPS: "Place Hailbombs together; swap immediately to whelps and [Ice Bulwark]. Place ice. Kick. Burn the shield."
+      WIPE: "Loose whelps or slow [Ice Bulwark] damage overwhelms the group."
     encounterID: null   # fill via /gp ids
     npcID: 188252      # wowhead
     displayID: 106891  # wowhead modelviewer
     wipe:
-      - "Loose whelps or slow Ice Bulwark damage overwhelms the group."
+      - "Loose whelps or slow [Ice Bulwark] damage overwhelms the group."
       - "Entering a shield phase unstable while whelps remain loose."
       - "Slow shield damage or loose whelps during the intermission."
     roles:
       TANK:
         job:
-          - "Kick Frigid Shard."
-          - "Collect whelps at 66% and 33%, then help break Ice Bulwark."
+          - "Kick [Frigid Shard]."
+          - "Collect whelps at 66% and 33%, then help break [Ice Bulwark]."
         avoid:
-          - "Keep a clear path through Hailbombs during the longer, weaker Chillstorm pull."
+          - "Keep a clear path through Hailbombs during the longer, weaker [Chillstorm] pull."
           - "Do not step on extra eggs before the encounter."
         defensive:
-          - "Cover whelp pickup and any missed Frigid Shard."
+          - "Cover whelp pickup and any missed [Frigid Shard]."
         reminder: "Kick. Gather whelps. Break the shield."
       HEALER:
         job:
-          - "Top before Chillstorm and the 66%/33% shield phases."
-          - "Help damage Ice Bulwark when safe."
-          - "Chillstorm ticks more slowly but lasts longer; recover after Frost Overload."
+          - "Top before [Chillstorm] and the 66%/33% shield phases."
+          - "Help damage [Ice Bulwark] when safe."
+          - "[Chillstorm] ticks more slowly but lasts longer; recover after [Frost Overload]."
         avoid:
           - "Hailbomb contact now deals little damage but applies a 50% Haste penalty."
-          - "Keep an escape route during Chillstorm."
+          - "Keep an escape route during [Chillstorm]."
         cooldowns:
-          - "Cover Frost Overload or a shield phase entered with players low."
+          - "Cover [Frost Overload] or a shield phase entered with players low."
         reminder: "Top first. Keep the escape lane clear."
       DPS:
         job:
           - "Place Hailbombs together."
-          - "Swap immediately to whelps and Ice Bulwark."
-          - "Kick Frigid Shard; whelps and Ice Bulwark before boss damage."
+          - "Swap immediately to whelps and [Ice Bulwark]."
+          - "Kick [Frigid Shard]; whelps and [Ice Bulwark] before boss damage."
         avoid:
           - "Hailbomb contact applies a 50% Haste penalty."
-          - "Move early for Chillstorm."
+          - "Move early for [Chillstorm]."
         defensive:
-          - "Use a personal for Chillstorm or Frost Overload."
+          - "Use a personal for [Chillstorm] or [Frost Overload]."
         reminder: "Place ice. Kick. Burn the shield."
 
   - name: "Kokia Blazehoof"
     sheet:
-      TANK: "Cover Searing Blows. Place the targeted Firestorm add for clean cleave. Mitigate. Cleave. Follow the endpoint."
-      HEALER: "Prepare for Inferno while tracking Searing Blows on the tank. Inferno is the check; the tank bleed continues."
-      DPS: "Place Ritual of Blazebinding using its target rim; swap instantly to the Firestorm add. Add first. Kick. Respect the endpoint."
-      WIPE: "An early Boulder collision or holding the boss in Burnout."
+      TANK: "Cover [Searing Blows]. Place the targeted Firestorm add for clean cleave. Mitigate. Cleave. Follow the endpoint."
+      HEALER: "Prepare for [Inferno] while tracking [Searing Blows] on the tank. [Inferno] is the check; the tank bleed continues."
+      DPS: "Place [Ritual of Blazebinding] using its target rim; swap instantly to the Firestorm add. Add first. Kick. Respect the endpoint."
+      WIPE: "An early Boulder collision or holding the boss in [Burnout]."
     encounterID: null
     npcID: 189232      # wowhead
     displayID: 106851  # wowhead modelviewer
+    adds:
+      - { name: "Blazebound Firestorm", npcID: 189886, displayID: 102505 }
     wipe:
-      - "An early Boulder collision or holding the boss in Burnout."
+      - "An early Boulder collision or holding the boss in [Burnout]."
       - "Falling behind on group and tank damage together."
       - "Ignoring the add or detonating Boulder into nearby terrain."
     roles:
       TANK:
         job:
-          - "Cover Searing Blows."
+          - "Cover [Searing Blows]."
           - "Place the targeted Firestorm add for clean cleave."
         avoid:
           - "Follow Molten Boulder's direction and displayed final explosion point."
-          - "Leave the add before Burnout finishes."
+          - "Leave the add before [Burnout] finishes."
         defensive:
-          - "Always cover Searing Blows and request help if the bleed becomes unsafe."
+          - "Always cover [Searing Blows] and request help if the bleed becomes unsafe."
         reminder: "Mitigate. Cleave. Follow the endpoint."
       HEALER:
         job:
-          - "Prepare for Inferno while tracking Searing Blows on the tank."
-          - "Stabilise after Inferno while the tank bleed continues."
+          - "Prepare for [Inferno] while tracking [Searing Blows] on the tank."
+          - "Stabilise after [Inferno] while the tank bleed continues."
         avoid:
-          - "Use the immediate Boulder endpoint marker; leave Burnout and permanent fire."
+          - "Use the immediate Boulder endpoint marker; leave [Burnout] and permanent fire."
         cooldowns:
-          - "Cover an Inferno overlap or a poorly placed Firestorm add."
-        reminder: "Inferno is the check; the tank bleed continues."
+          - "Cover an [Inferno] overlap or a poorly placed Firestorm add."
+        reminder: "[Inferno] is the check; the tank bleed continues."
       DPS:
         job:
-          - "Place Ritual of Blazebinding using its target rim."
+          - "Place [Ritual of Blazebinding] using its target rim."
           - "Swap instantly to the Firestorm add."
-          - "Kick Roaring Blaze; kill the Firestorm before Kokia."
+          - "Kick [Blaze Volley]; kill the Firestorm before Kokia."
         avoid:
-          - "Follow the displayed Boulder endpoint and leave before Burnout."
+          - "Follow the displayed Boulder endpoint and leave before [Burnout]."
           - "Do not stand in permanent fire."
         defensive:
-          - "Use a personal for Inferno, especially after a missed cast."
+          - "Use a personal for [Inferno], especially after a missed cast."
         reminder: "Add first. Kick. Respect the endpoint."
 
   - name: "Kyrakka and Erkhart Stormvein"
     sheet:
       TANK: "Keep Kyrakka hittable; use the longer landing delay to position before the final phase. Use the landing pause. Protect the path."
-      HEALER: "Top Inferno Spit targets; use the landing delay to stabilise before the final phase. Top marks. Preserve the path. Move early."
+      HEALER: "Top [Inferno Spit] targets; use the landing delay to stabilise before the final phase. Top marks. Preserve the path. Move early."
       DPS: "Prioritise Kyrakka; use the longer landing delay to reset positioning. Kill Kyrakka. Edge the fire. Reset on landing."
       WIPE: "Breath through the group or no safe route through fire."
     encounterID: null
@@ -273,7 +277,7 @@ bosses:
     displayID: 107137  # wowhead modelviewer
     wipe:
       - "Breath through the group or no safe route through fire."
-      - "Low players at Inferno Spit expiration or standing in breath."
+      - "Low players at [Inferno Spit] expiration or standing in breath."
       - "Fire through the centre or greed inside breath."
     roles:
       TANK:
@@ -281,13 +285,13 @@ bosses:
           - "Keep Kyrakka hittable."
           - "Use the longer landing delay to position before the final phase."
         avoid:
-          - "Face Roaring Firebreath away and do not let wind push you into fire."
+          - "Face [Roaring Firebreath] away and do not let wind push you into fire."
         defensive:
-          - "Cover heavy hits and dangerous Inferno Spit overlaps."
+          - "Cover heavy hits and dangerous [Inferno Spit] overlaps."
         reminder: "Use the landing pause. Protect the path."
       HEALER:
         job:
-          - "Top Inferno Spit targets."
+          - "Top [Inferno Spit] targets."
           - "Use the landing delay to stabilise before the final phase."
           - "Prioritise marked players and anyone trapped by fire."
         avoid:
@@ -300,7 +304,7 @@ bosses:
           - "Prioritise Kyrakka; use the longer landing delay to reset positioning."
           - "No routine boss kick; Kyrakka remains the damage priority."
         avoid:
-          - "Reduced winds move fire more slowly; still move early for Roaring Firebreath."
+          - "Reduced winds move fire more slowly; still move early for [Roaring Firebreath]."
         defensive:
-          - "Use a personal for Inferno Spit expiration or a bad overlap."
+          - "Use a personal for [Inferno Spit] expiration or a bad overlap."
         reminder: "Kill Kyrakka. Edge the fire. Reset on landing."

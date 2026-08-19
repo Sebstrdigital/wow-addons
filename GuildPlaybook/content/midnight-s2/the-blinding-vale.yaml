@@ -47,12 +47,16 @@ patch: "12.1.0"
 sourceVersion: "0.10"
 instanceID: null   # capture with /gp ids
 
+mdtRoutes:
+  - name: "elitzur - keystone.guru (Aug 2026, 100.5% forces; SKIPS boss Lightblossom Trinity)"
+    string: "!~MDT2~tZZbc9tEFMfRxfI1Jen10BZQuQwDbYSllXXpAzPGVpI2JTaxDeVa4miVqJWlINkl5anrTKcDhQ/Aay9pPyB5ZyU5rvtkdYb6QfP/Wbvn7Lmsdp+vBv3beHsY/fm47h/V7QeWoqlSbWVZ0TVJZo5uGjd6na6IQlsMQlEd7or9IIquiDbew77t+jti4ItDd4BDccu3xb0QOzjE/ja+dGxPlXVJsZZNQ9KouY2NVte6Kn7V7Ipf9lZXrabY6TXWxO5anf7R6nSsjtho9Ta64kprU+xu1jtr4seXxF67We9a4marR5/1la61Kbbr3cbaSye1qqSvLKOaKdXenBcFKZJMvVRlSX8TXuyHOYY5Wqkmv0+O6t4/zBULaVUJpfVQLVTTJfW1QZ01kBFkSW5S0DNI1Yxzr+imZGaEBlINKg1F0udKOlGTzBhqkpYd0mAMIzGQBahLhUpTlrS50kLIjDtBMVEcWSZoIKTFkqZ3rqQTlSQYU0+sZAMlTTDdaWp2oEmjZTTNubKBlLilTDPOxBxJp1XjhaFqNXGSDeiHQk93l5YdkgKiatIoWUGONweqJhXKBA1UNWKpxlWaI634qTUp1LLIiZOkabNBXDktBvqBzg611EDcXJlBOTaQHQxzxkBW0NLiJAvNCujYQHbQzbRxahLKDlraoK8FEwMoLlZGMCZJjBs0M9BixW0kZ5FK2nJZpD4pjiK9BiSfibilM8hJ4PpssubAceDGbBbmgZoUhe5jbXKCN9O+kzUU321uJFebvZHnifLLmwSNh15/ZIV+Hl8ZUpsO0Yz0pKHV/l9uSDo9fqg92ZAl881dXhA9uOT0TKWB3fyisRUN6ZoawWDvqhgGW6F4WXT9u24kRnfcPanU3r0Xvfo22g2DkZ2+vm67juNuj7zhvdPN3zC+85Z1d8sb4Rdfb49CGt6wOfJ3cOBfs/fh8bUIe/SO6Qb+/fXJ6zZNKbM6xHhAM/TWeug6w5bjRHgY3bfidEePDpmD8kKF/RsuwEV4F94HES7BB/AefAffQg++gZvcmON5wgqEt7YDLwhXHAdhxzlkxidPsWNQAHHjUjFHigLJT0bE7018yD4AFWqggQ4GN84JPOFzJC+Q4owhhF8wBycWl9hH8CF8BJ/CZ3AZrsAySPA5VEHmCSeQ3AJhThDmbcJMHZjUxQtmDO/ARfYv+B5+gB/hJ/gZ7oAHA/AhgD34lRuXKzzJ5UgpTxYLM36dPsKHJwlDDZyHC+wB7IILtwXCcFMXuq0quPY8T5YKpFQiNMBy8cHpk2fOnqpMMxHHSQNg/4Bb8AtsQR+2wQYMDuwUDsqVhdK4VK6Q3GnCnCHM4tR0PImmhxkXC+zDQpGOWThRIVz+gGe5czMx0nU6T3KEqxB2OtOkK38K5wlzljBL07GaWdPsfhv7eHCvHkXujj+g1Y+eC88YnhdyQl4oCvlnLM8JPLMkLAqlJ2W+JBT5ylM2z+X5fK7AP2ULXCFWuWflQr5QKhQpnyOF1qSVOqO+h+9ij2kO8f5wA3vu8PdReIu2I74lNwa2+2TDCTHeDTz7euD62P537ZiZa328M3I92oNMY+Ta6+2w2Y40b39/ffU/"
+
 # All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
 quicksheet:
   trash:
-    TANK: "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; MITIGATE: Luminous Thornmaw — Grievous Gash; Virid Grovekeeper — Earthrupture Strike.; POSITION: Luminous Thornmaw — Solar Breath; Sporeblight Belcher — Lightwarden's Blight."
-    HEALER: "HEAL: Sporeblight Belcher — Spouting Floret; Potatoad Matriarch — Toxic Spew.; TOP TO FULL: Luminous Thornmaw — Grievous Gash; Lightwarden Ruia — Grievous Thrash.; MOVE: Virid Grovekeeper — Uproot; Overgrown Hydra — Lightmaw Beams.; LIVE CHECK: Bloodthorn Roots dispel type and final tuning."
-    DPS: "INTERRUPT: Radiant Spellsower — Frantic Blooming; Lightwarden Ruia — Warden's Wrath.; STOP DAMAGE: Spineshield Beetle — Spiny Shield reflects attacks.; KILL FIRST: Pollinating Lashers, roots, Potadpole eggs and boss shields.; MOVE: Thorny Saptor — Hunting Leap; Overgrown Hydra — Lightmaw Beams."
+    TANK: "INTERRUPT: Radiant Spellsower — [Frantic Blooming]; Lightwarden Ruia — [Warden's Wrath].; MITIGATE: Luminous Thornmaw — [Grievous Gash]; Virid Grovekeeper — [Earthrupture Strike].; POSITION: Luminous Thornmaw — [Solar Breath]; Sporeblight Belcher — [Lightwarden's Blight]."
+    HEALER: "HEAL: Sporeblight Belcher — [Spouting Floret]; Potatoad Matriarch — [Toxic Spew].; TOP TO FULL: Luminous Thornmaw — [Grievous Gash]; Lightwarden Ruia — [Grievous Thrash].; MOVE: Virid Grovekeeper — [Uproot]; Overgrown Hydra — [Lightmaw Beams].; LIVE CHECK: Bloodthorn Roots dispel type and final tuning."
+    DPS: "INTERRUPT: Radiant Spellsower — [Frantic Blooming]; Lightwarden Ruia — [Warden's Wrath].; STOP DAMAGE: Spineshield Beetle — [Spiny Shield] reflects attacks.; KILL FIRST: Pollinating Lashers, roots, Potadpole eggs and boss shields.; MOVE: Thorny Saptor — [Hunting Leap]; Overgrown Hydra — [Lightmaw Beams]."
     ROUTE: "Current PTR left path; final placement requires live verification."
 
 overview:
@@ -66,30 +70,30 @@ overview:
     - "Ziekket's shield"
   tank:
     damage:
-      - "Luminous Thornmaw — Grievous Gash"
-      - "Trinity — Bedrock Slam"
-      - "Ziekket — Thornspike"
+      - "Luminous Thornmaw — [Grievous Gash]"
+      - "Trinity — [Bedrock Slam]"
+      - "Ziekket — [Thornspike]"
     pullWarnings:
-      - "Do not combine Pollination, Spiny Shield and heavy caster pressure without stops."
-      - "Mitigate: Luminous Thornmaw — Grievous Gash; Virid Grovekeeper — Earthrupture Strike."
-      - "Position: Luminous Thornmaw — Solar Breath; Sporeblight Belcher — Lightwarden's Blight."
+      - "Do not combine Pollination, [Spiny Shield] and heavy caster pressure without stops."
+      - "Mitigate: Luminous Thornmaw — [Grievous Gash]; Virid Grovekeeper — [Earthrupture Strike]."
+      - "Position: Luminous Thornmaw — [Solar Breath]; Sporeblight Belcher — [Lightwarden's Blight]."
   healer:
     dispels:
       - "Bloodthorn Roots dispel type and final tuning need live confirmation."
     pressure:
-      - "Heal first: Spouting Floret, Bedrock Surge, Lightcrazed Frenzy, Grievous Thrash and Oozing Xylem."
-      - "Sporeblight Belcher — Spouting Floret; Potatoad Matriarch — Toxic Spew."
-      - "Top to full: Luminous Thornmaw — Grievous Gash; Lightwarden Ruia — Grievous Thrash."
+      - "Heal first: [Spouting Floret], [Bedrock Surge], [Lightcrazed Frenzy], [Grievous Thrash] and [Oozing Xylem]."
+      - "Sporeblight Belcher — [Spouting Floret]; Potatoad Matriarch — [Toxic Spew]."
+      - "Top to full: Luminous Thornmaw — [Grievous Gash]; Lightwarden Ruia — [Grievous Thrash]."
     pullWarnings:
-      - "Toxic Spew plus Spouting Floret can create a dangerous party-damage overlap."
-      - "Move for Virid Grovekeeper — Uproot and Overgrown Hydra — Lightmaw Beams."
+      - "[Toxic Spew] plus [Spouting Floret] can create a dangerous party-damage overlap."
+      - "Move for Virid Grovekeeper — [Uproot] and Overgrown Hydra — [Lightmaw Beams]."
   dps:
     purges:
-      - "Spineshield Beetle — Spiny Shield reflects attacks; stop attacking into the reflect and break the absorb."
+      - "Spineshield Beetle — [Spiny Shield] reflects attacks; stop attacking into the reflect and break the absorb."
       - "Kill first: Pollinating Lashers, roots, Potadpole eggs and boss shields."
     pullWarnings:
-      - "Stop attacking into Spineshield Beetle — Spiny Shield."
-      - "Move: Thorny Saptor — Hunting Leap; Overgrown Hydra — Lightmaw Beams."
+      - "Stop attacking into Spineshield Beetle — [Spiny Shield]."
+      - "Move: Thorny Saptor — [Hunting Leap]; Overgrown Hydra — [Lightmaw Beams]."
     defensives:
       - "Save personals for scheduled party damage; do not spend them after the hit."
   tip:
@@ -97,7 +101,7 @@ overview:
     - "Healer: Pre-position for beam mechanics so movement does not interrupt recovery healing."
     - "DPS: Save personals for scheduled party damage; do not spend them after the hit."
     - "Timer: 31 minutes, reduced from 33 minutes in the 28 July PTR update."
-    - "Tuning: Lightblossom Trinity and Lightwarden Ruia boss health are both 10% lower; Trinity's Thornblade bleed now lasts 12 sec."
+    - "Tuning: Lightblossom Trinity and Lightwarden Ruia boss health are both 10% lower; Trinity's [Thornblade] bleed now lasts 12 sec."
     - "Version 0.10, review and verified 9 August 2026 against Blizzard PTR updates and release schedule, Wowhead, Icy Veins, Warcraft Wiki and the current PTR community guide."
     - "Requires live verification after Patch 12.1: final tuning, pack placement and Bloodthorn Roots dispel type."
 
@@ -114,17 +118,17 @@ trashSegments:
       - { name: "Sporeblight Belcher", npcID: 254850, displayID: 126462 }
     roles:
       TANK:
-        - "Radiant Spellsower — Frantic Blooming: Stop the 8 sec channel before dormant Lashers awaken."
-        - "Virid Grovekeeper — Uproot: Move out before the roots erupt and knock back."
-        - "Sporeblight Belcher — Spouting Floret: Prepare for repeated party damage."
+        - "Radiant Spellsower — [Frantic Blooming]: Stop the 8 sec channel before dormant Lashers awaken."
+        - "Virid Grovekeeper — [Uproot]: Move out before the roots erupt and knock back."
+        - "Sporeblight Belcher — [Spouting Floret]: Prepare for repeated party damage."
       HEALER:
-        - "Radiant Spellsower — Frantic Blooming: Stop the 8 sec channel before dormant Lashers awaken."
-        - "Virid Grovekeeper — Uproot: Move out before the roots erupt and knock back."
-        - "Sporeblight Belcher — Spouting Floret: Prepare for repeated party damage."
+        - "Radiant Spellsower — [Frantic Blooming]: Stop the 8 sec channel before dormant Lashers awaken."
+        - "Virid Grovekeeper — [Uproot]: Move out before the roots erupt and knock back."
+        - "Sporeblight Belcher — [Spouting Floret]: Prepare for repeated party damage."
       DPS:
-        - "Radiant Spellsower — Frantic Blooming: Stop the 8 sec channel before dormant Lashers awaken."
-        - "Virid Grovekeeper — Uproot: Move out before the roots erupt and knock back."
-        - "Sporeblight Belcher — Spouting Floret: Prepare for repeated party damage."
+        - "Radiant Spellsower — [Frantic Blooming]: Stop the 8 sec channel before dormant Lashers awaken."
+        - "Virid Grovekeeper — [Uproot]: Move out before the roots erupt and knock back."
+        - "Sporeblight Belcher — [Spouting Floret]: Prepare for repeated party damage."
 
   - name: "Bridge trash — before Ikuzz"
     after: "Lightblossom Trinity"
@@ -134,17 +138,17 @@ trashSegments:
       - { name: "Spineshield Beetle", npcID: 245527, displayID: 110392 }
     roles:
       TANK:
-        - "Underbrush Stalker — Thornblade: Watch the backstab and 6 sec bleed."
-        - "Thorny Saptor — Hunting Leap: Sidestep the fixed channel path; it should no longer turn during the cast."
-        - "Spineshield Beetle — Spiny Shield: Stop attacking into the reflect; break the absorb."
+        - "Underbrush Stalker — [Thornblade]: Watch the backstab and 6 sec bleed."
+        - "Thorny Saptor — [Hunting Leap]: Sidestep the fixed channel path; it should no longer turn during the cast."
+        - "Spineshield Beetle — [Spiny Shield]: Stop attacking into the reflect; break the absorb."
       HEALER:
-        - "Underbrush Stalker — Thornblade: Watch the backstab and 6 sec bleed."
-        - "Thorny Saptor — Hunting Leap: Sidestep the fixed channel path; it should no longer turn during the cast."
-        - "Spineshield Beetle — Spiny Shield: Stop attacking into the reflect; break the absorb."
+        - "Underbrush Stalker — [Thornblade]: Watch the backstab and 6 sec bleed."
+        - "Thorny Saptor — [Hunting Leap]: Sidestep the fixed channel path; it should no longer turn during the cast."
+        - "Spineshield Beetle — [Spiny Shield]: Stop attacking into the reflect; break the absorb."
       DPS:
-        - "Underbrush Stalker — Thornblade: Watch the backstab and 6 sec bleed."
-        - "Thorny Saptor — Hunting Leap: Sidestep the fixed channel path; it should no longer turn during the cast."
-        - "Spineshield Beetle — Spiny Shield: Stop attacking into the reflect; break the absorb."
+        - "Underbrush Stalker — [Thornblade]: Watch the backstab and 6 sec bleed."
+        - "Thorny Saptor — [Hunting Leap]: Sidestep the fixed channel path; it should no longer turn during the cast."
+        - "Spineshield Beetle — [Spiny Shield]: Stop attacking into the reflect; break the absorb."
 
   - name: "Lower Vale trash — before Lightwarden Ruia"
     after: "Ikuzz the Light Hunter"
@@ -154,17 +158,17 @@ trashSegments:
       - { name: "Lightgorged Lasher", npcID: 245345, displayID: 125875 }
     roles:
       TANK:
-        - "Luminous Thornmaw — Grievous Gash: Clear the tank bleed by reaching full health."
-        - "Overgrown Hydra — Lightmaw Beams: Spread and keep moving out of the 4 yd beams."
-        - "Lightgorged Lasher — Lightboom Pollination: Break the shield before nearby enemies gain 50% damage and haste."
+        - "Luminous Thornmaw — [Grievous Gash]: Clear the tank bleed by reaching full health."
+        - "Overgrown Hydra — [Lightmaw Beams]: Spread and keep moving out of the 4 yd beams."
+        - "Lightgorged Lasher — [Lightboom Pollination]: Break the shield before nearby enemies gain 50% damage and haste."
       HEALER:
-        - "Luminous Thornmaw — Grievous Gash: Clear the tank bleed by reaching full health."
-        - "Overgrown Hydra — Lightmaw Beams: Spread and keep moving out of the 4 yd beams."
-        - "Lightgorged Lasher — Lightboom Pollination: Break the shield before nearby enemies gain 50% damage and haste."
+        - "Luminous Thornmaw — [Grievous Gash]: Clear the tank bleed by reaching full health."
+        - "Overgrown Hydra — [Lightmaw Beams]: Spread and keep moving out of the 4 yd beams."
+        - "Lightgorged Lasher — [Lightboom Pollination]: Break the shield before nearby enemies gain 50% damage and haste."
       DPS:
-        - "Luminous Thornmaw — Grievous Gash: Clear the tank bleed by reaching full health."
-        - "Overgrown Hydra — Lightmaw Beams: Spread and keep moving out of the 4 yd beams."
-        - "Lightgorged Lasher — Lightboom Pollination: Break the shield before nearby enemies gain 50% damage and haste."
+        - "Luminous Thornmaw — [Grievous Gash]: Clear the tank bleed by reaching full health."
+        - "Overgrown Hydra — [Lightmaw Beams]: Spread and keep moving out of the 4 yd beams."
+        - "Lightgorged Lasher — [Lightboom Pollination]: Break the shield before nearby enemies gain 50% damage and haste."
 
   - name: "Final approach — before Ziekket"
     after: "Lightwarden Ruia"
@@ -173,30 +177,30 @@ trashSegments:
       - { name: "Sporeblight Belcher", npcID: 254850, displayID: 126462 }
     roles:
       TANK:
-        - "Potatoad Matriarch — Toxic Spew: Prepare for party damage and a 9 sec toxin."
-        - "Potatoad Matriarch — Toadspawn: Kill eggs and newborn Potadpoles quickly."
-        - "Sporeblight Belcher — Belch Spores: Move from every impact during the channel."
+        - "Potatoad Matriarch — [Toxic Spew]: Prepare for party damage and a 9 sec toxin."
+        - "Potatoad Matriarch — [Toadspawn]: Kill eggs and newborn Potadpoles quickly."
+        - "Sporeblight Belcher — [Belch Spores]: Move from every impact during the channel."
       HEALER:
-        - "Potatoad Matriarch — Toxic Spew: Prepare for party damage and a 9 sec toxin."
-        - "Potatoad Matriarch — Toadspawn: Kill eggs and newborn Potadpoles quickly."
-        - "Sporeblight Belcher — Belch Spores: Move from every impact during the channel."
+        - "Potatoad Matriarch — [Toxic Spew]: Prepare for party damage and a 9 sec toxin."
+        - "Potatoad Matriarch — [Toadspawn]: Kill eggs and newborn Potadpoles quickly."
+        - "Sporeblight Belcher — [Belch Spores]: Move from every impact during the channel."
       DPS:
-        - "Potatoad Matriarch — Toxic Spew: Prepare for party damage and a 9 sec toxin."
-        - "Potatoad Matriarch — Toadspawn: Kill eggs and newborn Potadpoles quickly."
-        - "Sporeblight Belcher — Belch Spores: Move from every impact during the channel."
+        - "Potatoad Matriarch — [Toxic Spew]: Prepare for party damage and a 9 sec toxin."
+        - "Potatoad Matriarch — [Toadspawn]: Kill eggs and newborn Potadpoles quickly."
+        - "Sporeblight Belcher — [Belch Spores]: Move from every impact during the channel."
 
 bosses:
   - name: "Lightblossom Trinity"
     sheet:
       TANK: "Steady bosses, mitigate Slam, block the beam."
       HEALER: "Heal Surge, support the bleed, protect the soak."
-      DPS: "Kick Light Bolt; dodge plants; block beam."
-      WIPE: "Block Lightblossom Beam; Light-Gorged becomes Overgrowth after 10 sec."
+      DPS: "Kick [Light Bolt]; dodge plants; block beam."
+      WIPE: "Block [Lightblossom Beam]; Light-Gorged becomes Overgrowth after 10 sec."
     encounterID: null   # fill via /gp ids
     npcID: 243028      # wowhead
     displayID: 129588  # wowhead modelviewer
     wipe:
-      - "Block Lightblossom Beam; Light-Gorged becomes Overgrowth after 10 sec."
+      - "Block [Lightblossom Beam]; Light-Gorged becomes Overgrowth after 10 sec."
     roles:
       TANK:
         job:
@@ -204,60 +208,60 @@ bosses:
           - "Point movement away."
           - "Assign the beam intercept."
         avoid:
-          - "Fertile Loam, seed impacts and Fan of Thorns within 15 yd."
+          - "[Fertile Loam], seed impacts and [Fan of Thorns] within 15 yd."
         defensive:
-          - "Mitigate Bedrock Slam."
-          - "Use a personal during Bedrock Surge overlaps."
+          - "Mitigate [Bedrock Slam]."
+          - "Use a personal during [Bedrock Surge] overlaps."
         reminder: "Steady bosses, mitigate Slam, block the beam."
       HEALER:
         job:
           - "Stabilise shared-health pressure and protect the assigned beam interceptor."
-          - "Bedrock Surge pulses for 8 sec; recover the stronger 12 sec Thornblade bleed."
+          - "[Bedrock Surge] pulses for 8 sec; recover the stronger 12 sec [Thornblade] bleed."
         avoid:
-          - "Fertile Loam, seeds, Fan of Thorns and unassigned beam contact."
+          - "[Fertile Loam], seeds, [Fan of Thorns] and unassigned beam contact."
         cooldowns:
-          - "Use a group cooldown for a poor Bedrock Surge overlap."
+          - "Use a group cooldown for a poor [Bedrock Surge] overlap."
         reminder: "Heal Surge, support the bleed, protect the soak."
       DPS:
         job:
           - "Cleave the shared health pool and execute the assigned beam intercept."
-          - "Priority: Kezkitt — Light Bolt; beam intercept before damage."
+          - "Priority: Kezkitt — [Light Bolt]; beam intercept before damage."
         avoid:
-          - "Fertile Loam, seeds, Dash lanes and Fan of Thorns."
+          - "[Fertile Loam], seeds, Dash lanes and [Fan of Thorns]."
         defensive:
-          - "Use a personal during Bedrock Surge or while intercepting; respect the stronger 12 sec Thornblade bleed."
-        reminder: "Kick Light Bolt, dodge plants, block the beam."
+          - "Use a personal during [Bedrock Surge] or while intercepting; respect the stronger 12 sec [Thornblade] bleed."
+        reminder: "Kick [Light Bolt], dodge plants, block the beam."
 
   - name: "Ikuzz the Light Hunter"
     sheet:
       TANK: "Clear roots, open the lane, never let Ikuzz connect."
       HEALER: "Pre-heal, support the kite, avoid Footfalls."
       DPS: "Open lane; kite Gaze; avoid Footfalls."
-      WIPE: "If Ikuzz catches the fixate, Incise and Crunched add a bleed and 5 sec stun."
+      WIPE: "If Ikuzz catches the fixate, [Incise] and [Crunched] add a bleed and 5 sec stun."
     encounterID: null   # fill via /gp ids
     npcID: 244887      # wowhead
     displayID: 129424  # wowhead modelviewer
     wipe:
-      - "If Ikuzz catches the fixate, Incise and Crunched add a bleed and 5 sec stun."
-      - "A trapped or caught Gaze target can die during Crunched."
+      - "If Ikuzz catches the fixate, [Incise] and [Crunched] add a bleed and 5 sec stun."
+      - "A trapped or caught Gaze target can die during [Crunched]."
     roles:
       TANK:
         job:
           - "Keep roots out of the kite lane."
-          - "Use Crushing Footfalls to destroy them."
+          - "Use [Crushing Footfalls] to destroy them."
         avoid:
-          - "Standing within 7 yd during Bloodthirsty Gaze."
+          - "Standing within 7 yd during [Bloodthirsty Gaze]."
           - "Blocking the kite path."
         defensive:
-          - "Use a personal for Lightcrazed Frenzy or a bad Verdant Stomp recovery."
+          - "Use a personal for [Lightcrazed Frenzy] or a bad [Verdant Stomp] recovery."
         reminder: "Clear roots, open the lane, never let Ikuzz connect."
       HEALER:
         job:
-          - "Support the Gaze target and pre-heal Thorncaller Roar and Frenzy."
-          - "Lightcrazed Frenzy pulses; a caught target is stunned for 5 sec."
+          - "Support the Gaze target and pre-heal [Thorncaller Roar] and Frenzy."
+          - "[Lightcrazed Frenzy] pulses; a caught target is stunned for 5 sec."
         avoid:
-          - "Verdant Stomp roots after 4 sec on Mythic."
-          - "Avoid Crushing Footfalls."
+          - "[Verdant Stomp] roots after 4 sec on Mythic."
+          - "Avoid [Crushing Footfalls]."
         cooldowns:
           - "Plan a group cooldown for Frenzy."
           - "External a trapped fixate target."
@@ -276,80 +280,80 @@ bosses:
   - name: "Lightwarden Ruia"
     sheet:
       TANK: "Kick Wrath, walk the cones, let the healer top."
-      HEALER: "Top to full, move for Lightfire, cooldown below 40%."
+      HEALER: "Top to full, move for [Lightfire], cooldown below 40%."
       DPS: "Kick Wrath; place beams wide; clean below 40%."
-      WIPE: "Grievous Thrash clears only at full health; Lightfire damages and silences."
+      WIPE: "[Grievous Thrash] clears only at full health; [Lightfire] damages and silences."
     encounterID: null   # fill via /gp ids
     npcID: 245912      # wowhead
     displayID: 129856  # wowhead modelviewer
     wipe:
-      - "Grievous Thrash clears only at full health; Lightfire damages and silences."
-      - "Multiple uncleared Grievous Thrash bleeds quickly snowball."
-      - "Missed Warden's Wrath overwhelms the healer."
+      - "[Grievous Thrash] clears only at full health; [Lightfire] damages and silences."
+      - "Multiple uncleared [Grievous Thrash] bleeds quickly snowball."
+      - "Missed [Warden's Wrath] overwhelms the healer."
     roles:
       TANK:
         job:
           - "Face bear cones away."
-          - "Interrupt Warden's Wrath."
+          - "Interrupt [Warden's Wrath]."
           - "Create a clean top-up window."
         avoid:
-          - "Leave Lightfire before it forms; non-creators inside are hit immediately on creation."
+          - "Leave [Lightfire] before it forms; non-creators inside are hit immediately on creation."
         defensive:
-          - "Rotate mitigation through Pulverizing Strikes."
+          - "Rotate mitigation through [Pulverizing Strikes]."
           - "Major personal below 40%."
         reminder: "Kick Wrath, walk the cones, let the healer top."
       HEALER:
         job:
-          - "Top every player to clear Grievous Thrash."
-          - "Move before Lightfire expires."
-          - "Below 40%, Spirits of the Vale repeats abilities every 8 sec."
+          - "Top every player to clear [Grievous Thrash]."
+          - "Move before [Lightfire] expires."
+          - "Below 40%, [Spirits of the Vale] repeats abilities every 8 sec."
         avoid:
-          - "Leave Lightfire before it forms; non-creators inside are hit immediately on creation."
+          - "Leave [Lightfire] before it forms; non-creators inside are hit immediately on creation."
         cooldowns:
           - "Save a group cooldown for the sub-40% sequence."
-        reminder: "Top to full, move for Lightfire, cooldown below 40%."
+        reminder: "Top to full, move for [Lightfire], cooldown below 40%."
       DPS:
         job:
-          - "Place Lightfire wide and keep movement clean below 40%."
-          - "Priority: Lightwarden Ruia — Warden's Wrath."
+          - "Place [Lightfire] wide and keep movement clean below 40%."
+          - "Priority: Lightwarden Ruia — [Warden's Wrath]."
         avoid:
-          - "Leave Lightfire before it forms; non-creators inside are hit immediately on creation."
+          - "Leave [Lightfire] before it forms; non-creators inside are hit immediately on creation."
         defensive:
           - "Use a personal below 40% or while waiting to be topped."
         reminder: "Kick Wrath, place beams wide, stay clean below 40%."
 
   - name: "Ziekket"
     sheet:
-      TANK: "Beam Lashers, manage orbs, brace for Thornspike."
-      HEALER: "Heal the pulse, watch orb stacks, protect Thornspike."
+      TANK: "Beam Lashers, manage orbs, brace for [Thornspike]."
+      HEALER: "Heal the pulse, watch orb stacks, protect [Thornspike]."
       DPS: "Dormant at 1%; beam Lashers; catch assigned orbs."
-      WIPE: "Essence reaching Ziekket triggers Fluorescent Outburst, shield and damage gain."
+      WIPE: "Essence reaching Ziekket triggers [Fluorescent Outburst], shield and damage gain."
     encounterID: null   # fill via /gp ids
     npcID: 247676      # wowhead
     displayID: 136619  # wowhead modelviewer
     wipe:
-      - "Essence reaching Ziekket triggers Fluorescent Outburst, shield and damage gain."
+      - "Essence reaching Ziekket triggers [Fluorescent Outburst], shield and damage gain."
       - "Uncaught Essence empowers Ziekket; excessive stacks can kill the interceptor."
     roles:
       TANK:
         job:
-          - "Aim Concentrated Lightbeam through dormant Lashers."
+          - "Aim [Concentrated Lightbeam] through dormant Lashers."
           - "Control boss and orb lanes."
         avoid:
           - "Lightsap puddles and unassigned Essence orbs."
         defensive:
-          - "Mitigate Thornspike and its bleed."
-          - "Personal during Oozing Xylem."
-        reminder: "Beam Lashers, manage orbs, brace for Thornspike."
+          - "Mitigate [Thornspike] and its bleed."
+          - "Personal during [Oozing Xylem]."
+        reminder: "Beam Lashers, manage orbs, brace for [Thornspike]."
       HEALER:
         job:
-          - "Heal Oozing Xylem and support assigned Essence interceptors."
+          - "Heal [Oozing Xylem] and support assigned Essence interceptors."
           - "Each orb grants 10% output but adds a stacking 12 sec self-DoT."
         avoid:
           - "Lightsap puddles, unassigned orbs and the beam lane."
         cooldowns:
           - "Plan group healing for Xylem with orb DoTs active."
-        reminder: "Heal the pulse, watch orb stacks, protect Thornspike."
+        reminder: "Heal the pulse, watch orb stacks, protect [Thornspike]."
       DPS:
         job:
           - "Bring Lashers to 1% Dormant, beam through them and intercept assigned orbs."

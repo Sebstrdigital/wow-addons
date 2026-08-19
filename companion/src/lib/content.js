@@ -37,3 +37,12 @@ export function loadMdtData(slug) {
   if (!fs.existsSync(file)) return null;
   return JSON.parse(fs.readFileSync(file, "utf-8"));
 }
+
+// name -> spellID (or null for unresolved) from GuildPlaybook/content/abilities.yaml.
+// Tolerant of the file not existing yet — prose markup then renders unlinked.
+export function loadAbilities() {
+  const file = path.join(CONTENT_DIR, "abilities.yaml");
+  if (!fs.existsSync(file)) return new Map();
+  const doc = yaml.load(fs.readFileSync(file, "utf-8"));
+  return new Map((doc?.abilities ?? []).map((a) => [a.name, a.spellID ?? null]));
+}

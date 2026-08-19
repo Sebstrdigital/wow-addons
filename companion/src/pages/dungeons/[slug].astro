@@ -1,6 +1,7 @@
 ---
 import Base from "../../layouts/Base.astro";
-import { loadDungeons, loadMdtData, mapUrlFor } from "../../lib/content.js";
+import { loadDungeons, loadMdtData, loadAbilities, mapUrlFor } from "../../lib/content.js";
+import { renderAbilityMarkup } from "../../lib/markup.js";
 import RoutePanel from "../../components/RoutePanel.astro";
 
 export function getStaticPaths() {
@@ -9,6 +10,8 @@ export function getStaticPaths() {
 
 const { dungeon: d } = Astro.props;
 const mdt = loadMdtData(d.slug);
+const abilities = loadAbilities();
+const mk = (text) => renderAbilityMarkup(text, abilities);
 const mdtPayload = mdt ? { ...mdt, name: d.dungeon, mapUrl: mapUrlFor(d.slug, import.meta.env.BASE_URL) } : null;
 const ROLES = ["TANK", "HEALER", "DPS"];
 const ROLE_LABEL = { TANK: "Tank", HEALER: "Healer", DPS: "DPS" };
@@ -78,7 +81,7 @@ function bossSections(boss, role) {
             <h3 class="gold">Priority trash calls</h3>
             {["TANK", "HEALER", "DPS", "ROUTE"].map((r) =>
               d.quicksheet.trash[r] && (
-                <p class="qs-line"><strong class={r === "ROUTE" ? "gold" : `role-${r}`}>{r}:</strong> {d.quicksheet.trash[r]}</p>
+                <p class="qs-line"><strong class={r === "ROUTE" ? "gold" : `role-${r}`}>{r}:</strong> <span set:html={mk(d.quicksheet.trash[r])} /></p>
               ))}
           </div>
         )}
@@ -86,8 +89,8 @@ function bossSections(boss, role) {
           <div class="qs-boss">
             <h3 class="gold">{i + 1} · {b.name}</h3>
             {["TANK", "HEALER", "DPS"].map((r) =>
-              b.sheet[r] && <p class="qs-line"><strong class={`role-${r}`}>{r}:</strong> {b.sheet[r]}</p>)}
-            {b.sheet.WIPE && <p class="qs-line wipe"><strong>WIPE:</strong> {b.sheet.WIPE}</p>}
+              b.sheet[r] && <p class="qs-line"><strong class={`role-${r}`}>{r}:</strong> <span set:html={mk(b.sheet[r])} /></p>)}
+            {b.sheet.WIPE && <p class="qs-line wipe"><strong>WIPE:</strong> <span set:html={mk(b.sheet.WIPE)} /></p>}
           </div>
         ))}
       </div>
@@ -100,7 +103,7 @@ function bossSections(boss, role) {
       {overviewSections(d.overview ?? {}, role).map((sec) => (
         <div>
           <h3 class={sec.cls}>{sec.title}</h3>
-          <ul>{sec.items.map((it) => <li>{it}</li>)}</ul>
+          <ul>{sec.items.map((it) => <li set:html={mk(it)} />)}</ul>
         </div>
       ))}
     </div>
@@ -114,11 +117,11 @@ function bossSections(boss, role) {
       <h2 id={`mb-${i + 1}`}>★ {b.name} <span class="dim" style="font-size:15px">mini-boss</span></h2>
       {ROLES.map((role) => (
         <div class="role-pane card" data-role={role}>
-          {b.roles?.[role]?.reminder && <p class={`reminder role-${role}`}>{b.roles[role].reminder}</p>}
+          {b.roles?.[role]?.reminder && <p class={`reminder role-${role}`} set:html={mk(b.roles[role].reminder)} />}
           {bossSections(b, role).map((sec) => (
             <div>
               <h3 class={sec.cls}>{sec.title}</h3>
-              <ul class={sec.cls === "wipe" ? "wipe" : ""}>{sec.items.map((it) => <li>{it}</li>)}</ul>
+              <ul class={sec.cls === "wipe" ? "wipe" : ""}>{sec.items.map((it) => <li set:html={mk(it)} />)}</ul>
             </div>
           ))}
         </div>
@@ -131,11 +134,11 @@ function bossSections(boss, role) {
       <h2 id={`boss-${i + 1}`}>{i + 1}. {b.name}</h2>
       {ROLES.map((role) => (
         <div class="role-pane card" data-role={role}>
-          {b.roles?.[role]?.reminder && <p class={`reminder role-${role}`}>{b.roles[role].reminder}</p>}
+          {b.roles?.[role]?.reminder && <p class={`reminder role-${role}`} set:html={mk(b.roles[role].reminder)} />}
           {bossSections(b, role).map((sec) => (
             <div>
               <h3 class={sec.cls}>{sec.title}</h3>
-              <ul class={sec.cls === "wipe" ? "wipe" : ""}>{sec.items.map((it) => <li>{it}</li>)}</ul>
+              <ul class={sec.cls === "wipe" ? "wipe" : ""}>{sec.items.map((it) => <li set:html={mk(it)} />)}</ul>
             </div>
           ))}
         </div>

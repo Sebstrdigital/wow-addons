@@ -6,6 +6,9 @@ Usage:  python3 tools/generate.py          (run from the GuildPlaybook directory
 Reads   content/<season>/<dungeon>.yaml
 Writes  Data/<SeasonPascal>/<DungeonPascal>.lua
 
+Also reads   content/abilities.yaml
+Also writes  Data/Abilities.lua   (a single shared name -> spellID lookup)
+
 The generated files call ns.RegisterDungeon(...) which Core.lua defines,
 so every Data file must be listed in the TOC after Core.lua.
 """
@@ -35,6 +38,8 @@ TOP_LEVEL_KEYS = (
 )
 MDT_ROUTE_KEYS = ("name", "string")
 SEGMENT_KEYS = ("name", "after", "npcs", "roles")
+BOSS_KEYS = ("name", "roles", "sheet", "wipe", "encounterID", "npcID", "displayID", "adds")
+ABILITY_KEYS = ("name", "spellID", "caster")
 
 
 def fail(msg):
@@ -178,7 +183,91 @@ def validate_mdt_routes(doc, path):
             fail(f"{where} ({name!r}): 'string' must be printable ASCII (MDT export strings are ASCII-only)")
 
 
-def validate(doc, path):
+def validate_abilities(doc, path):
+    if not isinstance(doc, dict) or "abilities" not in doc:
+        fail(f"{path}: document must be a mapping with an 'abilities' key")
+    entries = doc["abilities"]
+    if not isinstance(entries, list):
+        fail(f"{path}: 'abilities' must be a list")
+    abilities = {}
+    for i, entry in enumerate(entries, 1):
+        where = f"{path}: abilities #{i}"
+        if not isinstance(entry, dict):
+            fail(f"{where}: must be a mapping")
+        for key in entry:
+            if key not in ABILITY_KEYS:
+                fail(f"{where}: unknown key '{key}' (use {'/'.join(ABILITY_KEYS)})")
+        name = entry.get("name")
+        if not isinstance(name, str) or not name.strip():
+            fail(f"{where}: 'name' must be a non-empty string")
+        where = f"{path}: abilities '{name}'"
+        if name in abilities:
+            fail(f"{where}: duplicate ability name")
+        spell_id = entry.get("spellID")
+        if spell_id is not None and (isinstance(spell_id, bool) or not isinstance(spell_id, int) or spell_id <= 0):
+            fail(f"{where}: spellID must be null or a positive integer (got {spell_id!r})")
+        caster = entry.get("caster")
+        if caster is not None and not isinstance(caster, str):
+            fail(f"{where}: caster must be a string or null (got {caster!r})")
+        abilities[name] = entry
+    return abilities
+
+
+def load_abilities():
+    path = CONTENT / "abilities.yaml"
+    rel = path.relative_to(ROOT)
+    if not path.exists():
+        fail(f"{rel}: file not found (required — it defines every [Ability Name] reference)")
+    doc = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return validate_abilities(doc, rel)
+
+
+def _bracket_spans(s):
+    # Returns (spans, error): spans is the list of inner texts found inside
+    # [Ability Name] markup; error is a short description if the brackets in
+    # this string are nested or unbalanced.
+    spans = []
+    depth = 0
+    start = None
+    for i, ch in enumerate(s):
+        if ch == "[":
+            if depth > 0:
+                return None, f"nested '[' at position {i}"
+            depth = 1
+            start = i + 1
+        elif ch == "]":
+            if depth == 0:
+                return None, f"unmatched ']' at position {i}"
+            depth = 0
+            spans.append(s[start:i])
+    if depth != 0:
+        return None, "unmatched '[' (missing closing ']')"
+    return spans, None
+
+
+def validate_ability_refs(node, path, abilities, where=""):
+    # Walks every string in the document looking for [Ability Name] markup.
+    # mdtRoutes is skipped entirely — it's an opaque MDT export blob (already
+    # constrained to printable ASCII by validate_mdt_routes), never prose.
+    if isinstance(node, dict):
+        for k, v in node.items():
+            if k == "mdtRoutes":
+                continue
+            validate_ability_refs(v, path, abilities, f"{where}.{k}" if where else k)
+    elif isinstance(node, list):
+        for i, item in enumerate(node):
+            validate_ability_refs(item, path, abilities, f"{where}[{i}]")
+    elif isinstance(node, str):
+        spans, err = _bracket_spans(node)
+        if err:
+            fail(f"{path}: {where}: {err} (in {node!r})")
+        for name in spans:
+            if name not in abilities:
+                fail(f"{path}: {where}: unknown ability '[{name}]' — "
+                     f"add '{name}' to content/abilities.yaml (in {node!r})")
+
+
+def validate(doc, path, abilities):
     if not isinstance(doc, dict):
         fail(f"{path}: document must be a mapping (got {type(doc).__name__})")
     for key in ("dungeon", "slug", "season", "overview", "bosses"):
@@ -196,8 +285,12 @@ def validate(doc, path):
         where = f"{path}: boss/miniboss #{i}"
         if "name" not in boss:
             fail(f"{where}: missing 'name'")
+        for key in boss:
+            if key not in BOSS_KEYS:
+                fail(f"{where} ({boss['name']}): unknown key '{key}' (use {'/'.join(BOSS_KEYS)})")
         if "roles" not in boss:
             fail(f"{where} ({boss['name']}): missing 'roles'")
+        validate_npcs(boss.get("adds"), f"{where} ({boss['name']})")
         for role, body in boss["roles"].items():
             if role not in ROLES:
                 fail(f"{where} ({boss['name']}): unknown role '{role}' (use {'/'.join(ROLES)})")
@@ -206,6 +299,7 @@ def validate(doc, path):
                     fail(f"{where} ({boss['name']}) {role}: unknown section '{section}'")
             if "reminder" not in body:
                 fail(f"{where} ({boss['name']}) {role}: missing 'reminder' (the TLDR line)")
+    validate_ability_refs(doc, path, abilities)
 
 
 def lua_str(s):
@@ -245,9 +339,31 @@ def pascal(slug):
     return "".join(part.capitalize() for part in slug.replace("_", "-").split("-"))
 
 
-def generate(src):
+def emit_abilities_file(abilities):
+    # A single shared lookup so the UI can resolve [Ability Name] markup to a
+    # spellID at render time: ns.ABILITIES["Blaze Volley"] = 373017. Interface
+    # frozen by the team lead — plain name -> spellID map. Unresolved
+    # abilities (spellID: null) are omitted entirely rather than emitted as
+    # nil/false/0, so the UI's "no tooltip" check is a plain missing-key test.
+    # caster is intentionally not emitted (the real spell tooltip covers it).
+    lookup = {name: entry["spellID"] for name, entry in abilities.items() if entry.get("spellID") is not None}
+    DATA.mkdir(parents=True, exist_ok=True)
+    out = DATA / "Abilities.lua"
+    body = lua_value(lookup, 0)
+    out.write_text(
+        "-- GENERATED FILE — do not edit by hand.\n"
+        "-- Source: content/abilities.yaml   (regenerate with tools/generate.py)\n"
+        "local _, ns = ...\n\n"
+        f"ns.ABILITIES = {body}\n",
+        encoding="utf-8",
+    )
+    print(f"wrote {out.relative_to(ROOT)}")
+    return out
+
+
+def generate(src, abilities):
     doc = yaml.safe_load(src.read_text(encoding="utf-8"))
-    validate(doc, src.relative_to(ROOT))
+    validate(doc, src.relative_to(ROOT), abilities)
 
     out_dir = DATA / pascal(doc["season"])
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -266,11 +382,13 @@ def generate(src):
 
 
 def main():
+    abilities = load_abilities()
+    emit_abilities_file(abilities)
     sources = sorted(CONTENT.glob("*/*.yaml"))
     if not sources:
         fail(f"no YAML files found under {CONTENT}")
     for src in sources:
-        generate(src)
+        generate(src, abilities)
     print(f"{len(sources)} dungeon(s) generated. Remember: Data files must be listed in the TOC.")
 
 

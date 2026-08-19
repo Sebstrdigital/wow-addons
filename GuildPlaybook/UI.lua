@@ -25,12 +25,51 @@ local C = {
 local ROLE_LABEL = { TANK = "Tank", HEALER = "Healer", DPS = "DPS" }
 
 -- ------------------------------------------------------------------
+-- Ability markup
+-- ------------------------------------------------------------------
+-- Playbook prose calls out abilities as literal "[Ability Name]" markup.
+-- ns.ABILITIES (Data/Abilities.lua, generated) maps that exact name to a
+-- spell ID - currently a bare number, unresolved names simply omitted. That
+-- shape has already changed once mid-implementation (a table with .spellID,
+-- briefly), so both are accepted here rather than assuming either is final:
+-- a future generator change can't break the UI. When an ID resolves, the
+-- name becomes a clickable, hoverable spell link in guild gold; when it
+-- doesn't - entry missing, wrong shape, or any other junk - it still
+-- renders in gold, brackets stripped, but inert. The generator is supposed
+-- to guarantee every markup resolves, but a content typo or a stale table
+-- must never surface as a dead link or a UI error.
+local GOLD = "|cffdfa55a"
+
+-- `resumeColor` is the color code the surrounding text was already in
+-- before this call. WoW's |r doesn't pop a color stack, it just reverts to
+-- the FontString's base color, so without re-asserting it, any text after
+-- an inline ability mention would lose its role/lead/call tint.
+local function RenderAbilityLinks(s, resumeColor)
+    if type(s) ~= "string" then return s end
+    resumeColor = resumeColor or ""
+    return (s:gsub("%[([^%[%]]+)%]", function(name)
+        local a = ns.ABILITIES and ns.ABILITIES[name]
+        local id
+        if type(a) == "number" then
+            id = a
+        elseif type(a) == "table" then
+            id = a.spellID
+        end
+        local rendered = (type(id) == "number" and id > 0)
+            and (GOLD .. "|Hspell:" .. id .. "|h" .. name .. "|h")
+            or (GOLD .. name)
+        return rendered .. C.R .. resumeColor
+    end))
+end
+
+-- ------------------------------------------------------------------
 -- Text building
 -- ------------------------------------------------------------------
 
 local function bullets(lines, out, color)
+    local c = color or C.BODY
     for _, line in ipairs(lines or {}) do
-        out[#out + 1] = (color or C.BODY) .. "• " .. line .. C.R
+        out[#out + 1] = c .. "• " .. RenderAbilityLinks(line, c) .. C.R
     end
 end
 
@@ -76,9 +115,10 @@ local LEAD_MAX = 64
 
 local function emphasiseCall(line)
     local at = line:find(": ", 1, true)
-    if not at or at > LEAD_MAX then return C.CALL .. line .. C.R end
-    if line:sub(1, at):find("[%.!%?]") then return C.CALL .. line .. C.R end
-    return C.LEAD .. line:sub(1, at - 1) .. ":" .. C.R .. " " .. C.CALL .. line:sub(at + 2) .. C.R
+    if not at or at > LEAD_MAX then return C.CALL .. RenderAbilityLinks(line, C.CALL) .. C.R end
+    if line:sub(1, at):find("[%.!%?]") then return C.CALL .. RenderAbilityLinks(line, C.CALL) .. C.R end
+    return C.LEAD .. RenderAbilityLinks(line:sub(1, at - 1), C.LEAD) .. ":" .. C.R .. " "
+        .. C.CALL .. RenderAbilityLinks(line:sub(at + 2), C.CALL) .. C.R
 end
 
 local function callBullets(calls, out)
@@ -134,7 +174,7 @@ local function BuildQuicksheetText(d)
                 end
                 if boss.sheet.WIPE then
                     out[#out + 1] = " "
-                    out[#out + 1] = C.WIPE .. "WIPE:|r " .. C.WIPE .. boss.sheet.WIPE .. C.R
+                    out[#out + 1] = C.WIPE .. "WIPE:|r " .. C.WIPE .. RenderAbilityLinks(boss.sheet.WIPE, C.WIPE) .. C.R
                 end
             end
         end
@@ -151,13 +191,14 @@ local function BuildOverviewText(d, role)
 
     heading(out, "Interrupt first")
     for i, it in ipairs(o.interrupts or {}) do
-        out[#out + 1] = C.BODY .. i .. ". " .. it.spell .. (it.note and (C.DIM .. " — " .. it.note) or "") .. C.R
+        out[#out + 1] = C.BODY .. i .. ". " .. RenderAbilityLinks(it.spell, C.BODY)
+            .. (it.note and (C.DIM .. " — " .. RenderAbilityLinks(it.note, C.DIM)) or "") .. C.R
     end
 
     if role ~= "HEALER" then
         heading(out, "Kill first")
         for i, name in ipairs(o.killPriority or {}) do
-            out[#out + 1] = C.BODY .. i .. ". " .. name .. C.R
+            out[#out + 1] = C.BODY .. i .. ". " .. RenderAbilityLinks(name, C.BODY) .. C.R
         end
     end
 
@@ -196,7 +237,7 @@ local function BuildOverviewText(d, role)
         if type(o.tip) == "table" then
             bullets(o.tip, out)
         else
-            out[#out + 1] = C.BODY .. o.tip .. C.R
+            out[#out + 1] = C.BODY .. RenderAbilityLinks(o.tip, C.BODY) .. C.R
         end
     end
 
@@ -208,7 +249,8 @@ local function BuildBossText(boss, role)
     local out = {}
 
     if body and body.reminder then
-        out[#out + 1] = (C[role] or C.HEAD) .. body.reminder .. C.R
+        local c = C[role] or C.HEAD
+        out[#out + 1] = c .. RenderAbilityLinks(body.reminder, c) .. C.R
     end
     if body then
         heading(out, "Your job")
@@ -992,6 +1034,23 @@ end
 local content = CreateFrame("Frame", nil, scroll)
 content:SetSize(PANEL_W - NAV_W - 60, 1)
 scroll:SetScrollChild(content)
+
+-- Spell links rendered by RenderAbilityLinks live in the `text` FontString
+-- below, which is a region of this frame - hyperlink hit-testing and the
+-- OnHyperlink* scripts belong on the frame that owns the region, not on the
+-- FontString itself (FontStrings don't take mouse scripts).
+content:EnableMouse(true)
+content:SetHyperlinksEnabled(true)
+content:SetScript("OnHyperlinkEnter", function(self, link)
+    ns.safecall(function()
+        GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
+        GameTooltip:SetHyperlink(link)
+        GameTooltip:Show()
+    end)
+end)
+content:SetScript("OnHyperlinkLeave", function()
+    ns.safecall(GameTooltip.Hide, GameTooltip)
+end)
 
 -- Long call text at this size needs a shorter measure than the panel is wide,
 -- and more leading than the 3px default, or every section reads as one block.

@@ -65,53 +65,57 @@ patch: "12.1.0"
 sourceVersion: "0.10"
 instanceID: null   # capture with /gp ids
 
+mdtRoutes:
+  - name: "elitzur - keystone.guru (Aug 2026, 100.8% forces)"
+    string: "!~MDT2~VZJLV9NAFMeZPKbT0rS0ShkfR8NShUpaaIm6QVqwlGNR1OOO0zY3NZomnDywuGJSu8FvAQg+vp7dO1UeZTGL+5jf/39n7tm62/oI7cDvH604wxVjUCmX88tr8wVNz+to+H5x8+32G3U3tG11SXU9tTSnGrALjmE5HdV11MDqgqc2HUPd9cAED5w2zJ6jVkv6AicVynkNDRv/QHbTD9SW6/sXPVWtWMpra/OLhWK+hIabV3La7IZhmabVDu1g/2blM8Cniepe0w7hx6t26HGloBI6HXCdmtGjxzUfbD6H5ToH9fPyFseg9QCgy81O1D3LDBqm6UPgH1RHEv63U9RPKikhSiqYKXI/lZ4iDFXbru16a6ZZBNM8il8mRqEOv9FAEJEkCwMBiZIsDkQByZL0PznJkMJQmqEUQ1MMJa/BinBMbzFE740Rdc78jpmUYWiaoexYv9kqAq9gwkSZkWkmjbkYke5GSKC3rwno8BNFibgQxRNiRGKZKDOVZekcEymNsDxzSMu0RJepTp/QIn1KF+kzujRGNc1fiMUEhjFLZlgqx/1ECpHZJL+5QOfoAzpPH9ICfUTzVKOPOVS4Ute53TOeEqXM1+wNHJNZEnMfM4eyIEo4RhJxlGPCpdpI74Te4a9xnx/1coymNhpkCxzo7q/4vtVxuvwj/bNJRhQmkyNExFj2BGGCFZTGuT4hBJ9irOAETkqSFJemeYtEGucbsB22bNgDG1UC6AWvwbaCL6G3s+daht9uejvaatewjl+aHsAH1zY2XMsB48+LixjVWtAJLZuvD1oNLaNe1t89r9X9Xq++/hc="
+
 # All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
 quicksheet:
   trash:
-    TANK: "Raj'kess the Spellstorm — Thundering Storm: Hold the pack steady; leave room for targeted strikes.; Watchful Harrower — Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss.; Devouring Brutalizer — Devour: Protect and help free the target before the cast completes.; Brutal Overseer — Brutal Slam: Mitigate the tank hit and DoT."
-    HEALER: "Raj'kess the Spellstorm — Thundering Storm: Prepare spot healing for targeted strikes.; Watchful Harrower — Live Verification: Expect a long, high-pressure miniboss pull.; Devouring Brutalizer — Devour: Keep the target stable while the group breaks it free.; Brutal Overseer — Brutal Slam: Prepare focused tank healing for the hit and DoT."
-    DPS: "Raj'kess the Spellstorm — Orb of Disruption: Kill immediately before Disrupting Blast.; Watchful Harrower — Live Verification: Commit priority damage to shorten the pull.; Devouring Brutalizer — Devour: Swap immediately and free the target.; Brutal Overseer — Brutal Slam: Use a personal if other damage overlaps."
+    TANK: "Raj'kess the Spellstorm — [Thundering Storm]: Hold the pack steady; leave room for targeted strikes.; Watchful Harrower — Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss.; Devouring Brutalizer — [Devour]: Protect and help free the target before the cast completes.; Brutal Overseer — [Brutal Slam]: Mitigate the tank hit and DoT."
+    HEALER: "Raj'kess the Spellstorm — [Thundering Storm]: Prepare spot healing for targeted strikes.; Watchful Harrower — Live Verification: Expect a long, high-pressure miniboss pull.; Devouring Brutalizer — [Devour]: Keep the target stable while the group breaks it free.; Brutal Overseer — [Brutal Slam]: Prepare focused tank healing for the hit and DoT."
+    DPS: "Raj'kess the Spellstorm — [Orb of Disruption]: Kill immediately before [Disrupting Blast].; Watchful Harrower — Live Verification: Commit priority damage to shorten the pull.; Devouring Brutalizer — [Devour]: Swap immediately and free the target.; Brutal Overseer — [Brutal Slam]: Use a personal if other damage overlaps."
     ROUTE: "Opening miniboss choice → Taz'Rah → Watchful Harrower section → Atroxus → Domanaar lieutenants → Charonus."
 
 overview:
   interrupts:
-    - { spell: "Orb of Disruption", note: "kill the orb before Disrupting Blast" }
+    - { spell: "Orb of Disruption", note: "kill the orb before [Disrupting Blast]" }
   killPriority:
-    - "Orb of Disruption"
+    - "[Orb of Disruption]"
     - "Toxic Creeper"
-    - "Any target trapped by Devour"
+    - "Any target trapped by [Devour]"
   tank:
     damage:
-      - "Taz'Rah — Cosmic Spike"
-      - "Atroxus — Hulking Claw"
-      - "Brutal Overseer — Brutal Slam"
+      - "Taz'Rah — [Cosmic Spike]"
+      - "Atroxus — [Hulking Claw]"
+      - "Brutal Overseer — [Brutal Slam]"
     pullWarnings:
       - "Do not combine Watchful Harrower with nearby packs until release tuning is confirmed."
   healer:
     dispels:
       - "Atroxus poison interactions changed on PTR; confirm the release behaviour."
     pressure:
-      - "Nether Dash DoTs"
-      - "Hulking Claw"
-      - "Sickening Roar"
-      - "Cosmic Blast"
+      - "[Nether Dash] DoTs"
+      - "[Hulking Claw]"
+      - "[Sickening Roar]"
+      - "[Cosmic Blast]"
     pullWarnings:
       - "Enter Watchful Harrower with mana and a healing cooldown available."
   dps:
     defensives:
-      - "Use personals for Sickening Roar, Cosmic Blast and dangerous overlaps."
+      - "Use personals for [Sickening Roar], [Cosmic Blast] and dangerous overlaps."
     pullWarnings:
-      - "Raj'kess the Spellstorm — Thundering Storm: Avoid targeted lightning strikes."
-      - "Agitated Voidscythe — Corrosive Essence: Separate from other targeted players."
+      - "Raj'kess the Spellstorm — [Thundering Storm]: Avoid targeted lightning strikes."
+      - "Agitated Voidscythe — [Corrosive Essence]: Separate from other targeted players."
       - "Watchful Harrower — Live Verification: Commit priority damage to shorten the pull."
       - "Position: Avoid adding nearby packs; the miniboss has true sight."
-      - "Devouring Brutalizer — Devour: Swap immediately and free the target."
-      - "Brutal Overseer — Brutal Slam: Use a personal if other damage overlaps."
+      - "Devouring Brutalizer — [Devour]: Swap immediately and free the target."
+      - "Brutal Overseer — [Brutal Slam]: Use a personal if other damage overlaps."
   tip:
     - "Tank: Preserve movement for gravity pulls and knockbacks."
     - "Healer: Enter Watchful Harrower with mana and a cooldown ready."
     - "DPS: Priority mechanics are worth more than boss uptime."
-    - "Version 0.10, five-source review verified 9 August 2026. One gameplay change found since 27 July: Atroxus — Noxious Breath cast time increased 3 sec → 4 sec."
+    - "Version 0.10, five-source review verified 9 August 2026. One gameplay change found since 27 July: Atroxus — [Noxious Breath] cast time increased 3 sec → 4 sec."
     - "Version note: current live game remains Midnight Season 1 / Patch 12.0.7 as of 9 Aug; this guide targets Season 2 / Patch 12.1 PTR."
     - "Requires live verification: final 12.1 trash placements, Enemy Forces values, miniboss buffs, lieutenant casts, crowd-control interactions and post-PTR tuning."
 
@@ -124,19 +128,19 @@ trashSegments:
       - { name: "Agitated Voidscythe", npcID: 263228, displayID: 138723 }
     roles:
       TANK:
-        - "Raj'kess the Spellstorm — Orb of Disruption: Destroy the orb immediately before Disrupting Blast; face the pack cleanly and call the kill."
-        - "Raj'kess the Spellstorm — Thundering Storm: Avoid the targeted lightning strikes; hold the pack steady and leave room for strikes."
-        - "Agitated Voidscythe — Corrosive Essence: Separate from other targeted players."
+        - "Raj'kess the Spellstorm — [Orb of Disruption]: Destroy the orb immediately before [Disrupting Blast]; face the pack cleanly and call the kill."
+        - "Raj'kess the Spellstorm — [Thundering Storm]: Avoid the targeted lightning strikes; hold the pack steady and leave room for strikes."
+        - "Agitated Voidscythe — [Corrosive Essence]: Separate from other targeted players."
         - "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification."
       HEALER:
-        - "Raj'kess the Spellstorm — Orb of Disruption: Support the immediate orb kill before Disrupting Blast."
-        - "Raj'kess the Spellstorm — Thundering Storm: Avoid the targeted lightning strikes; prepare spot healing for hits."
-        - "Agitated Voidscythe — Corrosive Essence: Separate targeted players and triage quickly."
+        - "Raj'kess the Spellstorm — [Orb of Disruption]: Support the immediate orb kill before [Disrupting Blast]."
+        - "Raj'kess the Spellstorm — [Thundering Storm]: Avoid the targeted lightning strikes; prepare spot healing for hits."
+        - "Agitated Voidscythe — [Corrosive Essence]: Separate targeted players and triage quickly."
         - "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification."
       DPS:
-        - "Raj'kess the Spellstorm — Orb of Disruption: Kill immediately before Disrupting Blast."
-        - "Raj'kess the Spellstorm — Thundering Storm: Avoid the targeted lightning strikes."
-        - "Agitated Voidscythe — Corrosive Essence: Separate from other targeted players."
+        - "Raj'kess the Spellstorm — [Orb of Disruption]: Kill immediately before [Disrupting Blast]."
+        - "Raj'kess the Spellstorm — [Thundering Storm]: Avoid the targeted lightning strikes."
+        - "Agitated Voidscythe — [Corrosive Essence]: Separate from other targeted players."
         - "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification."
 
   - name: "Watchful Harrower trash — Taz'Rah to Atroxus"
@@ -161,16 +165,16 @@ trashSegments:
       - { name: "Brutal Overseer", npcID: 252053, displayID: 137329 }
     roles:
       TANK:
-        - "Devouring Brutalizer — Devour: Protect and help free the target before the cast completes; keep the trapped player reachable for the swap."
-        - "Brutal Overseer — Brutal Slam: Mitigate the tank hit and DoT; keep the impact away from allies."
+        - "Devouring Brutalizer — [Devour]: Protect and help free the target before the cast completes; keep the trapped player reachable for the swap."
+        - "Brutal Overseer — [Brutal Slam]: Mitigate the tank hit and DoT; keep the impact away from allies."
         - "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification."
       HEALER:
-        - "Devouring Brutalizer — Devour: Keep the target stable while the group breaks it free; pre-heal the trapped target."
-        - "Brutal Overseer — Brutal Slam: Prepare focused tank healing for the hit and DoT."
+        - "Devouring Brutalizer — [Devour]: Keep the target stable while the group breaks it free; pre-heal the trapped target."
+        - "Brutal Overseer — [Brutal Slam]: Prepare focused tank healing for the hit and DoT."
         - "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification."
       DPS:
-        - "Devouring Brutalizer — Devour: Swap immediately and free the target."
-        - "Brutal Overseer — Brutal Slam: Use a personal if other damage overlaps."
+        - "Devouring Brutalizer — [Devour]: Swap immediately and free the target."
+        - "Brutal Overseer — [Brutal Slam]: Use a personal if other damage overlaps."
         - "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification."
 
 bosses:
@@ -190,31 +194,31 @@ bosses:
     roles:
       TANK:
         job:
-          - "Mitigate Cosmic Spike."
+          - "Mitigate [Cosmic Spike]."
           - "Keep escape space for Dark Rift."
         avoid:
-          - "Dark Rift's centre, Nether Dash lines and overlapping Ethereal Shards."
+          - "Dark Rift's centre, [Nether Dash] lines and overlapping Ethereal Shards."
         defensive:
-          - "Use mitigation for Cosmic Spike."
+          - "Use mitigation for [Cosmic Spike]."
           - "Save mobility for the rift pull."
         reminder: "Mitigate Spike → run from Rift → dodge shade lines."
       HEALER:
         job:
-          - "Heal Nether Dash DoTs while moving away from Dark Rift."
-          - "Prioritise dash targets and the tank after Cosmic Spike."
+          - "Heal [Nether Dash] DoTs while moving away from Dark Rift."
+          - "Prioritise dash targets and the tank after [Cosmic Spike]."
         avoid:
           - "Shade dash lines, Dark Rift and overlapping Ethereal Shards."
         cooldowns:
-          - "Use group healing if several players are hit by Nether Dash."
+          - "Use group healing if several players are hit by [Nether Dash]."
         reminder: "Heal dash DoTs → move from Rift → separate shards."
       DPS:
         job:
           - "Separate Ethereal Shards and keep damage going while escaping Dark Rift."
           - "No boss interrupt confirmed; clean positioning is the priority."
         avoid:
-          - "Dark Rift, Nether Dash lines and another player's shard path."
+          - "Dark Rift, [Nether Dash] lines and another player's shard path."
         defensive:
-          - "Use a personal if hit by Nether Dash or threatened by the rift."
+          - "Use a personal if hit by [Nether Dash] or threatened by the rift."
         reminder: "Separate shards → dodge lines → run from Rift."
 
   - name: "Atroxus"
@@ -234,23 +238,23 @@ bosses:
       TANK:
         job:
           - "Face Atroxus away."
-          - "Mitigate Hulking Claw and recover from its knockback and damage-over-time effect."
+          - "Mitigate [Hulking Claw] and recover from its knockback and damage-over-time effect."
           - "Make the Toxic Creeper easy to reach."
         avoid:
-          - "Noxious Breath — now a 4-sec cast; use the longer warning to sidestep without spinning the boss."
-          - "Poison Splash and Poison Pools."
+          - "[Noxious Breath] — now a 4-sec cast; use the longer warning to sidestep without spinning the boss."
+          - "[Poison Splash] and Poison Pools."
         defensive:
-          - "Use a defensive for Hulking Claw or a dangerous Sickening Roar overlap."
+          - "Use a defensive for [Hulking Claw] or a dangerous [Sickening Roar] overlap."
         reminder: "Face away → 4-sec Breath dodge → Creeper first."
       HEALER:
         job:
-          - "Cover Sickening Roar and the tank's Hulking Claw damage."
+          - "Cover [Sickening Roar] and the tank's [Hulking Claw] damage."
           - "Prioritise the tank and the Toxic Creeper's fixated target."
         avoid:
-          - "Noxious Breath — now a 4-sec cast; reposition during the longer window."
-          - "Poison Splash and the Creeper's close aura."
+          - "[Noxious Breath] — now a 4-sec cast; reposition during the longer window."
+          - "[Poison Splash] and the Creeper's close aura."
         cooldowns:
-          - "Use group healing for Sickening Roar; save throughput after repositioning for the 4-sec Breath."
+          - "Use group healing for [Sickening Roar]; save throughput after repositioning for the 4-sec Breath."
         reminder: "4-sec Breath move → Roar cooldown → Creeper pressure."
       DPS:
         job:
@@ -259,9 +263,9 @@ bosses:
           - "Toxic Creeper first."
           - "Return to Atroxus only after it dies."
         avoid:
-          - "Noxious Breath, poison impacts, pools and the Creeper aura."
+          - "[Noxious Breath], poison impacts, pools and the Creeper aura."
         defensive:
-          - "Noxious Breath now casts for 4 sec — move early, and use a personal for Sickening Roar."
+          - "[Noxious Breath] now casts for 4 sec — move early, and use a personal for [Sickening Roar]."
         reminder: "Creeper first → 4-sec Breath dodge → avoid pools."
 
   - name: "Charonus"
@@ -275,33 +279,33 @@ bosses:
     displayID: 141323  # wowhead modelviewer
     wipe:
       - "Poor Singularity placement leaving no safe orb route."
-      - "Unconsumed orbs creating prolonged pressure during Cosmic Blast."
+      - "Unconsumed orbs creating prolonged pressure during [Cosmic Blast]."
       - "Failing to consume Gravitic Orbs in the Singularity."
     roles:
       TANK:
         job:
-          - "Place Unstable Singularity cleanly and leave routes for Gravitic Orbs."
+          - "Place [Unstable Singularity] cleanly and leave routes for Gravitic Orbs."
         avoid:
-          - "Void Cascade, knockbacks and stranding the group far from the Singularity."
+          - "[Void Cascade], knockbacks and stranding the group far from the Singularity."
         defensive:
           - "Prepare a defensive for Dark Waves after Gravitic Orbs."
         reminder: "Place the well → feed the orbs → brace after orbs."
       HEALER:
         job:
-          - "Prepare group healing for Cosmic Blast and guide your orb into the Singularity."
-          - "Stabilise Cosmic Blast's DoT and Condensed Mass targets."
+          - "Prepare group healing for [Cosmic Blast] and guide your orb into the Singularity."
+          - "Stabilise [Cosmic Blast]'s DoT and Condensed Mass targets."
         avoid:
-          - "Void Cascade and the damaging centre of the Singularity."
+          - "[Void Cascade] and the damaging centre of the Singularity."
         cooldowns:
-          - "Use group healing for Cosmic Blast."
+          - "Use group healing for [Cosmic Blast]."
         reminder: "Feed your orb → dodge Cascade → stabilise Blast."
       DPS:
         job:
-          - "Guide your Gravitic Orb into Unstable Singularity before returning to damage."
+          - "Guide your Gravitic Orb into [Unstable Singularity] before returning to damage."
           - "Orb first."
           - "Boss uptime second."
         avoid:
-          - "Void Cascade, knockbacks, the Singularity centre and crossed paths."
+          - "[Void Cascade], knockbacks, the Singularity centre and crossed paths."
         defensive:
-          - "Use a personal for Cosmic Blast or a Condensed Mass overlap."
+          - "Use a personal for [Cosmic Blast] or a Condensed Mass overlap."
         reminder: "Guide orb to well → dodge Cascade → stay nearby."

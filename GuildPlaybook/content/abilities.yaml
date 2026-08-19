@@ -1,0 +1,711 @@
+# Ability name -> spell ID. Sourced from upstream MDT Midnight data, cross-checked
+# against wago.tools DB2 SpellName. spellID null = no tooltip, renders inert.
+#
+# NOTE: "Hunting Leap" is one entry with spellID: null even though it maps to two
+# distinct real spells (Honored Raptor/kings-rest = 270500, Thorny Saptor/the-blinding-vale
+# = 269230) -- see the comment on that entry. abilities.yaml is a flat name->spellID
+# space with no per-dungeon key, so a duplicate-name entry breaks the generator; null
+# was chosen over guessing one ID to avoid silently mis-tooltipping the other dungeon.
+abilities:
+  # --- altar-of-fangs ---
+  - name: "Axegrinder"
+    spellID: 1301111
+    caster: "Zul'jan"
+  - name: "Blood Sacrifice"
+    spellID: 1306517
+    caster: "Ritual Chieftain"
+  - name: "Bloodletting"
+    spellID: 1301217
+    caster: "Zul'jan"
+  - name: "Boneslicer"
+    spellID: 1301413
+    caster: "Zul'jan"
+  - name: "Burrowing Charge"
+    spellID: 1299130
+    caster: "The Writhing Coil"
+  - name: "Carrion Burst"
+    spellID: 1307700
+    caster: "Rav'i"
+  - name: "Chop Down"
+    spellID: 1301350
+    caster: "Zul'jan"
+  - name: "Death Rattle"
+    spellID: 1299053
+    caster: "The Writhing Coil"
+  - name: "Evolve"
+    spellID: 1306385
+    caster: "High Evolutionist"
+  - name: "Fang Empowered"
+    spellID: 1300888
+    caster: "Zul'jan"
+  - name: "Feeding Frenzy"
+    spellID: 1307765
+    caster: "Rav'i"
+  - name: "Fetid Spit"
+    spellID: 1306381
+    caster: "Primal Serpent"
+  - name: "Fresh Meat"
+    spellID: 1307703
+    caster: "Rav'i"
+  - name: "Hydrastrike"
+    spellID: 1298683
+    caster: "Rav'i"
+  - name: "Infest"
+    spellID: 1308864
+    caster: "Ascendant Serpent"
+  - name: "Infusion Totems"
+    spellID: null  # unresolved: no confident spellID match (Ascendant Serpent)
+    caster: "Ascendant Serpent"
+  - name: "Laced Edge"
+    spellID: 1308518
+    caster: "Blade of the Altar"
+  - name: "Messy Eater"
+    spellID: 1306345
+    caster: "Rav'i"
+  - name: "Ravenous Stomp"
+    spellID: 1307894
+    caster: "Rav'i"
+  - name: "Regurgitate"
+    spellID: 1296050
+    caster: "Rav'i"
+  - name: "Ritual Venom"
+    spellID: 1300894
+    caster: "Zul'jan"
+  - name: "Ritual of the Fang"
+    spellID: 1300876
+    caster: "Zul'jan"
+  - name: "Septic Spatter"
+    spellID: 1294432
+    caster: "Venom Leech"
+  - name: "Ssscavenging"
+    spellID: 1296216
+    caster: "Rav'i"
+  - name: "Synchronized Venom"
+    spellID: 1299154
+    caster: "The Writhing Coil"
+  - name: "Tail Scythe"
+    spellID: 1298949
+    caster: "The Writhing Coil"
+  - name: "Totemic Ritual"
+    spellID: 1306844
+    caster: "Ritual Chieftain"
+  - name: "Toxic Atrophy"
+    spellID: 1310547
+    caster: "The Writhing Coil"
+  - name: "Triple Shot"
+    spellID: 1296220
+    caster: "Rav'i"
+  - name: "Undermining"
+    spellID: 1305393
+    caster: "The Writhing Coil"
+  - name: "Venom Jet"
+    spellID: 1299902
+    caster: "The Writhing Coil"
+  - name: "Vindictive Onslaught"
+    spellID: 1299940
+    caster: "The Writhing Coil"
+  - name: "Vine Grip"
+    spellID: 1287798
+    caster: "The Writhing Coil"
+  - name: "Virulent Whirl"
+    spellID: 1295055
+    caster: "Ascendant Serpent"
+  # --- den-of-nalorakk ---
+  - name: "Bonespike Slam"
+    spellID: 1235129
+    caster: "The Hoardmonger"
+  - name: "Colossal Roar"
+    spellID: null  # unresolved: no confident spellID match (The Hoardmonger)
+    caster: "The Hoardmonger"
+  - name: "Earthshatter Slam"
+    spellID: 1234021
+    caster: "The Hoardmonger"
+  - name: "Echoing Maul"
+    spellID: 1242860
+    caster: "Nalorakk"
+  - name: "Forceful Slam"
+    spellID: 1297797
+    caster: "Nalorakk"
+  - name: "Frozen Tempest"
+    spellID: 1235656
+    caster: "Sentinel of Winter"
+  - name: "Fury of the War God"
+    spellID: 1243002
+    caster: "Nalorakk"
+  - name: "Glacial Torment"
+    spellID: 1235548
+    caster: "Sentinel of Winter"
+  - name: "Harsh Winds"
+    spellID: null  # unresolved: no confident spellID match (The Winter Squall)
+    caster: "The Winter Squall"
+  - name: "Hearty Bellow"
+    spellID: 1235125
+    caster: "The Hoardmonger"
+  - name: "Mother's Wrath"
+    spellID: 1238053
+    caster: "Territorial Matriarch"
+  - name: "Overwhelmed Prey"
+    spellID: null  # unresolved: no confident spellID match (Bonded Beasttamer)
+    caster: "Bonded Beasttamer"
+  - name: "Overwhelming Onslaught"
+    spellID: 1243569
+    caster: "Nalorakk"
+  - name: "Piercing Screech"
+    spellID: null  # unresolved: no confident spellID match (Keen-Eyed Screecher)
+    caster: "Keen-Eyed Screecher"
+  - name: "Poison Spear Volley"
+    spellID: 1246986
+    caster: "Grizzled Warbringer"
+  - name: "Primal Echo"
+    spellID: 1246957
+    caster: "Grizzled Warbringer"
+  - name: "Putrid Burst"
+    spellID: 1245593
+    caster: "The Hoardmonger"
+  - name: "Raging Squalls"
+    spellID: 1235623
+    caster: "Sentinel of Winter"
+  - name: "Razor Dive"
+    spellID: 1238439
+    caster: "Keen-Eyed Striker"
+  - name: "Rimeshatter"
+    spellID: 1263590
+    caster: "Fractured Shivercore"
+  - name: "Rotten Mushrooms"
+    spellID: null  # unresolved: no confident spellID match (The Hoardmonger)
+    caster: "The Hoardmonger"
+  - name: "Spectral Slash"
+    spellID: 1255570
+    caster: "Echo of Nalorakk"
+  - name: "Starvation Effigy"
+    spellID: 1238760
+    caster: "Spirit of Hunger"
+  - name: "Toxic Spores"
+    spellID: 1234846
+    caster: "The Hoardmonger"
+  - name: "Volatile Totem"
+    spellID: 1309924
+    caster: "Loa Speaker Nanea"
+  - name: "Winter's Shroud"
+    spellID: 1235829
+    caster: "Fractured Shivercore"
+  # --- kings-rest ---
+  - name: "Awakening Slam"
+    spellID: 1312146
+    caster: "Mchimba the Embalmer"
+  - name: "Axe Barrage"
+    spellID: null  # unresolved: no confident spellID match (Guard Captain Atu)
+    caster: "Guard Captain Atu"
+  - name: "Barrel Through"
+    spellID: 266951
+    caster: "Aka'ali the Conqueror"
+  - name: "Blade Combo"
+    spellID: 268586
+    caster: "King Dazar"
+  - name: "Bladestorm"
+    spellID: 270928
+    caster: "King Timalji"
+  - name: "Bloodthirsty Axe"
+    spellID: 1301851
+    caster: "Royal Berserker"
+  - name: "Bound by Shadow"
+    spellID: null  # unresolved: no confident spellID match (Minion of Zul)
+    caster: "Minion of Zul"
+  - name: "Burn Corruption"
+    spellID: 267639
+    caster: "Mchimba the Embalmer"
+  - name: "Burning Ground"
+    spellID: 267874
+    caster: "Mchimba the Embalmer"
+  - name: "Dark Revelation"
+    spellID: null  # unresolved: no confident spellID match (Shadow of Zul)
+    caster: "Shadow of Zul"
+  - name: "Debilitating Backhand"
+    spellID: null  # unresolved: no confident spellID match (The Council of Tribes)
+    caster: "The Council of Tribes"
+  - name: "Desiccation"
+    spellID: null  # unresolved: no confident spellID match (Mchimba the Embalmer)
+    caster: "Mchimba the Embalmer"
+  - name: "Drain Fluids"
+    spellID: 267618
+    caster: "Mchimba the Embalmer"
+  - name: "Explosive Acids"
+    spellID: null  # unresolved: no confident spellID match (Mchimba the Embalmer)
+    caster: "Mchimba the Embalmer"
+  - name: "Explosive Totem"
+    spellID: null  # unresolved: no confident spellID match (Zanazal the Wise)
+    caster: "Zanazal the Wise"
+  - name: "Gilded Destruction"
+    spellID: 1303267
+    caster: "King Dazar"
+  - name: "Healing Tide Totem"
+    spellID: null  # unresolved: no confident spellID match (Spectral Shaman)
+    caster: "Spectral Shaman"
+  - name: "Hex"
+    spellID: 270492
+    caster: "Phantom Hex Priest"
+  - name: "Hunting Leap"
+    spellID: null  # unresolved: name collides with a different spell in the-blinding-vale
+    # (Honored Raptor here = 270500, Thorny Saptor in the-blinding-vale = 269230). The
+    # schema has no per-dungeon key, so picking either ID would mis-tooltip the other
+    # dungeon's cast; null is safer than a silently wrong spellID. Needs a schema fix
+    # (e.g. dungeon-scoped keys) to resolve both accurately.
+    caster: "Honored Raptor"
+  - name: "Impaling Spear"
+    spellID: 1302945
+    caster: "King Dazar"
+  - name: "Induce Regeneration"
+    spellID: null  # unresolved: no confident spellID match (Seneschal M'bara)
+    caster: "Seneschal M'bara"
+  - name: "Lightning Bolt"
+    spellID: null  # unresolved: no confident spellID match (Zanazal the Wise)
+    caster: "Zanazal the Wise"
+  - name: "Lucre's Call"
+    spellID: 265923
+    caster: "The Golden Serpent"
+  - name: "Luster"
+    spellID: 265991
+    caster: "The Golden Serpent"
+  - name: "Molten Gold"
+    spellID: null  # unresolved: no confident spellID match (The Golden Serpent)
+    caster: "The Golden Serpent"
+  - name: "Poison Nova"
+    spellID: 267273
+    caster: "Zanazal the Wise"
+  - name: "Pool of Darkness"
+    spellID: null  # unresolved: no confident spellID match (Shadow of Zul)
+    caster: "Shadow of Zul"
+  - name: "Purification Beam"
+    spellID: null  # unresolved: no confident spellID match (Purification Construct)
+    caster: "Purification Construct"
+  - name: "Quaking Leap"
+    spellID: 1303324
+    caster: "T'zala"
+  - name: "Released Inhibitors"
+    spellID: null  # unresolved: no confident spellID match (Shadow-Borne Champion)
+    caster: "Shadow-Borne Champion"
+  - name: "Savage Maul"
+    spellID: 1303488
+    caster: "T'zala"
+  - name: "Serpentine Gust"
+    spellID: 265781
+    caster: "The Golden Serpent"
+  - name: "Severing Axe"
+    spellID: 266231
+    caster: "Kula the Butcher"
+  - name: "Shadow Barrage"
+    spellID: null  # unresolved: no confident spellID match (Shadow of Zul)
+    caster: "Shadow of Zul"
+  - name: "Shadow Bolt Volley"
+    spellID: null  # unresolved: no confident spellID match (Shadow-Borne Witch Doctor)
+    caster: "Shadow-Borne Witch Doctor"
+  - name: "Spit Gold"
+    spellID: 265773
+    caster: "The Golden Serpent"
+  - name: "Struggle"
+    spellID: null  # unresolved: no confident spellID match (Mchimba the Embalmer)
+    caster: "Mchimba the Embalmer"
+  - name: "Suppression Slam"
+    spellID: 270003
+    caster: "Animated Guardian"
+  - name: "Tail Thrash"
+    spellID: null  # unresolved: no confident spellID match (The Golden Serpent)
+    caster: "The Golden Serpent"
+  - name: "Whirling Axes"
+    spellID: 266191
+    caster: "Kula the Butcher"
+  - name: "Wretched Discharge"
+    spellID: 267763
+    caster: "Half-Finished Mummy"
+  # --- murder-row ---
+  - name: "Axe Toss"
+    spellID: 1214637
+    caster: "Xathuux the Annihilator"
+  - name: "Blade Dance"
+    spellID: 1302007
+    caster: "Felmaster Lucsei"
+  - name: "Burning Steps"
+    spellID: 474231
+    caster: "Xathuux the Annihilator"
+  - name: "Chaos Barrage"
+    spellID: 1230298
+    caster: "Kystia Manaheart"
+  - name: "Chaos Bolt"
+    spellID: 474375
+    caster: "Lithiel Cinderfury"
+  - name: "Corroding Spittle"
+    spellID: 1217633
+    caster: "Massive Felwyrm"
+  - name: "Curse of Doom"
+    spellID: 1217973
+    caster: "Corrupted Warlock"
+  - name: "Dark Pact"
+    spellID: 1297684
+    caster: "Corrupted Warlock"
+  - name: "Defiled Slam"
+    spellID: 1294824
+    caster: "Defiled Golem"
+  - name: "Demonic Rage"
+    spellID: 474197
+    caster: "Xathuux the Annihilator"
+  - name: "Destabilized"
+    spellID: null  # unresolved: no confident spellID match (Kystia Manaheart)
+    caster: "Kystia Manaheart"
+  - name: "Envenom"
+    spellID: 1222795
+    caster: "Zaen Bladesorrow"
+  - name: "Fel Nova"
+    spellID: 474240
+    caster: "Kystia Manaheart"
+  - name: "Fel Spray"
+    spellID: 1253811
+    caster: "Nibbles"
+  - name: "Felshield"
+    spellID: 1217989
+    caster: "Kystia Manaheart"
+  - name: "Felstorm"
+    spellID: 1264106
+    caster: "Kystia Manaheart"
+  - name: "Fingers of the Legion"
+    spellID: null  # unresolved: no confident spellID match (Lithiel Cinderfury)
+    caster: "Lithiel Cinderfury"
+  - name: "Fire Bomb"
+    spellID: 1214352
+    caster: "Zaen Bladesorrow"
+  - name: "Heartstop Poison"
+    spellID: 474515
+    caster: "Zaen Bladesorrow"
+  - name: "Killing Spree"
+    spellID: 474478
+    caster: "Zaen Bladesorrow"
+  - name: "Legion Strike"
+    spellID: 473898
+    caster: "Xathuux the Annihilator"
+  - name: "Malefic Wave"
+    spellID: 1217345
+    caster: "Lithiel Cinderfury"
+  - name: "Murder in a Row"
+    spellID: 474545
+    caster: "Zaen Bladesorrow"
+  - name: "Same-Day Delivery"
+    spellID: 474766
+    caster: "Crate Loader"
+  # --- ruby-life-pools ---
+  - name: "Blaze Volley"
+    spellID: 373017
+    caster: "Blazebound Firestorm"
+  - name: "Blaze of Glory"
+    spellID: 373972
+    caster: "Ashseer Flamelasher"
+  - name: "Blazing Rush"
+    spellID: 372087
+    caster: "Defier Draghar"
+  - name: "Burning Ambition"
+    spellID: null  # unresolved: no confident spellID match (Primalist Cinderweaver)
+    caster: "Primalist Cinderweaver"
+  - name: "Burnout"
+    spellID: 373614
+    caster: "Blazebound Destroyer"
+  - name: "Chillstorm"
+    spellID: 372851
+    caster: "Melidrussa Chillworn"
+  - name: "Cinderbolt"
+    spellID: 384194
+    caster: "Primalist Cinderweaver"
+  - name: "Crushing Smash"
+    spellID: 372730
+    caster: "Primal Juggernaut"
+  - name: "Excavating Blast"
+    spellID: 1305201
+    caster: "Primal Juggernaut"
+  - name: "Fire Maw"
+    spellID: 392394
+    caster: "Flamegullet"
+  - name: "Flame Dance"
+    spellID: null  # unresolved: no confident spellID match (Primalist Flamedancer)
+    caster: "Primalist Flamedancer"
+  - name: "Frigid Shard"
+    spellID: 372808
+    caster: "Melidrussa Chillworn"
+  - name: "Frost Overload"
+    spellID: 373680
+    caster: "Melidrussa Chillworn"
+  - name: "Ice Bulwark"
+    spellID: 372988
+    caster: "Melidrussa Chillworn"
+  - name: "Ice Shield"
+    spellID: 372743
+    caster: "Flashfrost Chillweaver"
+  - name: "Inferno"
+    spellID: 373692
+    caster: "Blazebound Destroyer"
+  - name: "Inferno Spit"
+    spellID: 381602
+    caster: "Kyrakka"
+  - name: "Living Bomb"
+    spellID: 373693
+    caster: "Primalist Cinderweaver"
+  - name: "Molten Blood"
+    spellID: 392569
+    caster: "Flamegullet"
+  - name: "Ritual of Blazebinding"
+    spellID: 372863
+    caster: "Kokia Blazehoof"
+  - name: "Roaring Firebreath"
+    spellID: 381525
+    caster: "Kyrakka"
+  - name: "Rolling Thunder"
+    spellID: 392640
+    caster: "Thunderhead"
+  - name: "Searing Blows"
+    spellID: 372858
+    caster: "Kokia Blazehoof"
+  - name: "Steel Barrage"
+    spellID: 372047
+    caster: "Defier Draghar"
+  - name: "Storm Breath"
+    spellID: 391726
+    caster: "Thunderhead"
+  - name: "Tectonic Strike"
+    spellID: 1305225
+    caster: "Deepstone Earthshaper"
+  - name: "Thunder Jaw"
+    spellID: 392395
+    caster: "Thunderhead"
+  # --- temple-of-sethraliss ---
+  - name: "Accumulate Charge"
+    spellID: 1293464
+    caster: "Agitated Nimbus"
+  - name: "Arrow Barrage"
+    spellID: 1308113
+    caster: "Sandswept Hunter"
+  - name: "Consume Charge"
+    spellID: null  # unresolved: no confident spellID match (Galvazzt)
+    caster: "Galvazzt"
+  - name: "Corruption Burst"
+    spellID: 1302826
+    caster: "Lifeforce"
+  - name: "Defiling Taint"
+    spellID: 1301199
+    caster: "Essence Defiler"
+  - name: "Essence Disruption"
+    spellID: null  # unresolved: no confident spellID match (Temple Disruptor)
+    caster: "Temple Disruptor"
+  - name: "Flame Shock"
+    spellID: 268013
+    caster: "Twisted Hexxer"
+  - name: "Gale Force"
+    spellID: 1289062
+    caster: "Aspix"
+  - name: "Galvanized"
+    spellID: null  # unresolved: no confident spellID match (Galvazzt)
+    caster: "Galvazzt"
+  - name: "Ground Pound"
+    spellID: null  # unresolved: no confident spellID match (Sandfury Stonefist)
+    caster: "Sandfury Stonefist"
+  - name: "Healing Surge"
+    spellID: null  # unresolved: no confident spellID match (Charged Dust Devil)
+    caster: "Charged Dust Devil"
+  - name: "Hex Muck"
+    spellID: 1300684
+    caster: "Twisted Hexxer"
+  - name: "Induction"
+    spellID: 1290531
+    caster: "Galvazzt"
+  - name: "Lightning Spires"
+    spellID: null  # unresolved: no confident spellID match (Galvazzt)
+    caster: "Galvazzt"
+  - name: "Overload"
+    spellID: 1288428
+    caster: "Adderis"
+  - name: "Poisoned Cheap Shot"
+    spellID: 1308100
+    caster: "Shrouded Fang"
+  - name: "Release Charge"
+    spellID: 1293475
+    caster: "Agitated Nimbus"
+  - name: "Serpentstorm"
+    spellID: 1293048
+    caster: "Merektha"
+  - name: "Serrated Charge"
+    spellID: 1291399
+    caster: "Barbed Krolusk"
+  - name: "Shadowlash"
+    spellID: 1300714
+    caster: "Faithless Tormentor"
+  - name: "Shock"
+    spellID: null  # unresolved: no confident spellID match (Imbued Stormcaller)
+    caster: "Imbued Stormcaller"
+  - name: "Siphon Energy"
+    spellID: 1303596
+    caster: "Eye of Sethraliss"
+  - name: "Storm Catalyst"
+    spellID: 1291622
+    caster: "Storm Serpent"
+  - name: "Swarming Krolusks"
+    spellID: 1292990
+    caster: "Dutiful Tamer"
+  - name: "Tempest Winds"
+    spellID: 1288864
+    caster: "Aspix"
+  - name: "Thunder Spit"
+    spellID: 1289602
+    caster: "Merektha"
+  - name: "Vile Charge"
+    spellID: 1302616
+    caster: "Corrupted Guardian"
+  # --- the-blinding-vale ---
+  - name: "Bedrock Slam"
+    spellID: 1234753
+    caster: "Meittik"
+  - name: "Bedrock Surge"
+    spellID: 1276586
+    caster: "Meittik"
+  - name: "Belch Spores"
+    spellID: 1263636
+    caster: "Sporeblight Belcher"
+  - name: "Bloodthirsty Gaze"
+    spellID: 1253410
+    caster: "Ikuzz the Light Hunter"
+  - name: "Concentrated Lightbeam"
+    spellID: 1246607
+    caster: "Ziekket"
+  - name: "Crunched"
+    spellID: 1272290
+    caster: "Ikuzz the Light Hunter"
+  - name: "Crushing Footfalls"
+    spellID: 1237093
+    caster: "Ikuzz the Light Hunter"
+  - name: "Earthrupture Strike"
+    spellID: 1237855
+    caster: "Virid Grovekeeper"
+  - name: "Fan of Thorns"
+    spellID: 1261011
+    caster: "Lekshi"
+  - name: "Fertile Loam"
+    spellID: 1234802
+    caster: "Meittik"
+  - name: "Fluorescent Outburst"
+    spellID: 1247039
+    caster: "Ziekket"
+  - name: "Frantic Blooming"
+    spellID: 1238200
+    caster: "Radiant Spellsower"
+  - name: "Grievous Gash"
+    spellID: 1242135
+    caster: "Luminous Thornmaw"
+  - name: "Grievous Thrash"
+    spellID: 1241058
+    caster: "Lightwarden Ruia"
+  - name: "Incise"
+    spellID: 1237166
+    caster: "Ikuzz the Light Hunter"
+  - name: "Light Bolt"
+    spellID: 1235616
+    caster: "Kezkitt"
+  - name: "Lightblossom Beam"
+    spellID: 1235564
+    caster: "Kezkitt"
+  - name: "Lightboom Pollination"
+    spellID: 1238158
+    caster: "Lightgorged Lasher"
+  - name: "Lightcrazed Frenzy"
+    spellID: 1237073
+    caster: "Ikuzz the Light Hunter"
+  - name: "Lightfire"
+    spellID: 1239824
+    caster: "Lightwarden Ruia"
+  - name: "Lightmaw Beams"
+    spellID: 1238368
+    caster: "Overgrown Hydra"
+  - name: "Lightwarden's Blight"
+    spellID: 1242180
+    caster: "Sporeblight Belcher"
+  - name: "Oozing Xylem"
+    spellID: 1247377
+    caster: "Ziekket"
+  - name: "Pulverizing Strikes"
+    spellID: 1240210
+    caster: "Lightwarden Ruia"
+  - name: "Solar Breath"
+    spellID: 1242138
+    caster: "Luminous Thornmaw"
+  - name: "Spiny Shield"
+    spellID: 1238581
+    caster: "Spineshield Beetle"
+  - name: "Spirits of the Vale"
+    spellID: 1241067
+    caster: "Lightwarden Ruia"
+  - name: "Spouting Floret"
+    spellID: 1263628
+    caster: "Sporeblight Belcher"
+  - name: "Thornblade"
+    spellID: 1238066
+    caster: "Underbrush Stalker"
+  - name: "Thorncaller Roar"
+    spellID: 1236709
+    caster: "Ikuzz the Light Hunter"
+  - name: "Thornspike"
+    spellID: 1247685
+    caster: "Ziekket"
+  - name: "Toadspawn"
+    spellID: 1250199
+    caster: "Potatoad Matriarch"
+  - name: "Toxic Spew"
+    spellID: 1250937
+    caster: "Potatoad Matriarch"
+  - name: "Uproot"
+    spellID: 1255205
+    caster: "Virid Grovekeeper"
+  - name: "Verdant Stomp"
+    spellID: 1236746
+    caster: "Ikuzz the Light Hunter"
+  - name: "Warden's Wrath"
+    spellID: 1239821
+    caster: "Lightwarden Ruia"
+  # --- voidscar-arena ---
+  - name: "Brutal Slam"
+    spellID: 1298900
+    caster: "Brutal Overseer"
+  - name: "Corrosive Essence"
+    spellID: 1289258
+    caster: "Agitated Voidscythe"
+  - name: "Cosmic Blast"
+    spellID: null  # unresolved: no confident spellID match (Charonus)
+    caster: "Charonus"
+  - name: "Cosmic Spike"
+    spellID: null  # unresolved: no confident spellID match (Taz'Rah)
+    caster: "Taz'Rah"
+  - name: "Devour"
+    spellID: 1300248
+    caster: "Devouring Brutalizer"
+  - name: "Disrupting Blast"
+    spellID: null  # unresolved: no confident spellID match (Raj'kess the Spellstorm)
+    caster: "Raj'kess the Spellstorm"
+  - name: "Hulking Claw"
+    spellID: 1222642
+    caster: "Atroxus"
+  - name: "Nether Dash"
+    spellID: 1222100
+    caster: "Ethereal Shade"
+  - name: "Noxious Breath"
+    spellID: 1222721
+    caster: "Atroxus"
+  - name: "Orb of Disruption"
+    spellID: 1311747
+    caster: "Raj'kess the Spellstorm"
+  - name: "Poison Splash"
+    spellID: 1226031
+    caster: "Atroxus"
+  - name: "Sickening Roar"
+    spellID: null  # unresolved: no confident spellID match (Atroxus)
+    caster: "Atroxus"
+  - name: "Thundering Storm"
+    spellID: 1299270
+    caster: "Raj'kess the Spellstorm"
+  - name: "Unstable Singularity"
+    spellID: 1248112
+    caster: "Charonus"
+  - name: "Void Cascade"
+    spellID: 1222755
+    caster: "Charonus"

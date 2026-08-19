@@ -47,56 +47,60 @@ patch: "12.1.0"
 sourceVersion: "0.10"
 instanceID: null   # fill via /gp ids
 
+mdtRoutes:
+  - name: "elitzur - keystone.guru (Aug 2026, 100.3% forces)"
+    string: "!~MDT2~lZdJb9tGFIDDRSQl787mthf21EMShsPh2lNdWc7itHGQtiiKAoEsDmUmFGlwiZ2eQilp0UPvuSZOWv/A6N43I9pQgAAeG7D1Ps+8Zd57HD79dyfbe0oGZfH3u810uhm+/h6Z27ewFxhYmH73bjP8qyUI022T/Xwz3UzefOzZlmsE27cs7Bs2A0TBNjA/OIZNwTQQP2DmFOzYnNC1LYuKlmGdK/ZsFBgeAGKH4oKujVwq2oZ3rgiKiAUGH5gbTJ8lDT48foAMU3Bp0njBNGgiTMwPOJgV1EQXAYs6RYFvBNzge4ZPwTVcfsCGS8GGivECtLxDwaKB8oJDmwEFJnXKC4gmEfm+4XOD6zIDcEbMDxY7nE8LzAsOdPUWgMMjsgZCkMOAH3z6QCPfognnBAiQJQLywQ2nBkzD4YcmUESLxAvmzKkFDx43sAuKJjzgB3fWqKyBeMGhDx414PCDxR6ipgrcwFrC+tzL4vcenl3IyKOXLIZr070wmKyrLwSmO2eAF2YH8fD5ohU0AWLIADdgljXPhorygh/MDDhQUW5wZgn3oKLc0Biw4RbghsaAD8njg64VmLwiSwRq4POt5cJlT+cD6EPU9UzQtCAyfK7Y80x2IVuuB+fgBQRetgBMHnEWmGMxRU6AlxGo2w6H2ASGPegRTnADbza00SmJG8yZgQsB63kLQ7T8gGaDHsTLD40BmFR5AVrA8GgKzWbY7SHERlkMtbPF6YMHPz/+ST+okkRHX59usUzWwJhOPeL015t3q6Gex8P9Ui/ikOhlphfP4gP9MC73s6rU4/R5XNwu9vOsCo1TG47DKoFhEnQ/ceOeubFdnw1kNFBx+pBtSfpFqe9lRXG2i44s9FUCbwcHgnnThR0k17vZ6OBbfZRVaanf0IskO4z6YP2G/rQaHbD4jM7u/oui2XjYz/M4y/WE9A9u6nk2rMjtUZY+04v9fpgdgsmD22XeT4sBSUOSDshNujLqp41GmFdxyGRwMfMaZfloztv9MI6ieFAl5YsrW4eEPLvUe95PKnLyaFDlOUnLrSodkiy9Fx5tvL1XkAS+gsRZ+nKnWd6F5Ah3SkJGcTq8tJPHUfkwigpSFi97NHHFPydCLYljWZJeKS1ZkuvW2uuWLCrSynhpcWOjFnqDLMny7SjCJIqOxUlLUaVXbU3tNAv03wEBKy2xbkv1qlxLoKauTTpae+WVomrtOQuYvF8Zr1+Wa231zDImAZj4II47C9Kfl69cW1+7Ko877bV64Uwx2sPkg/J6bX1ldVmdaJ22PFlcWV4bL63OBcG2CKKmqGotaGNBbH8SfADLk3ZnQa1lbayp7YncUua04WytWlifUwnA6b8LY0lcqoVrtbBcC9fnYqY6HxbGcmtxLMnLE1GSr9M/zXofsXiWxqJ0tRYW69Y1sPNJJt9vfFULG1/A75dzVmkqd0lKRi82iyIepiMoYXEivJO0liaeSIoMQSsy5FTpKAuafLysLaorsvpWVrT3giaqqqppi8eSJqstZWmiqdpyrT5sWuFxtZeQ5yQRtkpyVP5Akrj8o8qfQF8+Qd1RGB//GOWE7GdJeD+LUxJ+vHvKwr09MqziBFpI6ELH7sTbvwx/8wZHRzt3/gc="
+
 # All-roles quick sheet (from the Tank/Healer/DPS PDFs' page-1 cheat sheets)
 quicksheet:
   trash:
-    TANK: "Keen-Eyed Screecher — Piercing Screech: group and stop.; Spirit of Hunger — Starvation Effigy: tank beside it.; The Winter Squall — Harsh Winds: keep shelter close.; Grizzled Warbringer — Poison Spear Volley: keep space clear.; Grizzled Warbringer — Primal Echo: mitigate."
-    HEALER: "Keen-Eyed Screecher — Piercing Screech: pre-position for silence.; Spirit of Hunger — Starvation Effigy: kill it; maximum health falls.; The Winter Squall — Harsh Winds: heal while moving.; Grizzled Warbringer — Poison Spear Volley: prepare for missed circles.; Grizzled Warbringer — Primal Echo: react quickly."
-    DPS: "Keen-Eyed Screecher — Piercing Screech: interrupt / stop.; Spirit of Hunger — Starvation Effigy: kill immediately.; The Winter Squall — Harsh Winds: kill first.; Grizzled Warbringer — Poison Spear Volley: dodge circles.; Grizzled Warbringer — Primal Echo: use a personal."
+    TANK: "Keen-Eyed Screecher — [Piercing Screech]: group and stop.; Spirit of Hunger — [Starvation Effigy]: tank beside it.; The Winter Squall — [Harsh Winds]: keep shelter close.; Grizzled Warbringer — [Poison Spear Volley]: keep space clear.; Grizzled Warbringer — [Primal Echo]: mitigate."
+    HEALER: "Keen-Eyed Screecher — [Piercing Screech]: pre-position for silence.; Spirit of Hunger — [Starvation Effigy]: kill it; maximum health falls.; The Winter Squall — [Harsh Winds]: heal while moving.; Grizzled Warbringer — [Poison Spear Volley]: prepare for missed circles.; Grizzled Warbringer — [Primal Echo]: react quickly."
+    DPS: "Keen-Eyed Screecher — [Piercing Screech]: interrupt / stop.; Spirit of Hunger — [Starvation Effigy]: kill immediately.; The Winter Squall — [Harsh Winds]: kill first.; Grizzled Warbringer — [Poison Spear Volley]: dodge circles.; Grizzled Warbringer — [Primal Echo]: use a personal."
     ROUTE: "Foraging → Hoardmonger → Winter → Sentinel → Heart of Rage → Nalorakk."
 
 overview:
   interrupts:
     - { spell: "Piercing Screech", note: "interrupt / stop" }
   killPriority:
-    - "Piercing Screech"
-    - "Starvation Effigy"
+    - "[Piercing Screech]"
+    - "[Starvation Effigy]"
     - "The Winter Squall"
     - "Volatile Totems"
   tank:
     damage:
-      - "Tank checks: empowered Hoardmonger, Frozen Tempest, Primal Echo and Overwhelming Onslaught."
+      - "Tank checks: empowered Hoardmonger, [Frozen Tempest], [Primal Echo] and [Overwhelming Onslaught]."
     pullWarnings:
       - "Pull plan: do not combine unknown PTR packs or difficult patrols until live-tested."
       - "Positioning: face large enemies away and preserve shelter during the winter gauntlet."
-      - "Control priority: Piercing Screech, Starvation Effigy and dangerous Heart of Rage packs."
+      - "Control priority: [Piercing Screech], [Starvation Effigy] and dangerous Heart of Rage packs."
   healer:
     dispels:
-      - "Dispel: Mother's Wrath is confirmed dispellable; current PTR removes all stacks."
+      - "Dispel: [Mother's Wrath] is confirmed dispellable; current PTR removes all stacks."
     pressure:
-      - "Healing checks: Hoardmonger roars, Frozen Tempest, Primal Echo and Fury of the War God."
+      - "Healing checks: Hoardmonger roars, [Frozen Tempest], [Primal Echo] and [Fury of the War God]."
     pullWarnings:
-      - "Silence warning: Piercing Screech silences the party for 2 seconds."
-      - "Mana: avoid healing through Starvation Effigy; the group must kill it."
+      - "Silence warning: [Piercing Screech] silences the party for 2 seconds."
+      - "Mana: avoid healing through [Starvation Effigy]; the group must kill it."
   dps:
     defensives:
-      - "Movement: dodge Poison Spear Volley and keep clean shelter routes in the winter gauntlet."
-      - "Personal defensives: boss roars, Frozen Tempest and difficult Fury sequences."
+      - "Movement: dodge [Poison Spear Volley] and keep clean shelter routes in the winter gauntlet."
+      - "Personal defensives: boss roars, [Frozen Tempest] and difficult Fury sequences."
     pullWarnings:
-      - "Keen-Eyed Screecher — Razor Dive: The cast is less frequent after the PTR cooldown increase; use a defensive if repeatedly targeted."
-      - "Spirit of Hunger — Starvation Effigy: Immediate swap: kill the Starvation Effigy before health reduction stacks."
-      - "Territorial Matriarch — Mother's Wrath: Use a stop if available and give the healer room to dispel."
-      - "The Winter Squall — Harsh Winds: Priority target. Kill The Winter Squall to end Harsh Winds."
+      - "Keen-Eyed Screecher — [Razor Dive]: The cast is less frequent after the PTR cooldown increase; use a defensive if repeatedly targeted."
+      - "Spirit of Hunger — [Starvation Effigy]: Immediate swap: kill the [Starvation Effigy] before health reduction stacks."
+      - "Territorial Matriarch — [Mother's Wrath]: Use a stop if available and give the healer room to dispel."
+      - "The Winter Squall — [Harsh Winds]: Priority target. Kill The Winter Squall to end [Harsh Winds]."
       - "Glacial Revenant — Current PTR ability package: Live verification required; observe the cast bar and stop dangerous casts."
       - "Frigid Mauler / Terra Rumbler — Current PTR ability package: Live verification required; respect frontals and ground telegraphs."
-      - "Grizzled Warbringer — Poison Spear Volley: Move out of impact circles; current PTR travel time is 3 seconds."
-      - "Grizzled Warbringer — Primal Echo: Use a personal if targeted and avoid adding spear damage."
+      - "Grizzled Warbringer — [Poison Spear Volley]: Move out of impact circles; current PTR travel time is 3 seconds."
+      - "Grizzled Warbringer — [Primal Echo]: Use a personal if targeted and avoid adding spear damage."
       - "Bonded Beasttamer — Current PTR ability package: Priority target; exact current interrupt list requires live verification."
       - "Loyal Saberfang — Fixate (cast name unconfirmed): Priority kill; targeted player kites without crossing the group."
-      - "Loa Speaker Nanea — Volatile Totem: Immediate swap to Volatile Totems. Exact release behaviour requires live verification."
+      - "Loa Speaker Nanea — [Volatile Totem]: Immediate swap to Volatile Totems. Exact release behaviour requires live verification."
   tip:
-    - "Mechanics beat uptime: clear mushrooms, soak Rimeshatter and place echoes outside."
-    - "Version 0.10, reviewed and verified 9 August 2026; supersedes PTR Draft 0.9 (27 July 2026). The documents claim four changes since 27 July; date-anchored in the text: Razor Dive's cooldown increased (28 July PTR) and Fury of the War God echoes gained a new 1-second pre-charge window. Also new in this draft, though not explicitly dated: Bonded Beasttamer's Overwhelmed Prey removed, Overwhelming Onslaught knockback reduced 50%."
+    - "Mechanics beat uptime: clear mushrooms, soak [Rimeshatter] and place echoes outside."
+    - "Version 0.10, reviewed and verified 9 August 2026; supersedes PTR Draft 0.9 (27 July 2026). The documents claim four changes since 27 July; date-anchored in the text: [Razor Dive]'s cooldown increased (28 July PTR) and [Fury of the War God] echoes gained a new 1-second pre-charge window. Also new in this draft, though not explicitly dated: Bonded Beasttamer's [Overwhelmed Prey] removed, [Overwhelming Onslaught] knockback reduced 50%."
     - "Requires live verification: the Glacial Revenant, Frigid Mauler/Terra Rumbler and Bonded Beasttamer ability packages; the Loyal Saberfang cast name; and the Screecher/Striker naming discrepancy."
 
 trashSegments:
@@ -111,20 +115,20 @@ trashSegments:
       - { name: "Territorial Matriarch", npcID: 241808, displayID: 14316 }
     roles:
       TANK:
-        - "Keen-Eyed Screecher — Piercing Screech: Group it tightly; the cast damages and silences the party for 2 seconds."
-        - "Keen-Eyed Screecher — Razor Dive: The 28 July PTR increased its cooldown; still watch repeated dives and the stacking bleed."
-        - "Spirit of Hunger — Starvation Effigy: Keep the pack near the effigy so the group can swap immediately."
-        - "Territorial Matriarch — Mother's Wrath: Expect rising pressure while stacks remain."
+        - "Keen-Eyed Screecher — [Piercing Screech]: Group it tightly; the cast damages and silences the party for 2 seconds."
+        - "Keen-Eyed Screecher — [Razor Dive]: The 28 July PTR increased its cooldown; still watch repeated dives and the stacking bleed."
+        - "Spirit of Hunger — [Starvation Effigy]: Keep the pack near the effigy so the group can swap immediately."
+        - "Territorial Matriarch — [Mother's Wrath]: Expect rising pressure while stacks remain."
       HEALER:
-        - "Keen-Eyed Screecher — Piercing Screech: Pre-position before the silence; do not begin a long cast as Screech completes."
-        - "Keen-Eyed Screecher — Razor Dive: The cast is less frequent after the PTR change; track and stabilise the stacking bleed."
-        - "Spirit of Hunger — Starvation Effigy: Maximum health falls while the effigy lives; do not try to heal through it."
-        - "Territorial Matriarch — Mother's Wrath: Dispel Mother's Wrath; the current PTR removes all stacks."
+        - "Keen-Eyed Screecher — [Piercing Screech]: Pre-position before the silence; do not begin a long cast as Screech completes."
+        - "Keen-Eyed Screecher — [Razor Dive]: The cast is less frequent after the PTR change; track and stabilise the stacking bleed."
+        - "Spirit of Hunger — [Starvation Effigy]: Maximum health falls while the effigy lives; do not try to heal through it."
+        - "Territorial Matriarch — [Mother's Wrath]: Dispel [Mother's Wrath]; the current PTR removes all stacks."
       DPS:
-        - "Keen-Eyed Screecher — Piercing Screech: Top stop priority. Interrupt or crowd-control the party-wide silence."
-        - "Keen-Eyed Screecher — Razor Dive: The cast is less frequent after the PTR change; use a defensive if repeatedly targeted."
-        - "Spirit of Hunger — Starvation Effigy: Immediate swap. Kill the effigy before maximum-health reduction stacks."
-        - "Territorial Matriarch — Mother's Wrath: Stop the cast where possible and give the healer room to dispel."
+        - "Keen-Eyed Screecher — [Piercing Screech]: Top stop priority. Interrupt or crowd-control the party-wide silence."
+        - "Keen-Eyed Screecher — [Razor Dive]: The cast is less frequent after the PTR change; use a defensive if repeatedly targeted."
+        - "Spirit of Hunger — [Starvation Effigy]: Immediate swap. Kill the effigy before maximum-health reduction stacks."
+        - "Territorial Matriarch — [Mother's Wrath]: Stop the cast where possible and give the healer room to dispel."
 
   - name: "Winter gauntlet — after The Hoardmonger"
     after: "The Hoardmonger"
@@ -135,15 +139,15 @@ trashSegments:
       - { name: "Terra Rumbler", npcID: 241911, displayID: 35201 }
     roles:
       TANK:
-        - "The Winter Squall — Harsh Winds: Pull deliberately and keep the group near shelter; killing the Squall ends Harsh Winds."
+        - "The Winter Squall — [Harsh Winds]: Pull deliberately and keep the group near shelter; killing the Squall ends [Harsh Winds]."
         - "Glacial Revenant — Current ability package: Requires live verification. Avoid combining it with another unknown high-risk pack."
         - "Frigid Mauler / Terra Rumbler — Current ability package: Requires live verification. Face large enemies away until frontals are confirmed."
       HEALER:
-        - "The Winter Squall — Harsh Winds: Heal while moving between shelter; the effect ends when the Squall dies."
+        - "The Winter Squall — [Harsh Winds]: Heal while moving between shelter; the effect ends when the Squall dies."
         - "Glacial Revenant — Current ability package: Requires live verification. Keep a cooldown available for first contact."
         - "Frigid Mauler / Terra Rumbler — Current ability package: Requires live verification. Watch tank damage during the first pulls."
       DPS:
-        - "The Winter Squall — Harsh Winds: Priority target. Kill the Squall to stop Harsh Winds."
+        - "The Winter Squall — [Harsh Winds]: Priority target. Kill the Squall to stop [Harsh Winds]."
         - "Glacial Revenant — Current ability package: Requires live verification. Watch the cast bar and stop dangerous casts."
         - "Frigid Mauler / Terra Rumbler — Current ability package: Requires live verification. Respect frontals and ground telegraphs."
 
@@ -156,23 +160,23 @@ trashSegments:
       - { name: "Loa Speaker Nanea", npcID: 244889, displayID: 138584 }
     roles:
       TANK:
-        - "Grizzled Warbringer — Poison Spear Volley: Keep the area readable; impacts land after a 3-second travel time."
-        - "Grizzled Warbringer — Primal Echo: Use mitigation during the short, intense damage-over-time window."
-        - "Bonded Beasttamer — Current ability package: Control it with its bonded beast. Overwhelmed Prey was removed."
+        - "Grizzled Warbringer — [Poison Spear Volley]: Keep the area readable; impacts land after a 3-second travel time."
+        - "Grizzled Warbringer — [Primal Echo]: Use mitigation during the short, intense damage-over-time window."
+        - "Bonded Beasttamer — Current ability package: Control it with its bonded beast. [Overwhelmed Prey] was removed."
         - "Loyal Saberfang — Fixate (cast name unconfirmed): Help control its path while it pursues a non-tank player."
-        - "Loa Speaker Nanea — Volatile Totem: Position Nanea so the group can reach spawned totems."
+        - "Loa Speaker Nanea — [Volatile Totem]: Position Nanea so the group can reach spawned totems."
       HEALER:
-        - "Grizzled Warbringer — Poison Spear Volley: Prepare for avoidable party damage if players are slow to move."
-        - "Grizzled Warbringer — Primal Echo: React quickly to the short, high periodic-damage window."
+        - "Grizzled Warbringer — [Poison Spear Volley]: Prepare for avoidable party damage if players are slow to move."
+        - "Grizzled Warbringer — [Primal Echo]: React quickly to the short, high periodic-damage window."
         - "Bonded Beasttamer — Current ability package: Expect a dangerous pack; the release-build cast list still needs confirmation."
         - "Loyal Saberfang — Fixate (cast name unconfirmed): Keep the pursued player stable."
-        - "Loa Speaker Nanea — Volatile Totem: Prepare for damage if a totem is not removed quickly."
+        - "Loa Speaker Nanea — [Volatile Totem]: Prepare for damage if a totem is not removed quickly."
       DPS:
-        - "Grizzled Warbringer — Poison Spear Volley: Move out of impact circles; current travel time is 3 seconds."
-        - "Grizzled Warbringer — Primal Echo: Use a personal if targeted and avoid adding spear damage."
+        - "Grizzled Warbringer — [Poison Spear Volley]: Move out of impact circles; current travel time is 3 seconds."
+        - "Grizzled Warbringer — [Primal Echo]: Use a personal if targeted and avoid adding spear damage."
         - "Bonded Beasttamer — Current ability package: Priority target; exact current interrupt list requires live verification."
         - "Loyal Saberfang — Fixate (cast name unconfirmed): Priority kill; the targeted player kites without crossing the group."
-        - "Loa Speaker Nanea — Volatile Totem: Immediate swap to Volatile Totems; exact release behaviour requires live verification."
+        - "Loa Speaker Nanea — [Volatile Totem]: Immediate swap to Volatile Totems; exact release behaviour requires live verification."
 
 bosses:
   - name: "The Hoardmonger"
@@ -180,48 +184,48 @@ bosses:
       TANK: "Control the pile → face slams away → keep the arena clear."
       HEALER: "Heal the roar → watch mushroom cleaners → limit spore stacks."
       DPS: "Clear mushrooms safely → dodge slams → defensive the roar."
-      WIPE: "Uncleared Rotten Mushrooms burst and apply Toxic Spores to the party."
+      WIPE: "Uncleared [Rotten Mushrooms] burst and apply [Toxic Spores] to the party."
     encounterID: null   # fill via /gp ids
     npcID: 248710      # wowhead
     displayID: 129344  # wowhead modelviewer
     wipe:
-      - "Uncleared Rotten Mushrooms burst and apply Toxic Spores to the party."
+      - "Uncleared [Rotten Mushrooms] burst and apply [Toxic Spores] to the party."
       - "Multiple spore stacks plus a roar can overwhelm the group."
     roles:
       TANK:
         job:
           - "Control which resource pile the boss reaches at 90%, 60% and 30%."
-          - "Face Earthshatter Slam and Bonespike Slam away."
+          - "Face [Earthshatter Slam] and [Bonespike Slam] away."
           - "Move early as mushrooms and spikes reduce space."
         avoid:
           - "Both frontal slams."
-          - "Bone spikes and unnecessary Toxic Spores stacks."
+          - "Bone spikes and unnecessary [Toxic Spores] stacks."
         defensive:
-          - "Mitigate Colossal Roar."
-          - "Use stronger protection when Hearty Bellow is active."
+          - "Mitigate [Colossal Roar]."
+          - "Use stronger protection when [Hearty Bellow] is active."
         reminder: "Control the pile → face slams away → keep the arena clear."
       HEALER:
         job:
-          - "Prepare for Colossal Roar."
-          - "Track Toxic Spores on mushroom-clearing players."
+          - "Prepare for [Colossal Roar]."
+          - "Track [Toxic Spores] on mushroom-clearing players."
           - "Keep the tank stable while the boss repositions."
-          - "Hearty Bellow adds an initial hit and follow-up group damage."
+          - "[Hearty Bellow] adds an initial hit and follow-up group damage."
           - "Stabilise one mushroom-clearing player at a time."
         avoid:
           - "Both frontals, bone spikes and clearing several mushrooms together."
         cooldowns:
-          - "Use a healing cooldown when a later roar overlaps Toxic Spores or Hearty Bellow."
+          - "Use a healing cooldown when a later roar overlaps [Toxic Spores] or [Hearty Bellow]."
         reminder: "Heal the roar → watch mushroom cleaners → limit spore stacks."
       DPS:
         job:
-          - "Destroy or safely trigger Rotten Mushrooms before they burst."
+          - "Destroy or safely trigger [Rotten Mushrooms] before they burst."
           - "Maintain damage while the tank guides the boss to a resource pile."
-          - "Rotten Mushrooms are the priority mechanic; clear them before Putrid Burst."
+          - "[Rotten Mushrooms] are the priority mechanic; clear them before [Putrid Burst]."
         avoid:
-          - "Earthshatter Slam, Bonespike Slam and bone spikes."
+          - "[Earthshatter Slam], [Bonespike Slam] and bone spikes."
           - "Running through multiple mushrooms."
         defensive:
-          - "Use a personal for a roar overlapping Toxic Spores."
+          - "Use a personal for a roar overlapping [Toxic Spores]."
         reminder: "Clear mushrooms safely → dodge slams → defensive the roar."
 
   - name: "Sentinel of Winter"
@@ -229,44 +233,44 @@ bosses:
       TANK: "Centre the boss → preserve Snowdrifts → move inside."
       HEALER: "Pre-heal → move inside → cover the Frost damage."
       DPS: "Kill cores → soak fragment → get inside."
-      WIPE: "An unsoaked Rimeshatter causes party damage and a root."
+      WIPE: "An unsoaked [Rimeshatter] causes party damage and a root."
     encounterID: null   # fill via /gp ids
     npcID: 261053      # wowhead
     displayID: 129418  # wowhead modelviewer
     wipe:
-      - "An unsoaked Rimeshatter causes party damage and a root."
-      - "Missing Rimeshatter or entering the storm low can collapse the party."
+      - "An unsoaked [Rimeshatter] causes party damage and a root."
+      - "Missing [Rimeshatter] or entering the storm low can collapse the party."
     roles:
       TANK:
         job:
-          - "Keep the boss central so the party can reach the Frozen Tempest safe zone."
+          - "Keep the boss central so the party can reach the [Frozen Tempest] safe zone."
           - "Group Fractured Shivercores and preserve useful Snowdrifts."
         avoid:
-          - "Raging Squalls and Rimeshatter impact zones assigned to another player."
+          - "[Raging Squalls] and [Rimeshatter] impact zones assigned to another player."
         defensive:
-          - "Enter the 10-yard inner safe zone and mitigate Frozen Tempest."
+          - "Enter the 10-yard inner safe zone and mitigate [Frozen Tempest]."
         reminder: "Centre the boss → preserve Snowdrifts → move inside."
       HEALER:
         job:
-          - "Pre-heal Frozen Tempest while moving into the safe zone."
-          - "Cover ramping Glacial Torment and Winter's Shroud pressure."
-          - "Stabilise players assigned to Rimeshatter."
-          - "Keep the party healthy before Frozen Tempest starts."
+          - "Pre-heal [Frozen Tempest] while moving into the safe zone."
+          - "Cover ramping [Glacial Torment] and [Winter's Shroud] pressure."
+          - "Stabilise players assigned to [Rimeshatter]."
+          - "Keep the party healthy before [Frozen Tempest] starts."
         avoid:
-          - "Raging Squalls and becoming isolated before the storm."
+          - "[Raging Squalls] and becoming isolated before the storm."
         cooldowns:
-          - "Use a healing cooldown during Frozen Tempest."
+          - "Use a healing cooldown during [Frozen Tempest]."
         reminder: "Pre-heal → move inside → cover the Frost damage."
       DPS:
         job:
           - "Swap to Fractured Shivercores."
-          - "Soak assigned Rimeshatter impacts."
-          - "Move inside the boss's 10-yard safe zone for Frozen Tempest."
-          - "Fractured Shivercores are the priority target; reduce Winter's Shroud pressure."
+          - "Soak assigned [Rimeshatter] impacts."
+          - "Move inside the boss's 10-yard safe zone for [Frozen Tempest]."
+          - "Fractured Shivercores are the priority target; reduce [Winter's Shroud] pressure."
         avoid:
-          - "Raging Squalls and unassigned Rimeshatter zones."
+          - "[Raging Squalls] and unassigned [Rimeshatter] zones."
         defensive:
-          - "Use a personal during Frozen Tempest or high Frost vulnerability."
+          - "Use a personal during [Frozen Tempest] or high Frost vulnerability."
         reminder: "Kill cores → soak fragment → get inside."
 
   - name: "Nalorakk"
@@ -281,36 +285,36 @@ bosses:
     wipe:
       - "Echoes reaching Zul'jarra trigger group damage and a stacking damage-taken penalty."
       - "Repeated failures to protect Zul'jarra create escalating party damage."
-      - "Poorly placed echoes repeat Echoing Maul and can make the arena unusable."
+      - "Poorly placed echoes repeat [Echoing Maul] and can make the arena unusable."
     roles:
       TANK:
         job:
-          - "Stand behind Zul'jarra for Overwhelming Onslaught; its PTR knockback is 50% lower, but the protection remains required."
-          - "Keep Echoing Maul placements away from the centre."
-          - "Echoes now wait 1 second before charging — use that window to help assign separate echo-interception lanes during Fury of the War God."
+          - "Stand behind Zul'jarra for [Overwhelming Onslaught]; its PTR knockback is 50% lower, but the protection remains required."
+          - "Keep [Echoing Maul] placements away from the centre."
+          - "Echoes now wait 1 second before charging — use that window to help assign separate echo-interception lanes during [Fury of the War God]."
         avoid:
-          - "Stored Echoing Maul locations and unsafe Forceful Slam angles."
+          - "Stored [Echoing Maul] locations and unsafe [Forceful Slam] angles."
         defensive:
-          - "Mitigate Overwhelming Onslaught and Forceful Slam."
+          - "Mitigate [Overwhelming Onslaught] and [Forceful Slam]."
           - "Use a group defensive for difficult Fury sequences."
         reminder: "Use Zul'jarra's cover → 1-second lane check → intercept echoes."
       HEALER:
         job:
-          - "Keep echo interceptors healthy during Fury of the War God."
-          - "Prepare for Overwhelming Onslaught as a group mechanic; its knockback is 50% lower on the current PTR."
-          - "Track the arena before each Echoing Maul."
+          - "Keep echo interceptors healthy during [Fury of the War God]."
+          - "Prepare for [Overwhelming Onslaught] as a group mechanic; its knockback is 50% lower on the current PTR."
+          - "Track the arena before each [Echoing Maul]."
           - "Recover the party quickly if an echo reaches Zul'jarra."
-          - "Current PTR: Fury interceptors no longer receive Spectral Slash from the intercepted echo."
+          - "Current PTR: Fury interceptors no longer receive [Spectral Slash] from the intercepted echo."
           - "Use the new 1-second pre-charge window on Fury echoes to confirm lanes and prepare recovery."
         avoid:
-          - "Stored Echoing Maul locations and duplicate interceptions."
+          - "Stored [Echoing Maul] locations and duplicate interceptions."
         cooldowns:
           - "Use a healing cooldown during Fury; save recovery for a failed interception."
         reminder: "Pre-heal Fury → use the 1-second window → heal interceptors."
       DPS:
         job:
-          - "Place Echoing Maul at an outside edge."
-          - "Intercept one assigned echo during Fury of the War God; echoes now wait 1 second before charging, so take your lane during that window."
+          - "Place [Echoing Maul] at an outside edge."
+          - "Intercept one assigned echo during [Fury of the War God]; echoes now wait 1 second before charging, so take your lane during that window."
           - "Return without crossing stored echoes."
           - "No boss interrupt priority confirmed; mechanic execution is the priority."
         avoid:
