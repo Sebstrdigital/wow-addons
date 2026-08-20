@@ -115,6 +115,46 @@ local function CheckZone()
 end
 
 -- ------------------------------------------------------------------
+-- Guild identity
+-- ------------------------------------------------------------------
+-- The addon is published on CurseForge, so most of it has to work for anyone.
+-- The guild tab is the exception: it carries the Discord invite and anything
+-- else meant for the roster, and a stranger should never see that the invite
+-- exists. Membership is what gates the tab.
+
+ns.GUILD_NAME = "Stand as One"
+ns.DISCORD_URL = "https://discord.gg/EbwYS9u8t"
+
+local GUILD_NAME_FOLDED = ns.GUILD_NAME:lower()
+
+-- Matched on the folded name alone, deliberately: casing is the guild master's
+-- to change, and GetGuildInfo's realm return is the *guild's* home realm, which
+-- on a connected realm is not the character's - pinning to a realm would lock
+-- out exactly the transfers and connected-realm alts we want covered. A
+-- same-named guild elsewhere matching too costs us nothing.
+function ns.IsGuildMember()
+    if not IsInGuild() then return false end
+    -- GetGuildInfo("player") returns nil for a guilded character while the
+    -- roster is still loading, which is precisely the state at PLAYER_LOGIN.
+    -- Hence the events below rather than one check at startup.
+    local name = GetGuildInfo("player")
+    return type(name) == "string" and name:lower() == GUILD_NAME_FOLDED
+end
+
+ns.isGuildMember = false
+
+-- A flip adds or removes a whole tab, so it has to redraw. Unchanged is the
+-- overwhelmingly common case - GUILD_ROSTER_UPDATE fires on every roster
+-- change and every guild-panel open - and costs nothing.
+function ns.UpdateGuildMembership()
+    local now = ns.IsGuildMember()
+    if now ~= ns.isGuildMember then
+        ns.isGuildMember = now
+        ns.safecall(ns.UI_GuildMembershipChanged)
+    end
+end
+
+-- ------------------------------------------------------------------
 -- Events
 -- ------------------------------------------------------------------
 
@@ -126,6 +166,9 @@ f:RegisterEvent("GROUP_ROSTER_UPDATE")
 f:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 f:RegisterEvent("ENCOUNTER_START")
 f:RegisterEvent("ENCOUNTER_END")
+-- Guild name is unavailable at login and arrives on one of these two.
+f:RegisterEvent("PLAYER_GUILD_UPDATE")
+f:RegisterEvent("GUILD_ROSTER_UPDATE")
 
 f:SetScript("OnEvent", function(_, event, arg1, arg2)
     if event == "ADDON_LOADED" and arg1 == ADDON then
@@ -138,7 +181,10 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2)
             :format(C_AddOns.GetAddOnMetadata(ADDON, "Version") or "?", n, ns.uiLoaded and "ok" or "|cffff4040FAILED|r"))
     elseif event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
         ns.UpdateRole()
+        ns.UpdateGuildMembership()
         CheckZone()
+    elseif event == "PLAYER_GUILD_UPDATE" or event == "GUILD_ROSTER_UPDATE" then
+        ns.UpdateGuildMembership()
     elseif event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_SPECIALIZATION_CHANGED" then
         ns.UpdateRole()
     elseif event == "ENCOUNTER_START" then

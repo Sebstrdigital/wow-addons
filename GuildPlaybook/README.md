@@ -13,6 +13,8 @@ Copy the `GuildPlaybook` folder into `World of Warcraft/_retail_/Interface/AddOn
 - `/gp ids` — capture mode: prints the zone's `instanceID` and each boss's `encounterID` to chat so they can be filled into the YAML (needed once per dungeon; the reworked Midnight IDs aren't documented yet).
 - `/gp list` — show loaded playbooks.
 
+Members of the guild named in `ns.GUILD_NAME` (`Core.lua`) get a second top-level tab, **Guild**, holding the guild's Discord invite. Membership is checked with `IsInGuild()` and `GetGuildInfo("player")`, matched case-insensitively on the guild name alone so connected-realm alts and transfers still count. Everyone else gets no tab strip at all and the panel is unchanged.
+
 ## Editing content
 
 1. Edit or add a YAML file under `content/<season>/` — one file per dungeon. Follow the structure of `content/midnight-s2/ruby-life-pools.yaml`: a per-role dungeon overview plus one entry per boss with `job` / `avoid` / `defensive` (healers: `cooldowns`) / `reminder` lists per role and a shared `wipe` list. Optional per boss: `displayID` (or `npcID`) shows a 3D model of the boss next to the panel, and `adds` lists the named adds that boss summons — each an entry of `name` plus `npcID` / `displayID`, exactly like a trash `npcs` entry. A boss with `adds` becomes expandable in the nav, and selecting an add shows its 3D model alongside that boss's playbook text. Optional per dungeon: `trashSegments`, the named trash packs between bosses — each has a `name`, the boss it follows (`after`, or null before the first), per-role calls, and the `npcs` involved, which drive the same 3D model panel. Write trash calls as `Mob Name — advice` so the UI can attribute each call to a mob when one is selected.

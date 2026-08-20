@@ -468,6 +468,45 @@ local function CreateChromeButton(parent, width, height)
     return btn
 end
 
+-- Top-level tabs ----------------------------------------------------
+-- Two unrelated things live in this panel: the dungeon playbooks, and material
+-- that only concerns the guild. They share no state and no chrome - the role
+-- filter and the boss nav mean nothing on the guild page - so they are split at
+-- the top rather than folded in as another nav row.
+--
+-- The Guild tab exists only for members of ns.GUILD_NAME. Everyone else gets no
+-- tab strip at all rather than a locked tab: the addon is public on CurseForge,
+-- and a visible-but-refused tab would advertise a private Discord to every
+-- stranger who installs it.
+
+local TAB_W, TAB_H = 90, 24
+-- The header rows are laid out from the top by hand. When the strip is present
+-- it takes the band the role tabs used to have and pushes everything below it
+-- down by exactly one row; when it isn't, the rows sit where they always did
+-- and no gap is left behind. ApplyTabLayout drives both cases off these.
+local HEADER_ROW_Y, HEADER_ROW_STEP, NAV_TOP_Y = -52, 30, -104
+
+local activeTab = "dungeons"
+local tabButtons = {}
+
+local lastTabBtn
+for _, tab in ipairs({ { key = "dungeons", label = "Dungeons" },
+                       { key = "guild",    label = "Guild" } }) do
+    local btn = CreateChromeButton(frame, TAB_W, TAB_H)
+    if lastTabBtn then
+        btn:SetPoint("LEFT", lastTabBtn, "RIGHT", 4, 0)
+    else
+        btn:SetPoint("TOPLEFT", 14, HEADER_ROW_Y)
+    end
+    btn:SetText(tab.label)
+    btn:SetScript("OnClick", function()
+        activeTab = tab.key
+        ns.safecall(ns.UI_Refresh)
+    end)
+    tabButtons[tab.key] = btn
+    lastTabBtn = btn
+end
+
 -- Role tabs -------------------------------------------------------
 
 local roleButtons = {}
@@ -477,13 +516,15 @@ local function UpdateRoleTabs()
     end
 end
 
-local lastRoleBtn
+-- Only the first button is anchored to the frame; the rest chain off it, so
+-- ApplyTabLayout moves the whole row by re-anchoring this one.
+local firstRoleBtn, lastRoleBtn
 for _, role in ipairs({ "TANK", "HEALER", "DPS" }) do
     local btn = CreateChromeButton(frame, 85, 26)
     if lastRoleBtn then
         btn:SetPoint("LEFT", lastRoleBtn, "RIGHT", 4, 0)
     else
-        btn:SetPoint("TOPLEFT", 14, -52)
+        firstRoleBtn = btn
     end
     btn:SetText((C[role] or "") .. ROLE_LABEL[role] .. C.R)
     btn:SetScript("OnClick", function()
@@ -781,7 +822,8 @@ end
 -- available height once one of them is expanded, and the rows below would
 -- otherwise be unreachable.
 local navScroll = CreateFrame("ScrollFrame", nil, frame)
-navScroll:SetPoint("TOPLEFT", 14, -104)
+-- TOPLEFT is set by ApplyTabLayout, which knows whether the tab strip is
+-- taking a header row.
 navScroll:SetPoint("BOTTOMLEFT", 14, 14)
 navScroll:SetWidth(NAV_W)
 
@@ -1176,6 +1218,61 @@ local sectionTitle = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
 sectionTitle:SetPoint("BOTTOMLEFT", scroll, "TOPLEFT", TEXT_INSET, 6)
 sectionTitle:SetText("")
 
+-- Guild page --------------------------------------------------------
+-- Members-only content. The prose runs through the same body FontStrings as a
+-- playbook page, but the invite itself cannot: WoW gives an addon no way to
+-- write the clipboard, so a URL has to be handed over as selectable text in an
+-- EditBox for the player to Ctrl+C - the same constraint that shapes the MDT
+-- copy-box above. Hence one live widget stacked under the text.
+
+local discordBox = CreateFrame("EditBox", nil, content, "InputBoxTemplate")
+discordBox:SetSize(TEXT_W - 24, 22)
+discordBox:SetAutoFocus(false)
+discordBox:SetFontObject("ChatFontNormal")
+discordBox:SetText(ns.DISCORD_URL)
+-- Read-only in effect. The box exists to be copied out of, and a player who
+-- typed over the invite would have no way to get it back. `user` is what
+-- separates their keystrokes from our own SetText, which would otherwise
+-- recurse through this same handler.
+discordBox:SetScript("OnTextChanged", function(self, user)
+    if user then
+        self:SetText(ns.DISCORD_URL)
+        self:HighlightText()
+    end
+end)
+discordBox:SetScript("OnEditFocusGained", discordBox.HighlightText)
+discordBox:SetScript("OnEscapePressed", discordBox.ClearFocus)
+discordBox:Hide()
+
+local function BuildGuildText()
+    local out = {}
+    out[#out + 1] = C.BODY .. "You're in " .. C.LEAD .. ns.GUILD_NAME .. C.R .. C.BODY
+                    .. ", so this page is yours." .. C.R
+    heading(out, "Discord")
+    out[#out + 1] = C.BODY .. "Everything that doesn't fit in guild chat lives there: "
+                    .. "M+ night sign-ups, roster and key planning, and the tactics "
+                    .. "discussions these playbooks come out of." .. C.R
+    out[#out + 1] = C.DIM .. "Click the link to select it, press Ctrl+C, then paste it "
+                    .. "into your browser." .. C.R
+    return table.concat(out, "\n")
+end
+
+-- The gap between the prose and the invite box. Wider than the body's own
+-- leading, so the box reads as a separate thing rather than another line.
+local GUILD_BOX_GAP = 12
+
+-- Lays the guild page out and returns its total height, matching what the
+-- playbook branches of UI_Refresh get back from SetBodyText.
+local function SetGuildBody()
+    local y = SetBodyText(BuildGuildText())
+    discordBox:ClearAllPoints()
+    -- InputBoxTemplate carries a left border texture outside its text area, so
+    -- the extra inset is what lines the text up with the prose above it.
+    discordBox:SetPoint("TOPLEFT", content, "TOPLEFT", TEXT_INSET + 6, -(y + GUILD_BOX_GAP))
+    discordBox:Show()
+    return y + GUILD_BOX_GAP + discordBox:GetHeight()
+end
+
 -- Model side-cart: shows the boss model when the selected boss has a
 -- displayID (preferred, always renders) or npcID (needs client cache).
 local sidecar = CreateFrame("Frame", "GuildPlaybookModelFrame", frame, "BackdropTemplate")
@@ -1247,6 +1344,58 @@ local function UpdateSidecar()
 end
 
 -- ------------------------------------------------------------------
+-- Tab layout
+-- ------------------------------------------------------------------
+-- Places the header rows for the current membership and hides whatever the
+-- active tab has no use for. Called from UI_Refresh, so every path that
+-- redraws also re-settles the geometry.
+
+local function ApplyTabLayout()
+    -- Membership can drop while the guild page is open - a /gquit, or a
+    -- reload on an alt outside the guild - so fall back before drawing
+    -- anything the player is no longer entitled to.
+    if activeTab == "guild" and not ns.isGuildMember then
+        activeTab = "dungeons"
+    end
+    -- One tab is no tab: for a non-member there is nothing to switch to, so
+    -- the strip is dead chrome and the rows below reclaim its band.
+    local strip = ns.isGuildMember
+    for key, btn in pairs(tabButtons) do
+        btn:SetShown(strip)
+        btn:SetAlpha(key == activeTab and 1 or 0.55)
+    end
+    local drop = strip and HEADER_ROW_STEP or 0
+    firstRoleBtn:ClearAllPoints()
+    firstRoleBtn:SetPoint("TOPLEFT", 14, HEADER_ROW_Y - drop)
+    navScroll:ClearAllPoints()
+    navScroll:SetPoint("TOPLEFT", 14, NAV_TOP_Y - drop)
+    navScroll:SetPoint("BOTTOMLEFT", 14, 14)
+
+    local guild = (activeTab == "guild")
+    -- The role filter, the boss nav and the model side-cart are all about a
+    -- dungeon; none of them means anything on the guild page.
+    for _, btn in pairs(roleButtons) do btn:SetShown(not guild) end
+    autoOpenCheck:SetShown(not guild)
+    navScroll:SetShown(not guild)
+    if guild then
+        navBar:Hide()
+        sidecar:Hide()
+    end
+    discordBox:SetShown(guild)
+
+    scroll:ClearAllPoints()
+    scroll:SetPoint("BOTTOMRIGHT", -32, 14)
+    -- Anchored to navScroll either way, hidden or not: a hidden frame keeps
+    -- its rect, so the nav stays the single place the column geometry is
+    -- stated. On the guild page the content simply starts where the nav would.
+    if guild then
+        scroll:SetPoint("TOPLEFT", navScroll, "TOPLEFT", 0, 0)
+    else
+        scroll:SetPoint("TOPLEFT", navScroll, "TOPRIGHT", 10, 0)
+    end
+end
+
+-- ------------------------------------------------------------------
 -- Public API used by Core.lua
 -- ------------------------------------------------------------------
 
@@ -1254,6 +1403,17 @@ function ns.UI_Refresh()
     local d = viewedDungeon
     local bodyHeight = 0
     UpdateRoleTabs()
+    ApplyTabLayout()
+    -- The guild page shares nothing with a playbook page but the scroll frame,
+    -- so it takes its own exit rather than threading a third case through the
+    -- dungeon/boss/trash selection below.
+    if activeTab == "guild" then
+        subtitle:SetText(ns.GUILD_NAME .. C.DIM .. "  —  guild only" .. C.R)
+        sectionTitle:SetText("Guild")
+        content:SetHeight(SetGuildBody() + 20)
+        scroll:SetVerticalScroll(0)
+        return
+    end
     -- Expanding a segment changes which rows exist, so the nav is rebuilt from
     -- `selected` on every refresh rather than only when the dungeon changes.
     BuildNav(d)
@@ -1326,6 +1486,15 @@ function ns.UI_SelectDefault()
     ns.UI_Refresh()
 end
 
+-- Called from Core when membership flips, which adds or removes a whole tab.
+-- Only a visible panel needs redrawing; a hidden one gets its layout from
+-- UI_Show on the way up.
+function ns.UI_GuildMembershipChanged()
+    if frame:IsShown() then
+        ns.UI_Refresh()
+    end
+end
+
 -- Shared show path for the toggle and for auto-open on dungeon entry: restores
 -- the saved position and refreshes before revealing the frame.
 function ns.UI_Show()
@@ -1345,6 +1514,7 @@ function ns.UI_Toggle()
     end
 end
 
+ApplyTabLayout()
 BuildNav(nil)   -- start in dungeon-list mode until zone detection kicks in
 
 ns.uiLoaded = true
