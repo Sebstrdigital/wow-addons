@@ -1297,11 +1297,19 @@ sectionTitle:SetText("")
 -- write the clipboard, so a URL has to be handed over as selectable text in an
 -- EditBox for the player to Ctrl+C - the same constraint that shapes the MDT
 -- copy-box above. Hence one live widget stacked under the text.
+--
+-- It stays an EditBox because only an EditBox can hold a selection for Ctrl+C,
+-- but it carries none of InputBoxTemplate's chrome: a sunken input well next
+-- to a Copy button invites typing, and there is nothing here to type. Stripped
+-- to bare text in link-blue, it reads as the URL it is.
 
-local discordBox = CreateFrame("EditBox", nil, content, "InputBoxTemplate")
-discordBox:SetSize(TEXT_W - 24, 22)
+local discordBox = CreateFrame("EditBox", nil, content)
+discordBox:SetHeight(20)
 discordBox:SetAutoFocus(false)
 discordBox:SetFontObject("ChatFontNormal")
+-- The same blue the ability links use, so "blue text" means the same thing on
+-- every page of the addon: something to act on rather than only to read.
+discordBox:SetTextColor(0.44, 0.84, 1)
 discordBox:SetText(ns.DISCORD_URL)
 -- Read-only in effect. The box exists to be copied out of, and a player who
 -- typed over the invite would have no way to get it back. `user` is what
@@ -1324,9 +1332,27 @@ discordBox:Hide()
 -- focus the box and select the whole invite, leaving Ctrl+C as the only
 -- keystroke. The label says so rather than promising a copy that didn't happen.
 local COPY_HINT = "Now press Ctrl+C"
-local copyButton = CreateChromeButton(content, 96, 22)
+local COPY_BTN_W, COPY_BTN_GAP = 62, 10
+local copyButton = CreateChromeButton(content, COPY_BTN_W, 22)
 copyButton:SetText("Copy")
 copyButton:Hide()
+
+-- Measures the invite so the box can be exactly as wide as its text: a fixed
+-- width either pushed the button off the panel edge (which is what a full-width
+-- box did) or left a stretch of dead selectable space after the URL. Hidden and
+-- never drawn; it exists only to be measured.
+local urlMeasure = content:CreateFontString(nil, "OVERLAY", "ChatFontNormal")
+urlMeasure:Hide()
+
+-- Width of the invite text, clamped so the box and the button together always
+-- fit the text column no matter how long a future invite runs.
+local function DiscordBoxWidth()
+    urlMeasure:SetText(discordBox:GetText() or "")
+    local w = math.ceil(urlMeasure:GetStringWidth()) + 4
+    local room = TEXT_W - COPY_BTN_GAP - COPY_BTN_W
+    if w > room then w = room end
+    return w
+end
 
 local copyHint = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
 copyHint:SetTextColor(0.62, 0.83, 0.38)
@@ -1450,12 +1476,13 @@ local function SetGuildBody(page)
         return y
     end
     discordBox:ClearAllPoints()
-    -- InputBoxTemplate carries a left border texture outside its text area, so
-    -- the extra inset is what lines the text up with the prose above it.
-    discordBox:SetPoint("TOPLEFT", content, "TOPLEFT", TEXT_INSET + 6, -(y + GUILD_BOX_GAP))
+    -- Flush with the prose: without a template there is no border texture to
+    -- sit outside the text area, so no inset is needed to line the two up.
+    discordBox:SetWidth(DiscordBoxWidth())
+    discordBox:SetPoint("TOPLEFT", content, "TOPLEFT", TEXT_INSET, -(y + GUILD_BOX_GAP))
     discordBox:Show()
     copyButton:ClearAllPoints()
-    copyButton:SetPoint("LEFT", discordBox, "RIGHT", 10, 0)
+    copyButton:SetPoint("LEFT", discordBox, "RIGHT", COPY_BTN_GAP, 0)
     copyButton:Show()
     -- Under the box rather than beside the button: the hint appears after a
     -- click, and growing the row sideways would shift the button out from

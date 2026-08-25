@@ -459,8 +459,8 @@ ns.GUILD_PAGES = {
             "Everything that doesn't fit in guild chat lives there: M+ night "
             .. "sign-ups, roster and key planning, and the tactics discussions "
             .. "these playbooks come out of.",
-            { note = "Click the link to select it, press Ctrl+C, then paste it into "
-                     .. "your browser." },
+            { note = "Hit Copy to select the invite, press Ctrl+C, then paste it "
+                     .. "into your browser." },
         },
     },
 }
