@@ -1328,14 +1328,16 @@ discordBox:Hide()
 -- A real one-click copy isn't available to us: the client's CopyToClipboard is
 -- marked #protected and so can only be called from Blizzard's own secure code -
 -- an addon calling it gets blocked, which is why no addon ships a true copy
--- button. What this does instead is the half a player can't do in one action:
--- focus the box and select the whole invite, leaving Ctrl+C as the only
--- keystroke. The label says so rather than promising a copy that didn't happen.
-local COPY_HINT = "Now press Ctrl+C"
-local COPY_BTN_W, COPY_BTN_GAP = 62, 10
-local copyButton = CreateChromeButton(content, COPY_BTN_W, 22)
-copyButton:SetText("Copy")
-copyButton:Hide()
+-- button. So the button does the half a player can't do in one action - focus
+-- the box and select the whole invite - and says "Select", because that is what
+-- it does. Ctrl+C stays the player's keystroke, and the hint under the box
+-- tracks which half of the job is still outstanding.
+local HINT_SELECTED = "Now press Ctrl+C"
+local HINT_COPIED = "Copied - paste it into your browser"
+local SELECT_BTN_W, SELECT_BTN_GAP = 62, 10
+local selectButton = CreateChromeButton(content, SELECT_BTN_W, 22)
+selectButton:SetText("Select")
+selectButton:Hide()
 
 -- Measures the invite so the box can be exactly as wide as its text: a fixed
 -- width either pushed the button off the panel edge (which is what a full-width
@@ -1349,27 +1351,84 @@ urlMeasure:Hide()
 local function DiscordBoxWidth()
     urlMeasure:SetText(discordBox:GetText() or "")
     local w = math.ceil(urlMeasure:GetStringWidth()) + 4
-    local room = TEXT_W - COPY_BTN_GAP - COPY_BTN_W
+    local room = TEXT_W - SELECT_BTN_GAP - SELECT_BTN_W
     if w > room then w = room end
     return w
 end
 
 local copyHint = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-copyHint:SetTextColor(0.62, 0.83, 0.38)
 -- Text set once, visibility toggled: the page reserves this line's height
 -- whether or not it is showing, and an empty FontString measures as nothing.
-copyHint:SetText(COPY_HINT)
+-- Both hints are one line at this width, so swapping them can't reflow the page.
+copyHint:SetText(HINT_COPIED)
 copyHint:Hide()
 
-copyButton:SetScript("OnClick", function()
+-- True once Ctrl+C has been seen, which is what keeps the "Copied" line up
+-- after the box has released focus - the "press Ctrl+C" line, by contrast,
+-- describes a live selection and has to go when that selection does.
+local copied = false
+
+local function ShowHint(text, r, g, b)
+    copyHint:SetText(text)
+    copyHint:SetTextColor(r, g, b)
+    copyHint:Show()
+end
+
+selectButton:SetScript("OnClick", function()
+    copied = false
     discordBox:SetFocus()
     discordBox:HighlightText()
-    copyHint:Show()
+    ShowHint(HINT_SELECTED, 1, 0.82, 0)
 end)
 
--- The hint describes the current selection, so it stops being true the moment
--- the selection goes away.
-discordBox:HookScript("OnEditFocusLost", function() copyHint:Hide() end)
+-- Focusing an EditBox hands it the whole keyboard: until it lets go, WASD and
+-- every keybind type into the box instead of moving the player, and
+-- OnTextChanged silently reverts each keystroke, so it reads as the keys having
+-- died. Releasing focus the moment the copy is done is what keeps a copy from
+-- costing the player their movement keys. Same shape MDT uses for its own
+-- external-link boxes (Modules/ExternalLinks.lua).
+--
+-- Control is tracked from OnKeyDown rather than tested on the way up: releasing
+-- Ctrl before C is just as natural as the other order, and by then
+-- IsControlKeyDown() is already false.
+local ctrlHeld = false
+
+discordBox:SetScript("OnKeyDown", function(_, key)
+    if IsControlKeyDown() or key == "LCTRL" or key == "RCTRL" then
+        ctrlHeld = true
+    end
+end)
+
+discordBox:SetScript("OnKeyUp", function(self, key)
+    if ctrlHeld and key == "C" then
+        -- The client has already handled the copy by the time the key comes
+        -- back up, so this is a statement of fact, not a promise.
+        copied = true
+        ShowHint(HINT_COPIED, 0.62, 0.83, 0.38)
+        self:ClearFocus()
+    elseif key == "LCTRL" or key == "RCTRL" then
+        ctrlHeld = false
+    end
+end)
+
+-- The "press Ctrl+C" hint describes the current selection, so it stops being
+-- true the moment the selection goes away. "Copied" outlives it.
+discordBox:HookScript("OnEditFocusLost", function()
+    ctrlHeld = false
+    if not copied then copyHint:Hide() end
+end)
+
+-- Takes the invite row off the page. Also drops focus: navigating away while
+-- the box still holds the keyboard would strand the player with dead movement
+-- keys and no visible box to explain why. `copied` resets with it, so coming
+-- back to the page doesn't open on a stale "Copied".
+local function HideInvite()
+    if discordBox:HasFocus() then discordBox:ClearFocus() end
+    copied, ctrlHeld = false, false
+    discordBox:Hide()
+    selectButton:Hide()
+    copyHint:Hide()
+end
 
 -- The page Data/Guild.lua's id refers to, falling back to the first page so a
 -- stale or missing id can never leave the panel blank.
@@ -1470,9 +1529,7 @@ local DISCORD_PAGE_ID = "discord"
 local function SetGuildBody(page)
     local y = SetBodyText(BuildGuildPageText(page), SetHero(page))
     if not page or page.id ~= DISCORD_PAGE_ID then
-        discordBox:Hide()
-        copyButton:Hide()
-        copyHint:Hide()
+        HideInvite()
         return y
     end
     discordBox:ClearAllPoints()
@@ -1481,9 +1538,9 @@ local function SetGuildBody(page)
     discordBox:SetWidth(DiscordBoxWidth())
     discordBox:SetPoint("TOPLEFT", content, "TOPLEFT", TEXT_INSET, -(y + GUILD_BOX_GAP))
     discordBox:Show()
-    copyButton:ClearAllPoints()
-    copyButton:SetPoint("LEFT", discordBox, "RIGHT", COPY_BTN_GAP, 0)
-    copyButton:Show()
+    selectButton:ClearAllPoints()
+    selectButton:SetPoint("LEFT", discordBox, "RIGHT", SELECT_BTN_GAP, 0)
+    selectButton:Show()
     -- Under the box rather than beside the button: the hint appears after a
     -- click, and growing the row sideways would shift the button out from
     -- under the cursor that just pressed it.
@@ -1605,9 +1662,7 @@ local function ApplyTabLayout()
         -- dungeon side ever draws them, so nothing else would hide them either,
         -- and a stale hero would sit on top of the playbook text.
         hero:Hide()
-        discordBox:Hide()
-        copyButton:Hide()
-        copyHint:Hide()
+        HideInvite()
     end
 
     scroll:ClearAllPoints()
