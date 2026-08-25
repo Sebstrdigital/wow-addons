@@ -1254,9 +1254,12 @@ end
 -- the leftovers from a longer previous page, and returns the stacked height.
 -- Every Build*Text function emits self-contained lines (each opens its own
 -- color and closes with |r), so splitting them apart cannot strand a color.
-local function SetBodyText(s)
+-- `top` is where the first line sits, for a page that stacks something above
+-- its prose (the guild landing page's hero banner). It is folded into the
+-- returned height too, so callers still get one number for the whole page.
+local function SetBodyText(s, top)
     s = tostring(s or "")
-    local y, n, from = 0, 0, 1
+    local y, n, from = top or 0, 0, 1
     -- find/plain rather than gmatch: a gmatch pattern loose enough to keep
     -- empty lines also fires one extra empty match past the end of the string,
     -- which would add a phantom spacer line to every page.
@@ -1314,6 +1317,34 @@ discordBox:SetScript("OnEditFocusGained", discordBox.HighlightText)
 discordBox:SetScript("OnEscapePressed", discordBox.ClearFocus)
 discordBox:Hide()
 
+-- A real one-click copy isn't available to us: the client's CopyToClipboard is
+-- marked #protected and so can only be called from Blizzard's own secure code -
+-- an addon calling it gets blocked, which is why no addon ships a true copy
+-- button. What this does instead is the half a player can't do in one action:
+-- focus the box and select the whole invite, leaving Ctrl+C as the only
+-- keystroke. The label says so rather than promising a copy that didn't happen.
+local COPY_HINT = "Now press Ctrl+C"
+local copyButton = CreateChromeButton(content, 96, 22)
+copyButton:SetText("Copy")
+copyButton:Hide()
+
+local copyHint = content:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+copyHint:SetTextColor(0.62, 0.83, 0.38)
+-- Text set once, visibility toggled: the page reserves this line's height
+-- whether or not it is showing, and an empty FontString measures as nothing.
+copyHint:SetText(COPY_HINT)
+copyHint:Hide()
+
+copyButton:SetScript("OnClick", function()
+    discordBox:SetFocus()
+    discordBox:HighlightText()
+    copyHint:Show()
+end)
+
+-- The hint describes the current selection, so it stops being true the moment
+-- the selection goes away.
+discordBox:HookScript("OnEditFocusLost", function() copyHint:Hide() end)
+
 -- The page Data/Guild.lua's id refers to, falling back to the first page so a
 -- stale or missing id can never leave the panel blank.
 local function GuildPage()
@@ -1344,6 +1375,62 @@ local function BuildGuildPageText(page)
     return table.concat(out, "\n")
 end
 
+-- Hero banner ------------------------------------------------------
+-- The landing page opens on the guild's name at a size the body text can't
+-- reach: a FontString can't change size part-way through itself, so the banner
+-- has to be its own widgets rather than another block in the body string. It
+-- stacks above the prose and hands its height to SetBodyText as the offset to
+-- start the first line at.
+
+local hero = CreateFrame("Frame", nil, content)
+hero:SetPoint("TOPLEFT", content, "TOPLEFT", TEXT_INSET, 0)
+hero:SetWidth(TEXT_W)
+hero:Hide()
+
+local heroName = hero:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
+heroName:SetPoint("TOPLEFT")
+heroName:SetWidth(TEXT_W)
+heroName:SetJustifyH("LEFT")
+heroName:SetWordWrap(true)
+-- The same gold the section headings use, so the banner reads as the loudest
+-- instance of an existing voice rather than a new colour.
+heroName:SetTextColor(1, 0.82, 0)
+
+local heroTagline = hero:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+heroTagline:SetPoint("TOPLEFT", heroName, "BOTTOMLEFT", 0, -6)
+heroTagline:SetWidth(TEXT_W)
+heroTagline:SetJustifyH("LEFT")
+heroTagline:SetWordWrap(true)
+heroTagline:SetTextColor(0.91, 0.91, 0.91)
+
+-- Closes the banner off so the prose beneath it reads as a new block. Anchored
+-- rather than sized here; HERO_RULE_GAP below is what actually places it.
+local heroRule = hero:CreateTexture(nil, "ARTWORK")
+heroRule:SetColorTexture(1, 0.82, 0, 0.35)
+heroRule:SetHeight(1)
+
+local HERO_RULE_GAP, HERO_BOTTOM_GAP = 12, 16
+
+-- Fills the banner in for a page and returns the height it occupies, or 0 for
+-- a page that has no hero (every page but the landing one).
+local function SetHero(page)
+    local spec = page and page.hero
+    if not spec then
+        hero:Hide()
+        return 0
+    end
+    heroName:SetText(ns.GUILD_NAME)
+    heroTagline:SetText(spec.tagline or "")
+    local h = heroName:GetStringHeight() + 6 + heroTagline:GetStringHeight()
+    heroRule:ClearAllPoints()
+    heroRule:SetPoint("TOPLEFT", hero, "TOPLEFT", 0, -(h + HERO_RULE_GAP))
+    heroRule:SetWidth(TEXT_W)
+    h = h + HERO_RULE_GAP + 1
+    hero:SetHeight(h)
+    hero:Show()
+    return h + HERO_BOTTOM_GAP
+end
+
 -- The gap between the prose and the invite box. Wider than the body's own
 -- leading, so the box reads as a separate thing rather than another line.
 local GUILD_BOX_GAP = 12
@@ -1355,9 +1442,11 @@ local DISCORD_PAGE_ID = "discord"
 -- Lays a guild page out and returns its total height, matching what the
 -- playbook branches of UI_Refresh get back from SetBodyText.
 local function SetGuildBody(page)
-    local y = SetBodyText(BuildGuildPageText(page))
+    local y = SetBodyText(BuildGuildPageText(page), SetHero(page))
     if not page or page.id ~= DISCORD_PAGE_ID then
         discordBox:Hide()
+        copyButton:Hide()
+        copyHint:Hide()
         return y
     end
     discordBox:ClearAllPoints()
@@ -1365,7 +1454,17 @@ local function SetGuildBody(page)
     -- the extra inset is what lines the text up with the prose above it.
     discordBox:SetPoint("TOPLEFT", content, "TOPLEFT", TEXT_INSET + 6, -(y + GUILD_BOX_GAP))
     discordBox:Show()
-    return y + GUILD_BOX_GAP + discordBox:GetHeight()
+    copyButton:ClearAllPoints()
+    copyButton:SetPoint("LEFT", discordBox, "RIGHT", 10, 0)
+    copyButton:Show()
+    -- Under the box rather than beside the button: the hint appears after a
+    -- click, and growing the row sideways would shift the button out from
+    -- under the cursor that just pressed it.
+    copyHint:ClearAllPoints()
+    copyHint:SetPoint("TOPLEFT", discordBox, "BOTTOMLEFT", 0, -6)
+    -- Reserved whether or not the hint is showing, so the page height doesn't
+    -- change under the player at the moment they click.
+    return y + GUILD_BOX_GAP + discordBox:GetHeight() + 6 + copyHint:GetStringHeight()
 end
 
 -- Model side-cart: shows the boss model when the selected boss has a
@@ -1475,9 +1574,13 @@ local function ApplyTabLayout()
     if guild then
         sidecar:Hide()
     else
-        -- Owned by SetGuildBody while the guild tab is up; nothing else on the
-        -- dungeon side would ever hide it.
+        -- All owned by SetGuildBody while the guild tab is up. Nothing on the
+        -- dungeon side ever draws them, so nothing else would hide them either,
+        -- and a stale hero would sit on top of the playbook text.
+        hero:Hide()
         discordBox:Hide()
+        copyButton:Hide()
+        copyHint:Hide()
     end
 
     scroll:ClearAllPoints()

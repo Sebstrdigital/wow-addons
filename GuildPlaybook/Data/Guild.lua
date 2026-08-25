@@ -11,6 +11,8 @@ local ADDON, ns = ...
 -- Page shape, shared by top-level pages and their children:
 --   id       unique string, used as the nav selection key
 --   title    nav row label and content heading
+--   hero     optional banner shown above the body, for the landing page only:
+--            { tagline = "...", stats = { { label, value }, ... } }
 --   body     ordered list of blocks, each one of:
 --              "a paragraph"                  plain body prose
 --              { head = "Section" }           a heading inside the page
@@ -23,6 +25,37 @@ local ADDON, ns = ...
 -- expander is never a dead row - it summarises what it expands into.
 
 ns.GUILD_PAGES = {
+    -- The landing page, and the one the Guild tab opens on. It is a signpost
+    -- rather than a document: the handbook proper starts at Mission & Vision.
+    {
+        id = "welcome",
+        title = "Welcome",
+        hero = {
+            tagline = "Stand together. Play your way. Bring people with you.",
+        },
+        body = {
+            "This is the guild handbook - the same mission, rules and rank "
+            .. "structure the officer team maintains, kept where you actually "
+            .. "play rather than in a document nobody opens twice.",
+            { head = "What's in here" },
+            { bullets = {
+                "Mission & Vision - what we're building, and why.",
+                "Direction & Goals - where the guild is pointed, and how streaming fits in.",
+                "Guild Rules - nine of them, one page each.",
+                "Ranks - Initiate through GM, and how inactivity is handled at each.",
+                "Roster & Alts - why your guild note matters, and rejoining after a break.",
+                "Discord - the invite, and what lives there.",
+            } },
+            { head = "New here?" },
+            "Read Mission & Vision, skim the rules, put your name in your guild "
+            .. "note, and get into Discord. That's the whole onboarding.",
+            { head = "The rest of the addon" },
+            "The Dungeons tab carries the Mythic+ playbooks - per-boss and "
+            .. "per-pull calls, filtered to your role, with MDT routes you can "
+            .. "import in one click.",
+            { note = "#StandAsOne" },
+        },
+    },
     {
         id = "mission",
         title = "Mission & Vision",
