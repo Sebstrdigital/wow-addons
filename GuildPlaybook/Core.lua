@@ -123,7 +123,7 @@ end
 -- exists. Membership is what gates the tab.
 
 ns.GUILD_NAME = "Stand as One"
-ns.DISCORD_URL = "https://discord.gg/EbwYS9u8t"
+ns.DISCORD_URL = "https://discord.gg/H7nAYGTpXU"
 
 local GUILD_NAME_FOLDED = ns.GUILD_NAME:lower()
 

@@ -811,6 +811,22 @@ local mdtRouteButtons = {}
 local selected = { kind = "overview", boss = nil, segment = nil, npc = nil, expanded = nil }
 local viewedDungeon = nil   -- dungeon shown in the panel (may differ from ns.currentDungeon while browsing)
 
+-- The Guild tab has a nav of its own and so needs its own selection, held
+-- apart from the dungeon one rather than folded into it: switching tabs must
+-- leave the other tab's page exactly where the player left it. Its rows go
+-- through the same `navButtons` pool, so the shape matches - `kind` plus the
+-- fields the highlight compares - with `section` standing in for boss/segment.
+local guildSelected = { kind = "guild", section = ns.GUILD_PAGES and ns.GUILD_PAGES[1]
+                                                  and ns.GUILD_PAGES[1].id or nil,
+                        expanded = nil }
+
+-- Whichever selection the visible nav is currently describing. Everything that
+-- reads the nav (highlighting, scroll-into-view) goes through this rather than
+-- naming one of the two tables, so neither tab has to know about the other.
+local function ActiveSelection()
+    return activeTab == "guild" and guildSelected or selected
+end
+
 local function SortedDungeons()
     local list = {}
     for _, d in pairs(ns.dungeons) do list[#list + 1] = d end
@@ -885,18 +901,51 @@ local function UpdateNavBar()
 end
 
 local function UpdateNavHighlight()
+    local selected = ActiveSelection()
     for _, btn in ipairs(navButtons) do
         local isSelected = (btn.kind == selected.kind) and (btn.boss == selected.boss)
                            and (btn.segment == selected.segment) and (btn.npc == selected.npc)
+                           and (btn.section == selected.section)
         btn:GetFontString():SetTextColor(isSelected and 1 or 0.82, isSelected and 0.82 or 0.82, isSelected and 0 or 0.82)
     end
 end
 
+-- Guild handbook rows: one per top-level page, with a page's children folded
+-- in behind the same accordion the trash segments use. A parent row is still
+-- a page in its own right, so it selects as well as expands.
+local function GuildNavEntries()
+    local entries = {}
+    for _, page in ipairs(ns.GUILD_PAGES or {}) do
+        local kids = page.children or {}
+        local open = (#kids > 0) and (guildSelected.expanded == page.id)
+        local label = page.title
+        if #kids > 0 then
+            label = label .. "  " .. (open and GLYPH_OPEN or GLYPH_SHUT)
+        end
+        entries[#entries + 1] = { kind = "guild", section = page.id, page = page,
+                                  label = label }
+        if open then
+            for _, child in ipairs(kids) do
+                entries[#entries + 1] = { kind = "guild", section = child.id,
+                                          page = child, parent = page,
+                                          label = child.title, inset = INSET_NPC }
+            end
+        end
+    end
+    return entries
+end
+
+-- `d` is the dungeon whose nav to build, and is ignored on the Guild tab: the
+-- two navs share the button pool and the scroll frame but nothing else, so the
+-- entry list forks here and the rest of the function stays common.
 local function BuildNav(d)
     for _, btn in ipairs(navButtons) do btn:Hide() end
     for _, btn in ipairs(mdtRouteButtons) do btn:Hide() end
     local entries = {}
-    if not d then
+    if activeTab == "guild" then
+        entries = GuildNavEntries()
+        d = nil
+    elseif not d then
         for _, dungeon in ipairs(SortedDungeons()) do
             entries[#entries + 1] = { kind = "dungeon", dungeon = dungeon, label = dungeon.dungeon }
         end
@@ -1000,8 +1049,27 @@ local function BuildNav(d)
         btn.navTop = total
         total = total + rowH
         btn.kind, btn.boss, btn.segment, btn.npc = entry.kind, entry.boss, entry.segment, entry.npc
+        btn.section = entry.section
         btn:SetScript("OnClick", function()
-            if entry.kind == "dungeon" then
+            if entry.kind == "guild" then
+                -- Same accordion as a trash segment, on the other selection
+                -- table: a page with children toggles its own expansion and
+                -- stays selected, a child keeps its parent open, and a
+                -- childless top-level page collapses whatever was open.
+                local expanded
+                if #(entry.page.children or {}) > 0 then
+                    -- Clicking the open parent again shuts it without dropping
+                    -- the selection, so its own page keeps showing.
+                    if guildSelected.expanded ~= entry.section then
+                        expanded = entry.section
+                    end
+                elseif entry.parent then
+                    expanded = entry.parent.id
+                end
+                guildSelected = { kind = "guild", section = entry.section,
+                                  expanded = expanded }
+                ns.safecall(ns.UI_Refresh)
+            elseif entry.kind == "dungeon" then
                 ns.safecall(ns.UI_SetDungeon, entry.dungeon)
             elseif entry.kind == "back" then
                 ns.safecall(ns.UI_SetDungeon, nil)
@@ -1090,12 +1158,14 @@ local function BuildNav(d)
     -- the selected row back into view only if the rebuild pushed it out. That
     -- keeps an expand from scrolling to top while still revealing the row the
     -- user just clicked.
+    local selected = ActiveSelection()
     local view = navScroll:GetHeight() or 0
     local at = SetNavScroll(navScroll:GetVerticalScroll() or 0)
     if view > 0 then
         for _, btn in ipairs(navButtons) do
             if btn:IsShown() and btn.kind == selected.kind and btn.boss == selected.boss
-               and btn.segment == selected.segment and btn.npc == selected.npc then
+               and btn.segment == selected.segment and btn.npc == selected.npc
+               and btn.section == selected.section then
                 local top, bottom = btn.navTop or 0, (btn.navTop or 0) + (btn:GetHeight() or 0)
                 if top < at then
                     at = SetNavScroll(top)
@@ -1244,16 +1314,33 @@ discordBox:SetScript("OnEditFocusGained", discordBox.HighlightText)
 discordBox:SetScript("OnEscapePressed", discordBox.ClearFocus)
 discordBox:Hide()
 
-local function BuildGuildText()
+-- The page Data/Guild.lua's id refers to, falling back to the first page so a
+-- stale or missing id can never leave the panel blank.
+local function GuildPage()
+    local pages = ns.GUILD_PAGES or {}
+    return (ns.GUILD_PAGE_BY_ID or {})[guildSelected.section] or pages[1]
+end
+
+-- Renders one handbook page's blocks into the same newline-separated string a
+-- playbook page produces, so it goes through SetBodyText unchanged. Blocks are
+-- separated by a blank line; a heading brings its own air (see `heading`) and
+-- so is not given one on top of that.
+local function BuildGuildPageText(page)
     local out = {}
-    out[#out + 1] = C.BODY .. "You're in " .. C.LEAD .. ns.GUILD_NAME .. C.R .. C.BODY
-                    .. ", so this page is yours." .. C.R
-    heading(out, "Discord")
-    out[#out + 1] = C.BODY .. "Everything that doesn't fit in guild chat lives there: "
-                    .. "M+ night sign-ups, roster and key planning, and the tactics "
-                    .. "discussions these playbooks come out of." .. C.R
-    out[#out + 1] = C.DIM .. "Click the link to select it, press Ctrl+C, then paste it "
-                    .. "into your browser." .. C.R
+    for _, block in ipairs(page and page.body or {}) do
+        if type(block) == "table" and block.head then
+            heading(out, block.head)
+        else
+            if #out > 0 then out[#out + 1] = " " end
+            if type(block) == "string" then
+                out[#out + 1] = C.BODY .. block .. C.R
+            elseif block.bullets then
+                bullets(block.bullets, out, C.BODY)
+            elseif block.note then
+                out[#out + 1] = C.DIM .. block.note .. C.R
+            end
+        end
+    end
     return table.concat(out, "\n")
 end
 
@@ -1261,10 +1348,18 @@ end
 -- leading, so the box reads as a separate thing rather than another line.
 local GUILD_BOX_GAP = 12
 
--- Lays the guild page out and returns its total height, matching what the
+-- The one handbook page that carries a live widget under its prose. Keyed by
+-- id rather than by position so reordering Data/Guild.lua can't strand the box.
+local DISCORD_PAGE_ID = "discord"
+
+-- Lays a guild page out and returns its total height, matching what the
 -- playbook branches of UI_Refresh get back from SetBodyText.
-local function SetGuildBody()
-    local y = SetBodyText(BuildGuildText())
+local function SetGuildBody(page)
+    local y = SetBodyText(BuildGuildPageText(page))
+    if not page or page.id ~= DISCORD_PAGE_ID then
+        discordBox:Hide()
+        return y
+    end
     discordBox:ClearAllPoints()
     -- InputBoxTemplate carries a left border texture outside its text area, so
     -- the extra inset is what lines the text up with the prose above it.
@@ -1372,27 +1467,22 @@ local function ApplyTabLayout()
     navScroll:SetPoint("BOTTOMLEFT", 14, 14)
 
     local guild = (activeTab == "guild")
-    -- The role filter, the boss nav and the model side-cart are all about a
-    -- dungeon; none of them means anything on the guild page.
+    -- The role filter and the model side-cart are about a dungeon; neither
+    -- means anything on a handbook page. The nav column stays: both tabs fill
+    -- it, one with bosses and one with handbook sections.
     for _, btn in pairs(roleButtons) do btn:SetShown(not guild) end
     autoOpenCheck:SetShown(not guild)
-    navScroll:SetShown(not guild)
     if guild then
-        navBar:Hide()
         sidecar:Hide()
+    else
+        -- Owned by SetGuildBody while the guild tab is up; nothing else on the
+        -- dungeon side would ever hide it.
+        discordBox:Hide()
     end
-    discordBox:SetShown(guild)
 
     scroll:ClearAllPoints()
     scroll:SetPoint("BOTTOMRIGHT", -32, 14)
-    -- Anchored to navScroll either way, hidden or not: a hidden frame keeps
-    -- its rect, so the nav stays the single place the column geometry is
-    -- stated. On the guild page the content simply starts where the nav would.
-    if guild then
-        scroll:SetPoint("TOPLEFT", navScroll, "TOPLEFT", 0, 0)
-    else
-        scroll:SetPoint("TOPLEFT", navScroll, "TOPRIGHT", 10, 0)
-    end
+    scroll:SetPoint("TOPLEFT", navScroll, "TOPRIGHT", 10, 0)
 end
 
 -- ------------------------------------------------------------------
@@ -1408,9 +1498,12 @@ function ns.UI_Refresh()
     -- so it takes its own exit rather than threading a third case through the
     -- dungeon/boss/trash selection below.
     if activeTab == "guild" then
+        local page = GuildPage()
+        BuildNav(nil)
+        UpdateNavHighlight()
         subtitle:SetText(ns.GUILD_NAME .. C.DIM .. "  —  guild only" .. C.R)
-        sectionTitle:SetText("Guild")
-        content:SetHeight(SetGuildBody() + 20)
+        sectionTitle:SetText(page and page.title or "Guild")
+        content:SetHeight(SetGuildBody(page) + 20)
         scroll:SetVerticalScroll(0)
         return
     end
