@@ -11,8 +11,8 @@ ns.RegisterDungeon({
   ["instanceID"] = nil,
   ["mdtRoutes"] = {
     {
-      ["name"] = "elitzur - keystone.guru (Aug 2026, 100.8% forces)",
-      ["string"] = "!~MDT2~VZJLV9NAFMeZPKbT0rS0ShkfR8NShUpaaIm6QVqwlGNR1OOO0zY3NZomnDywuGJSu8FvAQg+vp7dO1UeZTGL+5jf/39n7tm62/oI7cDvH604wxVjUCmX88tr8wVNz+to+H5x8+32G3U3tG11SXU9tTSnGrALjmE5HdV11MDqgqc2HUPd9cAED5w2zJ6jVkv6AicVynkNDRv/QHbTD9SW6/sXPVWtWMpra/OLhWK+hIabV3La7IZhmabVDu1g/2blM8Cniepe0w7hx6t26HGloBI6HXCdmtGjxzUfbD6H5ToH9fPyFseg9QCgy81O1D3LDBqm6UPgH1RHEv63U9RPKikhSiqYKXI/lZ4iDFXbru16a6ZZBNM8il8mRqEOv9FAEJEkCwMBiZIsDkQByZL0PznJkMJQmqEUQ1MMJa/BinBMbzFE740Rdc78jpmUYWiaoexYv9kqAq9gwkSZkWkmjbkYke5GSKC3rwno8BNFibgQxRNiRGKZKDOVZekcEymNsDxzSMu0RJepTp/QIn1KF+kzujRGNc1fiMUEhjFLZlgqx/1ECpHZJL+5QOfoAzpPH9ICfUTzVKOPOVS4Ute53TOeEqXM1+wNHJNZEnMfM4eyIEo4RhJxlGPCpdpI74Te4a9xnx/1coymNhpkCxzo7q/4vtVxuvwj/bNJRhQmkyNExFj2BGGCFZTGuT4hBJ9irOAETkqSFJemeYtEGucbsB22bNgDG1UC6AWvwbaCL6G3s+daht9uejvaatewjl+aHsAH1zY2XMsB48+LixjVWtAJLZuvD1oNLaNe1t89r9X9Xq++/hc=",
+      ["name"] = "Tactyks PUG Friendly - Method/wago.io (Aug 2026)",
+      ["string"] = "!~MDT2~XVNNT1NBFHXeR2mhLW0hcEEjoyAq4gewatwYMRgiCyJodGOcvnenPDq8gffmQXHFTGNMiAv/gnwU3foDDIn/xn1XbEyxIZTV3HvunHNmTmZ+eEng12be70RLW++C2torX2FdqVXmqd1aTJffvKQLUYChL3Zxm4kEj3EzESL+9pM0srm8ZbI5Z89t5Av9KZ3r2UtrUtxDTwoZcc7nkPODjCYdoN2W8Zg0iGVbDWJbdrtyGjaxLlHmsGkZx3WM4/ZpktUkd0mgjJw3iXFc2zhuXpN+TQoXY855ZQ4PYUQTuNnlOofNlHaKbbuSJgOaDF4xLeNRydjWgHGtwUa2t+8Sl/NmWjtF47gl47gD2hlsZHrSF9zyueWoJnDDXEi2b8F50zK9Gduke4qmUBzSNoBJuZ0dbKZte0J02tapou4v6fyQJgDGIl3xnRDdY+mU2z5BLlvS6eF9mIBJoHAPbsFtGIe7cAfGuhJuurovpbNFnS/p3PA+3IdpeAhTMAsP4Ak8ghl43JX3MTGZ3pLuH9IWgLGdrrSP4LomMKYJ0CtBBzEK9FQgQ12oeUkUYaiWEyEKstOsJBWB2yjIVgd4kYRVlOGiX4fDqqyso6dic8D8z2fPPv5Zff2bXzs7/ZT7uzLx6ztp1Z/Oz1NGKxHbERjRgNMQ0UefKkkj9BMPqVpD6q2x0EPKaC3warQqMaaScxa2/usGs6Nfv0yenp3ufRg5WshMkFZ9aimJFW2/Yjoz/X8tUxnR2dCnFRnH03SJxeq8ZGEr8CJkCv3nu4d+yDaw2vkaGCETG8GKktFGxKq45gkWx4t+vW/dDzgPvESoXRgXzPdl+BajOJDhiLW5eZ7gMhOoFC6GXB4Ilig530aDsNqSXXO/7vwD",
     },
   },
   ["quicksheet"] = {
