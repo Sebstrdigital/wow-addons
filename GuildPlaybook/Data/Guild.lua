@@ -473,3 +473,14 @@ for _, page in ipairs(ns.GUILD_PAGES) do
         ns.GUILD_PAGE_BY_ID[child.id] = child
     end
 end
+
+-- Key-level brackets people sign up under on the Mythic Monday board. The
+-- ranges overlap on purpose: a +6 key is the top of "low" and the bottom of
+-- "mid", and someone with one is happy in either kind of group. "any" carries
+-- no range at all - it means "put me wherever there is a slot".
+ns.MONDAY_BRACKETS = {
+    { id = "low",  label = "Low",  min = 2,   max = 6 },
+    { id = "mid",  label = "Mid",  min = 6,   max = 10 },
+    { id = "high", label = "High", min = 10,  max = 15 },
+    { id = "any",  label = "Any",  min = nil, max = nil },
+}

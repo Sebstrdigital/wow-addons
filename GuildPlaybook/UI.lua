@@ -910,6 +910,33 @@ local function UpdateNavHighlight()
     end
 end
 
+-- Synthetic nav rows for the ns.Monday boards: not one of Data/Guild.lua's
+-- pages (nothing there to add - each board is generated from ns.Monday, not
+-- authored prose), so they're appended here rather than folded into
+-- ns.GUILD_PAGES. Each still needs a `page` table of its own: the click
+-- handler below reads `entry.page.children` for every "guild" row, and
+-- neither of these has any. Order matches the nav: Mythic Monday first,
+-- Open groups second, both after every real handbook page (Discord is last
+-- in ns.GUILD_PAGES, so the boards sit below it). `title` is a static
+-- fallback for the nav label itself (used before ns.Monday has loaded); the
+-- page header inside SetMondayBody always asks ns.Monday.EventTitle(ev)
+-- instead, so the two can't drift.
+local MONDAY_BOARD_PAGES = {
+    { id = "monday", title = "Mythic Monday" },
+    { id = "open",   title = "Open groups" },
+}
+local MONDAY_BOARD_IDS = {}
+for _, p in ipairs(MONDAY_BOARD_PAGES) do
+    MONDAY_BOARD_IDS[p.id] = true
+end
+
+-- True for a synthetic ns.Monday board page id, as opposed to a real
+-- Data/Guild.lua handbook page. Used everywhere a "guild" section id has to
+-- be routed to SetMondayBody instead of GuildPage()/SetGuildBody.
+local function IsBoardPage(id)
+    return MONDAY_BOARD_IDS[id] == true
+end
+
 -- Guild handbook rows: one per top-level page, with a page's children folded
 -- in behind the same accordion the trash segments use. A parent row is still
 -- a page in its own right, so it selects as well as expands.
@@ -931,6 +958,10 @@ local function GuildNavEntries()
                                           label = child.title, inset = INSET_NPC }
             end
         end
+    end
+    for _, p in ipairs(MONDAY_BOARD_PAGES) do
+        local label = (ns.Monday and ns.Monday.EventTitle and ns.Monday.EventTitle(p.id)) or p.title
+        entries[#entries + 1] = { kind = "guild", section = p.id, page = p, label = label }
     end
     return entries
 end
@@ -1198,24 +1229,21 @@ local content = CreateFrame("Frame", nil, scroll)
 content:SetSize(PANEL_W - NAV_W - 60, 1)
 scroll:SetScrollChild(content)
 
--- Spell links rendered by RenderAbilityLinks live in the body FontStrings
--- below, which are regions of this frame - hyperlink hit-testing and the
--- OnHyperlink* scripts belong on the frame that owns the regions, not on the
--- FontStrings themselves (FontStrings don't take mouse scripts). This holds
--- for every FontString in the pool: they are all created by content, so one
--- pair of scripts on content serves all of them.
+-- Spell links rendered by RenderAbilityLinks, and the Monday board's own
+-- player-name links, both live in the body FontStrings below, which are
+-- regions of this frame - hyperlink hit-testing and the OnHyperlink*
+-- scripts belong on the frame that owns the regions, not on the FontStrings
+-- themselves (FontStrings don't take mouse scripts). This holds for every
+-- FontString in the pool: they are all created by content, so one set of
+-- scripts on content serves all of them.
 content:EnableMouse(true)
 content:SetHyperlinksEnabled(true)
-content:SetScript("OnHyperlinkEnter", function(self, link)
-    ns.safecall(function()
-        GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
-        GameTooltip:SetHyperlink(link)
-        GameTooltip:Show()
-    end)
-end)
-content:SetScript("OnHyperlinkLeave", function()
-    ns.safecall(GameTooltip.Hide, GameTooltip)
-end)
+-- OnHyperlinkEnter/Leave/Click are set up later, in the Monday board section
+-- (right before SetMondayBody), once that section's link/invite helpers
+-- (ShortName, MondayInvite, ...) are in scope for those closures to close
+-- over - a closure only captures a `local` that already exists in the
+-- source above it, so defining them here would silently resolve those names
+-- as globals instead.
 
 -- Long call text at this size needs a shorter measure than the panel is wide,
 -- and more leading than the 3px default, or every section reads as one block.
@@ -1551,6 +1579,573 @@ local function SetGuildBody(page)
     return y + GUILD_BOX_GAP + discordBox:GetHeight() + 6 + copyHint:GetStringHeight()
 end
 
+-- Mythic Monday page -------------------------------------------------
+-- Renders GuildPlaybook/Monday.lua's sign-up board. Unlike a prose page, most
+-- rows here carry a live button pinned to that exact row (sign-up actions,
+-- bracket toggles, per-group Join/Leave/Disband), so this doesn't go through
+-- BuildGuildPageText/SetBodyText - rows and their buttons are collected
+-- together first, then stacked in one pass so a button's Y always lands on
+-- the line it belongs to. Text still goes through the same bodyLines pool
+-- (one FontString per line, same hyperlink-cap rule as every other page).
+
+local ROLE_FULL = { T = "Tank", H = "Healer", D = "DPS" }
+local ROLE_COLOR = { T = C.TANK, H = C.HEALER, D = C.DPS }
+
+-- InviteAll()'s per-skip reason code, turned into the word Invite()'s own
+-- failure messages already use ("in party", not "inparty").
+local MONDAY_SKIP_REASON = { inparty = "in party", offline = "offline", self = "self" }
+
+-- Which bracket "Join a group" targets, kept per board (a bracket picked on
+-- the Monday page shouldn't light up on Open groups and vice versa). Only
+-- affects the join action, not what's already signed up. Not persisted -
+-- both start at "any" each session, matching the contract's stated default.
+local mondaySelectedBracket = { monday = "any", open = "any" }
+
+local MONDAY_BTN_H, MONDAY_BTN_GAP = 22, 6
+
+-- One flat pool for every button this page uses. They have nothing
+-- structurally different from each other, so one pool beats one per role.
+-- `mondayButtonCount` resets to 0 at the top of each redraw; whatever a
+-- previous draw acquired past the new count gets hidden below.
+local mondayButtons = {}
+local mondayButtonCount = 0
+
+local function NextMondayButton(width)
+    mondayButtonCount = mondayButtonCount + 1
+    local btn = mondayButtons[mondayButtonCount]
+    if not btn then
+        btn = CreateChromeButton(content, width, MONDAY_BTN_H)
+        mondayButtons[mondayButtonCount] = btn
+    end
+    btn:SetSize(width, MONDAY_BTN_H)
+    btn:Show()
+    return btn
+end
+
+local function HideUnusedMondayButtons()
+    for i = mondayButtonCount + 1, #mondayButtons do
+        mondayButtons[i]:Hide()
+    end
+end
+
+-- The board's own player key, matching the convention Monday.lua's protocol
+-- uses for every entry/member/leader name: "Name-Realm". Guarded the same
+-- way Monday.lua's own MyName is: GetNormalizedRealmName() can come back nil
+-- (seen on a realm mid-connect), and a "Name-nil" key would never match a
+-- member/leader name built the normal way.
+local function MondayPlayerKey()
+    local name = UnitName("player")
+    local realm = GetNormalizedRealmName()
+    if realm and realm ~= "" then
+        return name .. "-" .. realm
+    end
+    return name
+end
+
+-- Members, leaders and pool entries arrive as "Name-Realm"; the board only
+-- has room to show the name half.
+local function ShortName(full)
+    return (full and full:match("^[^%-]+")) or full or "?"
+end
+
+-- Renders a roster/pool name as a clickable custom link carrying the full
+-- "Name-Realm" key: `|Hgpmm:Name-Realm|h|cff<LINK>Name|r|h`. Handled by the
+-- OnHyperlinkClick script set on `content` below (left-click invite,
+-- right-click menu) via the "gpmm:" prefix, same mechanism RenderAbilityLinks
+-- already uses for spell links on this same frame. LINK is the same
+-- link-blue every other clickable thing in this addon uses, so "blue text"
+-- keeps meaning the same thing everywhere in the panel.
+local function MondayNameLink(fullName)
+    return "|Hgpmm:" .. fullName .. "|h" .. LINK .. ShortName(fullName) .. "|r|h"
+end
+
+local function FormatMondayAge(seconds)
+    if not seconds or seconds < 0 then seconds = 0 end
+    local mins = math.floor(seconds / 60)
+    if mins < 60 then return mins .. "m" end
+    return math.floor(mins / 60) .. "h"
+end
+
+-- Plain (uncoloured) "+12 Kings' Rest" - callers wrap it in whatever colour
+-- span they're already inside, since where this lands (mid-status-line vs.
+-- after a name in guild-lead colour) differs by row.
+local function FormatMondayKey(level, name)
+    if not level or not name then return "none" end
+    return "+" .. level .. " " .. name
+end
+
+local MONDAY_MONTH_ABBR = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" }
+
+-- TargetDate() is always a Monday by construction, so the weekday half of
+-- the label never has to be computed - only day and month need parsing out
+-- of the "YYYY-MM-DD" string.
+local function FormatMondayDate(dateStr)
+    local y, m, d = (dateStr or ""):match("^(%d+)-(%d+)-(%d+)$")
+    if not (y and m and d) then return dateStr or "" end
+    return "Mon " .. tonumber(d) .. " " .. (MONDAY_MONTH_ABBR[tonumber(m)] or m)
+end
+
+-- Brackets() carries the range on the same table as the label but not
+-- folded into it ("mid" -> label "Mid", min=6, max=10), so the "Mid 6-10"
+-- display string is built here rather than changing that table's shape.
+-- "Any" (or any bracket with no range, or none found at all) falls back to
+-- its bare label.
+local function BracketDisplay(b)
+    if not b then return "Any" end
+    if b.min and b.max then
+        return (b.label or b.id) .. " " .. b.min .. "-" .. b.max
+    end
+    return b.label or b.id or "Any"
+end
+
+local function FindMondayBracket(id)
+    for _, b in ipairs((ns.Monday and ns.Monday.Brackets()) or {}) do
+        if b.id == id then return b end
+    end
+    return nil
+end
+
+-- Shared by the per-bracket pool rows and the "Unspecified" catch-all below,
+-- so a pool entry looks the same regardless of which bucket it landed in.
+-- `showOffline` is false on the open board: those entries are pruned by the
+-- module rather than flagged, so `e.online` there carries nothing worth
+-- printing (and would misleadingly imply the flag is meaningful there).
+local function PoolEntryLine(e, showOffline)
+    local roleColor = ROLE_COLOR[e.role] or C.BODY
+    local keyStr = (e.level and e.keyName)
+                   and (C.BODY .. FormatMondayKey(e.level, e.keyName) .. C.R)
+                   or (C.DIM .. "no key" .. C.R)
+    local entryLine = MondayNameLink(e.name) .. "  "
+                       .. roleColor .. (ROLE_FULL[e.role] or "?") .. C.R .. "  " .. keyStr
+    if showOffline and not e.online then
+        entryLine = entryLine .. C.DIM .. " (offline)" .. C.R
+    end
+    return entryLine
+end
+
+-- Shared by the left-click invite and the right-click menu's "Invite" entry,
+-- so a single name link always fails the same way regardless of which path
+-- triggered it. Silent on "self" - there's nothing useful to tell the player
+-- about inviting themselves.
+local function MondayInvite(name)
+    if not (ns.Monday and ns.Monday.Invite) then return end
+    local ok, reason = ns.Monday.Invite(name)
+    if ok == false then
+        if reason == "offline" then
+            print("|cffff4040Mythic Monday:|r " .. ShortName(name) .. " appears offline")
+        elseif reason == "inparty" then
+            print("|cffff4040Mythic Monday:|r " .. ShortName(name) .. " is already in your party")
+        end
+    end
+end
+
+-- Right-click menu for a player-name link. MenuUtil.CreateContextMenu is the
+-- 11.0+ Menu API; on a client where it isn't available, right-click just
+-- does what the menu's other entry would have done.
+local function ShowMondayNameMenu(owner, name)
+    if MenuUtil and MenuUtil.CreateContextMenu then
+        MenuUtil.CreateContextMenu(owner, function(_, rootDescription)
+            rootDescription:CreateButton("Invite", function() MondayInvite(name) end)
+            rootDescription:CreateButton("Whisper", function() ChatFrame_OpenChat("/w " .. name .. " ") end)
+        end)
+    else
+        ChatFrame_OpenChat("/w " .. name .. " ")
+    end
+end
+
+-- content's hyperlink scripts, covering both RenderAbilityLinks' spell links
+-- (the original behaviour, preserved below) and this board's own "gpmm:"
+-- player-name links. Defined here rather than back where `content` was
+-- created: these closures need ShortName/MondayInvite/ShowMondayNameMenu
+-- already declared above them to close over the right locals.
+content:SetScript("OnHyperlinkEnter", function(self, link)
+    ns.safecall(function()
+        GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
+        local name = link:match("^gpmm:(.+)$")
+        if name then
+            GameTooltip:SetText(ShortName(name))
+            GameTooltip:AddLine("Click: invite  ·  Right-click: menu", 0.6, 0.6, 0.6)
+        else
+            GameTooltip:SetHyperlink(link)
+        end
+        GameTooltip:Show()
+    end)
+end)
+content:SetScript("OnHyperlinkLeave", function()
+    ns.safecall(GameTooltip.Hide, GameTooltip)
+end)
+content:SetScript("OnHyperlinkClick", function(self, link, text, button)
+    ns.safecall(function()
+        local name = link:match("^gpmm:(.+)$")
+        if not name then return end   -- no other link type here needs a click handler
+        if button == "RightButton" then
+            ShowMondayNameMenu(self, name)
+        else
+            MondayInvite(name)
+        end
+    end)
+end)
+
+-- Lays a ns.Monday board out and returns its total height, matching what
+-- SetGuildBody returns for a handbook page. `ev` is "monday" or "open" -
+-- same renderer for both, per the v1.4.0 addendum.
+local function SetMondayBody(ev)
+    HideInvite()
+    SetHero(nil)
+    mondayButtonCount = 0
+
+    if not ns.Monday then
+        local staticTitle = (ev == "open") and "Open groups" or "Mythic Monday"
+        local y = SetBodyText(C.DIM .. staticTitle .. " module not loaded." .. C.R)
+        HideUnusedMondayButtons()
+        return y
+    end
+
+    local rows = {}   -- { text = "...", buttons = { {label,width,onClick,...}, ... } }
+    local function line(text, buttons)
+        rows[#rows + 1] = { text = text, buttons = buttons }
+    end
+    -- Two blank lines above, none below - same spacing rule as `heading()`
+    -- uses for a playbook page, kept separate here because a section header
+    -- on this page never carries buttons of its own.
+    local function headingRow(text)
+        if #rows > 0 then
+            line(" ")
+            line(" ")
+        end
+        line(C.HEAD .. text .. C.R)
+    end
+
+    local me = ns.Monday.Me(ev)
+    local myKey = ns.Monday.MyKey()
+    local myRole = ns.Monday.MyRole()
+    local groups = ns.Monday.Groups(ev) or {}
+
+    -- Header -----------------------------------------------------------
+    -- "monday" carries a target date in its header; "open" is a standing
+    -- board with no single date to show. EventTitle(ev) gives the board
+    -- name either way. Refresh isn't routed through ns.safecall: Refresh(ev)
+    -- returns false, "throttled" on its cooldown, and safecall discards a
+    -- wrapped call's return values, which would silently swallow that.
+    -- pcall here instead, so a throttled click still says something rather
+    -- than doing nothing.
+    local title = ns.Monday.EventTitle(ev) or (ev == "open" and "Open groups" or "Mythic Monday")
+    local headerTail = (ev == "open") and "right now" or FormatMondayDate(ns.Monday.TargetDate())
+    line(C.HEAD .. title .. " — " .. headerTail .. C.R, {
+        { label = "Refresh", width = 70, align = "right",
+          onClick = function()
+              local ok, refreshed = pcall(ns.Monday.Refresh, ev)
+              if not ok then
+                  print("|cffff4040Guild Playbook error:|r " .. tostring(refreshed))
+              elseif refreshed == false then
+                  print("|cffff4040Guild Playbook:|r board refresh is rate-limited, try again in a minute.")
+              end
+          end },
+    })
+
+    -- Status line --------------------------------------------------------
+    local status
+    if not me then
+        status = "You: not signed up"
+    elseif me.intent == "lead" then
+        local mine
+        for _, g in ipairs(groups) do
+            if g.isMine then mine = g break end
+        end
+        local filled = "?"
+        if mine then
+            local missing = mine.missing or {}
+            filled = 5 - (missing.T and 1 or 0) - (missing.H and 1 or 0) - (missing.D or 0)
+        end
+        status = "You: leading " .. FormatMondayKey(myKey and myKey.level, myKey and myKey.name)
+                  .. " (" .. filled .. "/5)"
+    elseif me.leader then
+        status = "You: in " .. ShortName(me.leader) .. "'s group"
+    else
+        status = "You: in pool — " .. (ROLE_FULL[me.role] or "?") .. ", " .. BracketDisplay(FindMondayBracket(me.bracket))
+    end
+    line(C.BODY .. status .. C.R)
+
+    -- Post to guild ----------------------------------------------------
+    -- ChatLine(ev) itself is the "signed up" gate: it comes back nil (with
+    -- a reason - "notsignedup", or "full" once my own group fills up) until
+    -- there's something postable, so the button disables off the same nil
+    -- rather than re-deriving "postable" a second way. Only "full" gets its
+    -- own preview line ("notsignedup" stays silent - there's nothing to
+    -- preview before signing up at all).
+    local chatLine, chatReason
+    if ns.Monday.ChatLine then
+        chatLine, chatReason = ns.Monday.ChatLine(ev)
+    end
+    if chatLine then
+        -- Same FontString/AcquireBodyLine path as every other row: fixed
+        -- width, word-wrapped, height read back via GetStringHeight() in the
+        -- stacking pass below, so a long preview just wraps and pushes the
+        -- rest of the page down like any other line would.
+        line(C.DIM .. "Post preview: " .. chatLine .. C.R)
+    elseif chatReason == "full" then
+        line(C.DIM .. "Group is full - nothing to post." .. C.R)
+    end
+    line(" ", {
+        { label = "Post to guild", width = 120, disabled = (chatLine == nil),
+          onClick = function() ns.safecall(function()
+              if not ns.Monday.PostToGuild then return end
+              local ok, reason = ns.Monday.PostToGuild(ev)
+              if ok == false then
+                  if reason == "full" then
+                      print("|cffff4040Mythic Monday:|r Your group is full.")
+                      return
+                  end
+                  local msg = "could not post"
+                  if reason == "notsignedup" then msg = "sign up first"
+                  elseif reason == "throttled" then msg = "rate-limited, try again in a minute"
+                  elseif reason == "inkey" then msg = "can't post from inside a key"
+                  elseif reason == "noguild" then msg = "not in a guild"
+                  end
+                  print("|cffff4040Mythic Monday:|r " .. msg)
+              end
+          end) end },
+    })
+
+    -- Your sign-up ---------------------------------------------------------
+    headingRow("Your sign-up")
+    local myKeyLabel = myKey and FormatMondayKey(myKey.level, myKey.name) or "none"
+    line(C.BODY .. "Role: " .. (ROLE_FULL[myRole] or "?") .. "   Key: " .. myKeyLabel .. C.R)
+
+    local signupButtons = {
+        { label = "Lead with my key", width = 130, disabled = (myKey == nil),
+          onClick = function() ns.safecall(function()
+              local ok, reason = ns.Monday.SignUp(ev, { intent = "lead" })
+              if ok == false then
+                  print("|cffff4040Mythic Monday:|r " .. (reason or "could not lead"))
+              end
+          end) end },
+        { label = "Join a group", width = 110,
+          onClick = function() ns.safecall(function()
+              local ok, reason = ns.Monday.SignUp(ev, { intent = "join", bracket = mondaySelectedBracket[ev] })
+              if ok == false then
+                  print("|cffff4040Mythic Monday:|r " .. (reason or "could not join"))
+              end
+          end) end },
+    }
+    if me then
+        signupButtons[#signupButtons + 1] = { label = "Withdraw", width = 80,
+            onClick = function() ns.safecall(ns.Monday.Withdraw, ev) end }
+    end
+    line(" ", signupButtons)
+
+    -- Bracket toggles only steer "Join a group" above; they don't submit
+    -- anything themselves, so the click just repaints which one is lit.
+    local bracketButtons = {}
+    for _, b in ipairs(ns.Monday.Brackets() or {}) do
+        local id = b.id
+        -- Wider than before now that the label carries a range ("Mid 6-10"
+        -- instead of "Mid"); 4 * 88 + 3 gaps still clears TEXT_W (376).
+        bracketButtons[#bracketButtons + 1] = { label = BracketDisplay(b), width = 88,
+            dim = (id ~= mondaySelectedBracket[ev]),
+            onClick = function()
+                mondaySelectedBracket[ev] = id
+                ns.safecall(ns.UI_Refresh)
+            end }
+    end
+    line(" ", bracketButtons)
+
+    -- Groups -----------------------------------------------------------
+    headingRow("Groups")
+    if #groups == 0 then
+        line(C.DIM .. "No groups yet. Lead with your key to start one." .. C.R)
+    else
+        local myPlayerKey = MondayPlayerKey()
+        -- Monday.lua stamps `seen` with GetServerTime(); comparing against
+        -- time() (the client's own clock) would drift from that by whatever
+        -- the client/server offset is.
+        local now = GetServerTime()
+        for _, g in ipairs(groups) do
+            local leaderLine = C.LEAD .. ShortName(g.leader) .. C.R .. "  "
+                                .. C.BODY .. FormatMondayKey(g.level, g.keyName) .. C.R
+            -- Open-board groups are pruned (leader unseen > 15 min just drops
+            -- the group) rather than flagged, so there's nothing meaningful
+            -- to mark "offline" there - only Monday groups get the suffix.
+            if ev == "monday" and g.seen and (now - g.seen) > 600 then
+                leaderLine = leaderLine .. C.DIM .. " (offline " .. FormatMondayAge(now - g.seen) .. ")" .. C.R
+            end
+
+            local isMember = false
+            for _, m in ipairs(g.members or {}) do
+                if m.name == myPlayerKey then isMember = true end
+            end
+            -- Right-aligned buttons stack from the panel's right edge inward
+            -- in the order pushed, so Disband goes first (keeps its original
+            -- rightmost spot) and Invite all lands just to its left.
+            local rowButtons = {}
+            if g.isMine then
+                rowButtons[#rowButtons + 1] = { label = "Disband", width = 70, align = "right",
+                    onClick = function() ns.safecall(ns.Monday.Disband, ev) end }
+                rowButtons[#rowButtons + 1] = { label = "Invite all", width = 90, align = "right",
+                    onClick = function() ns.safecall(function()
+                        if not ns.Monday.InviteAll then return end
+                        local invited, skipped = ns.Monday.InviteAll(ev)
+                        if skipped and #skipped > 0 then
+                            local parts = {}
+                            for _, s in ipairs(skipped) do
+                                parts[#parts + 1] = ShortName(s.name) .. " (" .. (MONDAY_SKIP_REASON[s.reason] or s.reason or "?") .. ")"
+                            end
+                            print("|cffff4040Mythic Monday:|r Invited " .. (invited or 0) .. ". Skipped: " .. table.concat(parts, ", "))
+                        else
+                            print("|cffff4040Mythic Monday:|r Invited " .. (invited or 0) .. ".")
+                        end
+                    end) end }
+            elseif isMember then
+                rowButtons[#rowButtons + 1] = { label = "Leave", width = 70, align = "right",
+                    onClick = function() ns.safecall(ns.Monday.Leave, ev) end }
+            elseif not g.isFull then
+                local leaderName = g.leader
+                rowButtons[#rowButtons + 1] = { label = "Join", width = 70, align = "right",
+                    onClick = function() ns.safecall(function()
+                        local ok, reason = ns.Monday.Join(ev, leaderName)
+                        if ok == false then
+                            print("|cffff4040Mythic Monday:|r " .. (reason or "could not join"))
+                        end
+                    end) end }
+            end
+            line(leaderLine, #rowButtons > 0 and rowButtons or nil)
+
+            local missing = g.missing or {}
+            local tankName, healerName
+            local dpsMembers = {}
+            for _, m in ipairs(g.members or {}) do
+                -- T/H are single slots (a later member of the same role just
+                -- overwrites the last), so those two stay capped at one link
+                -- each by construction. DPS accumulates into a list instead,
+                -- so it needs an explicit cap below.
+                local shortN = MondayNameLink(m.name)
+                if m.role == "T" then tankName = shortN
+                elseif m.role == "H" then healerName = shortN
+                elseif m.role == "D" then dpsMembers[#dpsMembers + 1] = shortN end
+            end
+            -- Hard-capped at 3 dps link slots regardless of how many D
+            -- members g.members actually carries: a malformed/hostile G
+            -- could pack in far more than a real 5-person group ever holds,
+            -- and every name here is its own hyperlink - past ~9 links in
+            -- one FontString the client silently drops every link in it
+            -- (and the FontString's colour), not just the extras. Combined
+            -- with T/H's 1-link cap above, this line never exceeds 5 links.
+            -- Anything past the cap becomes a DIM, non-link count instead.
+            local DPS_SLOTS = 3
+            local dpsNames = {}
+            for i = 1, math.min(#dpsMembers, DPS_SLOTS) do
+                dpsNames[#dpsNames + 1] = dpsMembers[i]
+            end
+            local dpsOverflow = #dpsMembers - DPS_SLOTS
+            if dpsOverflow <= 0 then
+                -- Only pad with empty-slot dashes when there's genuinely
+                -- room left; missing.D should already read 0 once
+                -- dpsMembers exceeds the cap, but this keeps the two from
+                -- fighting even if it doesn't.
+                for _ = 1, math.min(missing.D or 0, DPS_SLOTS - #dpsMembers) do
+                    dpsNames[#dpsNames + 1] = C.DIM .. "——" .. C.R
+                end
+            end
+            local tankStr = tankName or (C.DIM .. "——" .. C.R)
+            local healerStr = healerName or (C.DIM .. "——" .. C.R)
+            local dpsStr = table.concat(dpsNames, ", ")
+            if dpsOverflow > 0 then
+                dpsStr = dpsStr .. C.DIM .. " +" .. dpsOverflow .. C.R
+            end
+            line(C.TANK .. "T " .. C.R .. tankStr .. C.DIM .. " · " .. C.R ..
+                 C.HEALER .. "H " .. C.R .. healerStr .. C.DIM .. " · " .. C.R ..
+                 C.DPS .. "D " .. C.R .. dpsStr)
+        end
+    end
+
+    -- Looking for group --------------------------------------------------
+    headingRow("Looking for group")
+    local pool = ns.Monday.Pool(ev) or {}
+    local brackets = ns.Monday.Brackets() or {}
+    -- Open-board pool entries are pruned rather than flagged (see the Groups
+    -- offline comment above), so no "(offline)" suffix there either.
+    local showOffline = (ev == "monday")
+    -- Tracks whether anything actually got rendered rather than trusting
+    -- #pool == 0: an entry whose bracket doesn't match any known id (nil,
+    -- or a stale id) used to fall through every bucket and vanish silently.
+    local renderedPool = false
+    local usedIds = {}
+    for _, b in ipairs(brackets) do
+        usedIds[b.id] = true
+        local members = {}
+        for _, e in ipairs(pool) do
+            if e.bracket == b.id then members[#members + 1] = e end
+        end
+        if #members > 0 then
+            renderedPool = true
+            line(C.LEAD .. BracketDisplay(b) .. C.R)
+            for _, e in ipairs(members) do
+                line(PoolEntryLine(e, showOffline))
+            end
+        end
+    end
+    -- Catch-all for entries whose bracket isn't one of Brackets()' ids, so
+    -- they still show up somewhere instead of being dropped.
+    local leftover = {}
+    for _, e in ipairs(pool) do
+        if not usedIds[e.bracket] then leftover[#leftover + 1] = e end
+    end
+    if #leftover > 0 then
+        renderedPool = true
+        line(C.LEAD .. "Unspecified" .. C.R)
+        for _, e in ipairs(leftover) do
+            line(PoolEntryLine(e, showOffline))
+        end
+    end
+    if not renderedPool then
+        line(C.DIM .. "Nobody in the pool." .. C.R)
+    end
+
+    -- Stack --------------------------------------------------------------
+    -- Same shape as SetBodyText's own loop (one FontString per row, y is a
+    -- running total), plus button placement synced to the row it belongs to.
+    local y = 0
+    for i, row in ipairs(rows) do
+        local fs = AcquireBodyLine(i)
+        fs:SetText(row.text ~= "" and row.text or " ")
+        fs:ClearAllPoints()
+        fs:SetPoint("TOPLEFT", content, "TOPLEFT", TEXT_INSET, -y)
+        fs:Show()
+        local rowH = fs:GetStringHeight()
+        if row.buttons then
+            rowH = math.max(rowH, MONDAY_BTN_H)
+            local bx = TEXT_INSET
+            -- Right-aligned buttons stack inward from the panel's right edge
+            -- in the order they appear in `row.buttons` (a group's own row
+            -- can carry both Disband and Invite all), rather than all
+            -- landing on top of each other at the same fixed edge.
+            local rightX = TEXT_INSET + TEXT_W
+            for _, spec in ipairs(row.buttons) do
+                local btn = NextMondayButton(spec.width)
+                btn:SetText(spec.label)
+                btn:ClearAllPoints()
+                if spec.align == "right" then
+                    btn:SetPoint("TOPRIGHT", content, "TOPLEFT", rightX, -y)
+                    rightX = rightX - spec.width - MONDAY_BTN_GAP
+                else
+                    btn:SetPoint("TOPLEFT", content, "TOPLEFT", bx, -y)
+                    bx = bx + spec.width + MONDAY_BTN_GAP
+                end
+                if spec.disabled then btn:Disable() else btn:Enable() end
+                btn:SetAlpha(spec.dim and 0.55 or 1)
+                btn:SetScript("OnClick", spec.onClick)
+            end
+        end
+        y = y + rowH + LINE_GAP
+    end
+    for i = #rows + 1, #bodyLines do
+        bodyLines[i]:Hide()
+    end
+    HideUnusedMondayButtons()
+    return y - LINE_GAP
+end
+
 -- Model side-cart: shows the boss model when the selected boss has a
 -- displayID (preferred, always renders) or npcID (needs client cache).
 local sidecar = CreateFrame("Frame", "GuildPlaybookModelFrame", frame, "BackdropTemplate")
@@ -1665,6 +2260,18 @@ local function ApplyTabLayout()
         HideInvite()
     end
 
+    -- The board buttons are pooled and only ever repainted by SetMondayBody
+    -- itself, so any render path that ISN'T a board page has to hide them
+    -- here - otherwise a Lead/Join/Disband button from Monday or Open groups
+    -- keeps floating over a handbook page or a dungeon playbook after
+    -- navigating away (including navigating from one board straight to the
+    -- other). SetMondayBody resets the same counter and re-hides on its own
+    -- turn, so this only has to cover every path that skips it.
+    if not (guild and IsBoardPage(guildSelected.section)) then
+        mondayButtonCount = 0
+        HideUnusedMondayButtons()
+    end
+
     scroll:ClearAllPoints()
     scroll:SetPoint("BOTTOMRIGHT", -32, 14)
     scroll:SetPoint("TOPLEFT", navScroll, "TOPRIGHT", 10, 0)
@@ -1683,12 +2290,24 @@ function ns.UI_Refresh()
     -- so it takes its own exit rather than threading a third case through the
     -- dungeon/boss/trash selection below.
     if activeTab == "guild" then
-        local page = GuildPage()
         BuildNav(nil)
         UpdateNavHighlight()
         subtitle:SetText(ns.GUILD_NAME .. C.DIM .. "  —  guild only" .. C.R)
-        sectionTitle:SetText(page and page.title or "Guild")
-        content:SetHeight(SetGuildBody(page) + 20)
+        -- A ns.Monday board is generated from ns.Monday, not a Data/Guild.lua
+        -- page, so it takes its own exit here rather than going through
+        -- GuildPage()/SetGuildBody (GuildPage() would just fall back to the
+        -- first real page for an id it doesn't recognise).
+        if IsBoardPage(guildSelected.section) then
+            local ev = guildSelected.section
+            local title = (ns.Monday and ns.Monday.EventTitle(ev))
+                          or (ev == "open" and "Open groups" or "Mythic Monday")
+            sectionTitle:SetText(title)
+            content:SetHeight(SetMondayBody(ev) + 20)
+        else
+            local page = GuildPage()
+            sectionTitle:SetText(page and page.title or "Guild")
+            content:SetHeight(SetGuildBody(page) + 20)
+        end
         scroll:SetVerticalScroll(0)
         return
     end
@@ -1790,6 +2409,36 @@ function ns.UI_Toggle()
     else
         ns.UI_Show()
     end
+end
+
+-- Entry point for `/gp monday` and `/gp now` (Core.lua). `ev` defaults to
+-- "monday" for nil or any id that isn't one of the two known boards, so a
+-- stale/misspelled call can't land on a blank page. UI_Show() no-ops on an
+-- already-open frame, so the tab/page switch is applied first and the
+-- redraw is forced explicitly rather than relying on UI_Show to do it.
+function ns.UI_ShowMonday(ev)
+    if not IsBoardPage(ev) then ev = "monday" end
+    activeTab = "guild"
+    guildSelected = { kind = "guild", section = ev, expanded = nil }
+    if frame:IsShown() then
+        ns.safecall(ns.UI_Refresh)
+    else
+        ns.UI_Show()
+    end
+end
+
+-- Monday.lua loads before UI.lua per the TOC, so ns.Monday is normally
+-- present by the time this runs; guarded anyway since a load-order change or
+-- a stripped file must not turn into a startup error. RegisterCallback now
+-- hands back which board changed; redraw only if that's the board actually
+-- on screen - a background change on the open board while Monday is showing
+-- (or a hidden panel, or the dungeon tab) has nothing to repaint yet.
+if ns.Monday then
+    ns.Monday.RegisterCallback(function(ev)
+        if frame:IsShown() and activeTab == "guild" and guildSelected.section == ev then
+            ns.safecall(ns.UI_Refresh)
+        end
+    end)
 end
 
 ApplyTabLayout()

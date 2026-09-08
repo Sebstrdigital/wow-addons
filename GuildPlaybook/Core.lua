@@ -293,7 +293,22 @@ local function Usage()
     print("  /gp autoopen    toggle auto-open when you enter a covered dungeon")
     print("  /gp list        list loaded dungeons")
     print("  /gp minimap     show/hide the minimap button")
+    print("  /gp monday      open the Mythic Monday sign-up board")
+    print("  /gp now         open the board for groups running right now")
+    print("  /gp monday refresh|dump   re-pull both boards / print their state")
     print("  /gp commtest    check the self-whisper the MDT import relies on")
+end
+
+-- The UI owns the board pages; the module only holds their state. Both are
+-- nil-guarded because either can fail to load independently.
+local function ShowBoard(ev)
+    if not ns.Monday then
+        print("|cff69ccf0Guild Playbook:|r the sign-up boards failed to load.")
+    elseif ns.UI_ShowMonday then
+        ns.safecall(ns.UI_ShowMonday, ev)
+    else
+        print("|cff69ccf0Guild Playbook:|r the board pages are unavailable.")
+    end
 end
 
 SLASH_GUILDPLAYBOOK1, SLASH_GUILDPLAYBOOK2 = "/gp", "/guildplaybook"
@@ -339,6 +354,28 @@ SlashCmdList.GUILDPLAYBOOK = function(msg)
             ns.ToggleMinimapButton()
         else
             print("|cff69ccf0Guild Playbook:|r minimap button unavailable (libraries failed to load).")
+        end
+    elseif msg == "now" then
+        ShowBoard("open")
+    elseif msg == "monday" or msg:match("^monday%s") then
+        local sub = msg:match("^monday%s+(%S+)") or ""
+        if not ns.Monday then
+            print("|cff69ccf0Guild Playbook:|r the sign-up boards failed to load.")
+        elseif sub == "dump" then
+            -- No argument dumps every board, which is what a bug report needs.
+            ns.safecall(ns.Monday.Dump)
+        elseif sub == "refresh" then
+            -- The two boards throttle separately, so both are asked.
+            for _, ev in ipairs(ns.Monday.EVENTS or {}) do
+                local ok, why = ns.Monday.Refresh(ev)
+                print("|cff69ccf0" .. (ns.Monday.EventTitle(ev) or ev) .. ":|r "
+                    .. (ok and "asked the guild for the board."
+                        or ("cannot refresh (" .. tostring(why) .. ").")))
+            end
+        elseif sub == "" then
+            ShowBoard("monday")
+        else
+            print("|cff69ccf0Guild Playbook:|r unknown — /gp monday [refresh|dump]")
         end
     elseif msg == "commtest" then
         StartCommTest()
