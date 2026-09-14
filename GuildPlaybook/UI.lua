@@ -10,16 +10,17 @@ local ADDON, ns = ...
 -- instruction after it, set a step darker so the lead reads as the heavier of
 -- the two.
 local C = {
-    TANK   = "|cff4a9eff",
-    HEALER = "|cff3fd47f",
-    DPS    = "|cffff9333",
-    WIPE   = "|cffff4040",
-    HEAD   = "|cffffd100",
-    BODY   = "|cffe8e8e8",
-    LEAD   = "|cffffffff",
-    CALL   = "|cffb9b9b9",
-    DIM    = "|cff9d9d9d",
-    R      = "|r",
+    TANK    = "|cff4a9eff",
+    HEALER  = "|cff3fd47f",
+    DPS     = "|cffff9333",
+    WIPE    = "|cffff4040",
+    HEAD    = "|cffffd100",
+    BODY    = "|cffe8e8e8",
+    LEAD    = "|cffffffff",
+    CALL    = "|cffb9b9b9",
+    DIM     = "|cff9d9d9d",
+    OFFLINE = "|cff808080",
+    R       = "|r",
 }
 
 local ROLE_LABEL = { TANK = "Tank", HEALER = "Healer", DPS = "DPS" }
@@ -1717,8 +1718,18 @@ end
 -- say: a pool entry from someone outside the guild still names their spec on
 -- the wire, and the spec names the class, so the name can be coloured from
 -- that rather than falling all the way back to link-blue.
-local function MondayClassColoredName(fullName, spec)
+--
+-- `online` is ns.Monday.IsOnline's tri-state: false flattens the name to grey
+-- regardless of class (the status icon in front already carries "offline";
+-- repeating it in the name colour would be the same fact said twice, and grey
+-- reads as "not here" the way class colour never could). true or nil (not in
+-- the roster, or not scanned yet) leaves class colour alone - nil is not the
+-- same claim as "offline" and must not render as one.
+local function MondayClassColoredName(fullName, spec, online)
     local text = ShortName(fullName)
+    if online == false then
+        return C.OFFLINE .. text .. "|r"
+    end
     local classFile = ns.Monday and ns.Monday.ClassOf and ns.Monday.ClassOf(fullName)
     if not classFile and spec then
         local _, specClass = MondaySpecInfo(spec)
@@ -1734,6 +1745,21 @@ local function MondayClassColoredName(fullName, spec)
     return LINK .. text .. "|r"
 end
 
+-- `|T<texture>:h:w|t` status icon in front of a name/leader line: online or
+-- offline get Blizzard's own friends-list dot, nil (not in the guild roster,
+-- or not scanned yet) gets nothing at all - there's no fact to report. A
+-- plain texture escape, not a hyperlink, so it never counts against the
+-- ~9-hyperlink-per-FontString cap the name links below are already budgeted
+-- against.
+local function MondayOnlineIcon(online)
+    if online == true then
+        return "|TInterface\\FriendsFrame\\StatusIcon-Online:12|t "
+    elseif online == false then
+        return "|TInterface\\FriendsFrame\\StatusIcon-Offline:12|t "
+    end
+    return ""
+end
+
 -- Renders a roster/pool name as a clickable custom link carrying the full
 -- "Name-Realm" key: `|Hgpmm:Name-Realm|h<coloured name>|h`. Handled by the
 -- OnHyperlinkClick script set on `content` below (left-click invite,
@@ -1741,21 +1767,16 @@ end
 -- already uses for spell links on this same frame. The link itself is
 -- unchanged by the name's colour - only the visible text inside it is.
 --
--- The spec icon sits *outside* the closing |h, so the link markup is byte for
--- byte what it always was and the line's hyperlink count is unchanged. That
--- matters more than making the icon clickable: past roughly nine links in one
+-- The online icon sits *in front of* the opening |h and the spec icon
+-- *outside* the closing |h, so the link markup itself is byte for byte what
+-- it always was and the line's hyperlink count is unchanged. That matters
+-- more than making either icon clickable: past roughly nine links in one
 -- FontString the client silently drops every link in it, and the group line
 -- below already runs to five.
-local function MondayNameLink(fullName, spec)
-    return "|Hgpmm:" .. fullName .. "|h" .. MondayClassColoredName(fullName, spec) .. "|h"
+local function MondayNameLink(fullName, spec, online)
+    return MondayOnlineIcon(online) .. "|Hgpmm:" .. fullName .. "|h"
+           .. MondayClassColoredName(fullName, spec, online) .. "|h"
            .. (MondaySpecIcon(spec, 14) or "")
-end
-
-local function FormatMondayAge(seconds)
-    if not seconds or seconds < 0 then seconds = 0 end
-    local mins = math.floor(seconds / 60)
-    if mins < 60 then return mins .. "m" end
-    return math.floor(mins / 60) .. "h"
 end
 
 -- Plain (uncoloured) "+12 Kings' Rest" - callers wrap it in whatever colour
@@ -1800,10 +1821,10 @@ end
 
 -- Shared by the per-bracket pool rows and the "Unspecified" catch-all below,
 -- so a pool entry looks the same regardless of which bucket it landed in.
--- `showOffline` is false on the open board: those entries are pruned by the
--- module rather than flagged, so `e.online` there carries nothing worth
--- printing (and would misleadingly imply the flag is meaningful there).
-local function PoolEntryLine(e, showOffline)
+-- Online status is now carried by MondayNameLink's own status icon and name
+-- colour (see MondayOnlineIcon/MondayClassColoredName) rather than a trailing
+-- "(offline)" word, so both boards read the same way here too.
+local function PoolEntryLine(e)
     -- Icon when the atlas resolved, today's coloured role word otherwise -
     -- same fallback the group member line below uses.
     local roleStr = MondayRoleIcon(e.role, 14)
@@ -1815,12 +1836,8 @@ local function PoolEntryLine(e, showOffline)
     -- the eye scans a column of roles for the one slot it cares about, and a
     -- name-first row makes it hunt. The fallback word leads in the same place
     -- the icon would, so the column holds either way.
-    local entryLine = roleStr .. "  " .. MondayNameLink(e.name, e.spec)
-                       .. "  " .. keyStr
-    if showOffline and not e.online then
-        entryLine = entryLine .. C.DIM .. " (offline)" .. C.R
-    end
-    return entryLine
+    return roleStr .. "  " .. MondayNameLink(e.name, e.spec, e.online)
+           .. "  " .. keyStr
 end
 
 -- Shared by the left-click invite and the right-click menu's "Invite" entry,
@@ -1886,19 +1903,89 @@ content:SetScript("OnHyperlinkClick", function(self, link, text, button)
     end)
 end)
 
+-- Open board scheduling controls -------------------------------------
+-- "Lead with my key" on the open board can carry a future `when` instead of
+-- signing up for right now. The day/hour/minute steppers below are plain
+-- buttons built from the same NextMondayButton pool every other row on this
+-- page uses - no EditBox (it would steal WASD focus, same reasoning as the
+-- Discord invite box above) and no MenuUtil (unverified on this client, see
+-- ShowMondayNameMenu's own fallback). State lives here rather than in
+-- GuildPlaybookDB: it's scratch for composing the next SignUp/SetWhen call,
+-- not something worth remembering across sessions. Not keyed by `ev` like
+-- mondaySelectedBracket - only the open board ever reads it.
+local openWhenMode = "now"          -- "now" | "scheduled"
+local openWhenDay, openWhenHour, openWhenMinute
+local openWhenSeeded = false
+
+-- Breaks ns.Monday.DefaultWhen()'s epoch back down into the day/hour/minute
+-- shape the steppers work in, using the same local-calendar arithmetic
+-- BuildWhen itself is built on (`time{}` over a plain date table, so DST is
+-- the C library's problem and not ours).
+local function SeedOpenWhen()
+    local now = GetServerTime()
+    local when = (ns.Monday and ns.Monday.DefaultWhen and ns.Monday.DefaultWhen(now)) or now
+    local target, today = date("*t", when), date("*t", now)
+    local todayMidnight = time({ year = today.year, month = today.month, day = today.day,
+                                  hour = 0, min = 0, sec = 0 })
+    local targetMidnight = time({ year = target.year, month = target.month, day = target.day,
+                                   hour = 0, min = 0, sec = 0 })
+    local dayOffset = math.floor((targetMidnight - todayMidnight) / 86400 + 0.5)
+    if dayOffset < 0 then dayOffset = 0 elseif dayOffset > 6 then dayOffset = 6 end
+    openWhenDay, openWhenHour, openWhenMinute = dayOffset, target.hour, target.min
+end
+
+local function EnsureOpenWhenSeeded()
+    if openWhenSeeded then return end
+    openWhenSeeded = true
+    SeedOpenWhen()
+end
+
+local function CycleOpenWhenDay(delta)
+    EnsureOpenWhenSeeded()
+    openWhenDay = (openWhenDay + delta) % 7
+end
+local function CycleOpenWhenHour(delta)
+    EnsureOpenWhenSeeded()
+    openWhenHour = (openWhenHour + delta) % 24
+end
+local function CycleOpenWhenMinute(delta)
+    EnsureOpenWhenSeeded()
+    openWhenMinute = (openWhenMinute + delta) % 60
+end
+
+-- The day stepper's label is FormatWhen's own day part - "Today" / "Tomorrow"
+-- / "Sat 19 Sep" - so it always reads exactly like the leader line will once
+-- applied. FormatWhen always ends that with "H:MM", and, only for a moment
+-- close enough to now to carry one, a trailing "(...)" relative suffix; both
+-- are stripped back off since the stepper only needs the day.
+local function OpenDayLabel(dayOffset, now)
+    if not (ns.Monday and ns.Monday.BuildWhen and ns.Monday.FormatWhen) then
+        return "Day " .. tostring(dayOffset)
+    end
+    local when = ns.Monday.BuildWhen(dayOffset, 0, 0, now)
+    local label = ns.Monday.FormatWhen(when, now) or ""
+    label = label:gsub("%s*%(.-%)%s*$", "")
+    label = label:gsub("%s+%d+:%d%d%s*$", "")
+    return label ~= "" and label or ("Day " .. tostring(dayOffset))
+end
+
 -- Lays a ns.Monday board out and returns its total height, matching what
 -- SetGuildBody returns for a handbook page. `ev` is "monday" or "open" -
 -- same renderer for both, per the v1.4.0 addendum.
+-- Returns (height, anyScheduled): anyScheduled is true when at least one
+-- rendered group carries a `when`, so the open-board repaint ticker's caller
+-- doesn't need its own separate ns.Monday.Groups(ev) scan just to find out.
 local function SetMondayBody(ev)
     HideInvite()
     SetHero(nil)
     mondayButtonCount = 0
+    local anyScheduled = false
 
     if not ns.Monday then
         local staticTitle = (ev == "open") and "Open groups" or "Mythic Monday"
         local y = SetBodyText(C.DIM .. staticTitle .. " module not loaded." .. C.R)
         HideUnusedMondayButtons()
-        return y
+        return y, anyScheduled
     end
 
     local rows = {}   -- { text = "...", buttons = { {label,width,onClick,...}, ... } }
@@ -2015,7 +2102,11 @@ local function SetMondayBody(ev)
     local signupButtons = {
         { label = "Lead with my key", width = 130, disabled = (myKey == nil),
           onClick = function() ns.safecall(function()
-              local ok, reason = ns.Monday.SignUp(ev, { intent = "lead" })
+              local opts = { intent = "lead" }
+              if ev == "open" and openWhenMode == "scheduled" then
+                  opts.when = ns.Monday.BuildWhen(openWhenDay, openWhenHour, openWhenMinute)
+              end
+              local ok, reason = ns.Monday.SignUp(ev, opts)
               if ok == false then
                   print("|cffff4040Mythic Monday:|r " .. (reason or "could not lead"))
               end
@@ -2033,6 +2124,55 @@ local function SetMondayBody(ev)
             onClick = function() ns.safecall(ns.Monday.Withdraw, ev) end }
     end
     line(" ", signupButtons)
+
+    -- When: (Open board only) -------------------------------------------
+    -- Feeds "Lead with my key" above via opts.when, and - once already
+    -- leading - lets the leader push a change out live through SetWhen. Not
+    -- shown on the Monday board: that board's key IS the date, it never
+    -- carries a `when` of its own.
+    if ev == "open" then
+        EnsureOpenWhenSeeded()
+        local leadingNow = me and me.intent == "lead"
+        local toggleButtons = {
+            { label = (openWhenMode == "scheduled") and "Scheduled" or "Now", width = 90,
+              onClick = function()
+                  local wasScheduled = (openWhenMode == "scheduled")
+                  openWhenMode = wasScheduled and "now" or "scheduled"
+                  -- Selecting Now while already leading commits immediately
+                  -- rather than waiting for Apply - there's nothing left to
+                  -- compose once the choice is "right now".
+                  if wasScheduled and me and me.intent == "lead" then
+                      ns.safecall(ns.Monday.SetWhen, ev, nil)
+                  end
+                  ns.safecall(ns.UI_Refresh)
+              end },
+        }
+        if leadingNow then
+            toggleButtons[#toggleButtons + 1] = { label = "Apply", width = 70,
+                onClick = function() ns.safecall(function()
+                    if openWhenMode == "scheduled" then
+                        ns.Monday.SetWhen(ev, ns.Monday.BuildWhen(openWhenDay, openWhenHour, openWhenMinute))
+                    else
+                        ns.Monday.SetWhen(ev, nil)
+                    end
+                end) end }
+        end
+        line(C.BODY .. "When:" .. C.R, toggleButtons)
+        if openWhenMode == "scheduled" then
+            local stepNow = GetServerTime()
+            line(" ", {
+                { label = "<", width = 20, onClick = function() CycleOpenWhenDay(-1); ns.safecall(ns.UI_Refresh) end },
+                { label = OpenDayLabel(openWhenDay, stepNow), width = 84, disabled = true },
+                { label = ">", width = 20, onClick = function() CycleOpenWhenDay(1); ns.safecall(ns.UI_Refresh) end },
+                { label = "<", width = 20, onClick = function() CycleOpenWhenHour(-1); ns.safecall(ns.UI_Refresh) end },
+                { label = ("%02d"):format(openWhenHour), width = 30, disabled = true },
+                { label = ">", width = 20, onClick = function() CycleOpenWhenHour(1); ns.safecall(ns.UI_Refresh) end },
+                { label = "<", width = 20, onClick = function() CycleOpenWhenMinute(-15); ns.safecall(ns.UI_Refresh) end },
+                { label = ("%02d"):format(openWhenMinute), width = 30, disabled = true },
+                { label = ">", width = 20, onClick = function() CycleOpenWhenMinute(15); ns.safecall(ns.UI_Refresh) end },
+            })
+        end
+    end
 
     -- Bracket toggles only steer "Join a group" above; they don't submit
     -- anything themselves, so the click just repaints which one is lit.
@@ -2061,24 +2201,30 @@ local function SetMondayBody(ev)
         -- the client/server offset is.
         local now = GetServerTime()
         for _, g in ipairs(groups) do
+            if g.when then anyScheduled = true end
             -- One pass for both: the leader's own member row carries the spec
-            -- the header needs to colour by when the guild roster has nothing
-            -- to say, and the membership test below wants the same list.
-            local isMember, leaderSpec = false, nil
+            -- and online status the header needs (to colour by, when the
+            -- guild roster has nothing to say, and to mark offline), and the
+            -- membership test below wants the same list.
+            local isMember, leaderSpec, leaderOnline = false, nil, nil
             for _, m in ipairs(g.members or {}) do
                 if m.name == myPlayerKey then isMember = true end
-                if m.name == g.leader then leaderSpec = m.spec end
+                if m.name == g.leader then
+                    leaderSpec = m.spec
+                    leaderOnline = m.online
+                end
             end
-            -- Class-coloured like every other name on the board. No link and
-            -- no spec icon here: the leader is also their own group's member
-            -- row just below, which already carries both.
-            local leaderLine = MondayClassColoredName(g.leader, leaderSpec) .. "  "
+            -- Status icon plus class-coloured (or, offline, grey) name, like
+            -- every other name on the board. No link and no spec icon here:
+            -- the leader is also their own group's member row just below,
+            -- which already carries both.
+            local leaderLine = MondayOnlineIcon(leaderOnline)
+                                .. MondayClassColoredName(g.leader, leaderSpec, leaderOnline) .. "  "
                                 .. C.BODY .. FormatMondayKey(g.level, g.keyName) .. C.R
-            -- Open-board groups are pruned (leader unseen > 15 min just drops
-            -- the group) rather than flagged, so there's nothing meaningful
-            -- to mark "offline" there - only Monday groups get the suffix.
-            if ev == "monday" and g.seen and (now - g.seen) > 600 then
-                leaderLine = leaderLine .. C.DIM .. " (offline " .. FormatMondayAge(now - g.seen) .. ")" .. C.R
+            -- Scheduled open-board groups carry a `when`; Monday groups never
+            -- do (their key IS the date), so this is silently a no-op there.
+            if g.when then
+                leaderLine = leaderLine .. "  " .. C.HEAD .. ns.Monday.FormatWhen(g.when, now) .. C.R
             end
 
             -- Right-aligned buttons stack from the panel's right edge inward
@@ -2125,7 +2271,7 @@ local function SetMondayBody(ev)
                 -- overwrites the last), so those two stay capped at one link
                 -- each by construction. DPS accumulates into a list instead,
                 -- so it needs an explicit cap below.
-                local shortN = MondayNameLink(m.name, m.spec)
+                local shortN = MondayNameLink(m.name, m.spec, m.online)
                 if m.role == "T" then tankName = shortN
                 elseif m.role == "H" then healerName = shortN
                 elseif m.role == "D" then dpsMembers[#dpsMembers + 1] = shortN end
@@ -2178,9 +2324,6 @@ local function SetMondayBody(ev)
     headingRow("Looking for group")
     local pool = ns.Monday.Pool(ev) or {}
     local brackets = ns.Monday.Brackets() or {}
-    -- Open-board pool entries are pruned rather than flagged (see the Groups
-    -- offline comment above), so no "(offline)" suffix there either.
-    local showOffline = (ev == "monday")
     -- Tracks whether anything actually got rendered rather than trusting
     -- #pool == 0: an entry whose bracket doesn't match any known id (nil,
     -- or a stale id) used to fall through every bucket and vanish silently.
@@ -2196,7 +2339,7 @@ local function SetMondayBody(ev)
             renderedPool = true
             line(C.LEAD .. BracketDisplay(b) .. C.R)
             for _, e in ipairs(members) do
-                line(PoolEntryLine(e, showOffline))
+                line(PoolEntryLine(e))
             end
         end
     end
@@ -2210,7 +2353,7 @@ local function SetMondayBody(ev)
         renderedPool = true
         line(C.LEAD .. "Unspecified" .. C.R)
         for _, e in ipairs(leftover) do
-            line(PoolEntryLine(e, showOffline))
+            line(PoolEntryLine(e))
         end
     end
     if not renderedPool then
@@ -2258,8 +2401,46 @@ local function SetMondayBody(ev)
         bodyLines[i]:Hide()
     end
     HideUnusedMondayButtons()
-    return y - LINE_GAP
+    return y - LINE_GAP, anyScheduled
 end
+
+-- Open board repaint ticker + board-page-shown tracking ----------------
+-- FormatWhen's "(in 2h 15m)" / "(started 12m ago)" relative suffix ages on
+-- its own even with nothing else on the page changing, so the open board
+-- needs a periodic repaint that neither a callback nor a click provides.
+-- Only runs while the open board is actually on screen, and only while at
+-- least one group there carries a `when` - a board with only right-now
+-- groups never changes between callback-driven repaints, so a ticker there
+-- would be wasted work.
+local openRepaintTicker
+
+local function StopOpenRepaintTicker()
+    if openRepaintTicker then
+        openRepaintTicker:Cancel()
+        openRepaintTicker = nil
+    end
+end
+
+local function EnsureOpenRepaintTicker(anyScheduled)
+    if not anyScheduled then
+        StopOpenRepaintTicker()
+        return
+    end
+    if openRepaintTicker then return end
+    openRepaintTicker = C_Timer.NewTicker(60, function()
+        if frame:IsShown() and activeTab == "guild" and guildSelected.section == "open" then
+            ns.safecall(ns.UI_Refresh)
+        else
+            StopOpenRepaintTicker()
+        end
+    end)
+end
+
+-- Which board page (if any) is currently the one on screen. Compared against
+-- on every UI_Refresh so RequestRoster() fires once per navigation onto a
+-- board rather than once per repaint - a bracket toggle, a callback-driven
+-- redraw, and the ticker above all route back through UI_Refresh too.
+local lastShownBoard
 
 -- Model side-cart: shows the boss model when the selected boss has a
 -- displayID (preferred, always renders) or npcID (needs client cache).
@@ -2401,6 +2582,24 @@ function ns.UI_Refresh()
     local bodyHeight = 0
     UpdateRoleTabs()
     ApplyTabLayout()
+
+    -- Board-page transition bookkeeping - shared by every exit this function
+    -- can take, since guild handbook pages, dungeon pages and both boards all
+    -- funnel back through here on every navigation. RequestRoster() fires
+    -- once on entry to a board page; the repaint ticker only ever runs for
+    -- the open board and is torn down the moment it isn't the page showing.
+    local currentBoard = (activeTab == "guild" and IsBoardPage(guildSelected.section))
+                          and guildSelected.section or nil
+    if currentBoard ~= lastShownBoard then
+        lastShownBoard = currentBoard
+        if currentBoard and ns.Monday and ns.Monday.RequestRoster then
+            ns.safecall(ns.Monday.RequestRoster)
+        end
+    end
+    if currentBoard ~= "open" then
+        StopOpenRepaintTicker()
+    end
+
     -- The guild page shares nothing with a playbook page but the scroll frame,
     -- so it takes its own exit rather than threading a third case through the
     -- dungeon/boss/trash selection below.
@@ -2417,7 +2616,11 @@ function ns.UI_Refresh()
             local title = (ns.Monday and ns.Monday.EventTitle(ev))
                           or (ev == "open" and "Open groups" or "Mythic Monday")
             sectionTitle:SetText(title)
-            content:SetHeight(SetMondayBody(ev) + 20)
+            local bodyH, anyScheduled = SetMondayBody(ev)
+            content:SetHeight(bodyH + 20)
+            if ev == "open" then
+                EnsureOpenRepaintTicker(anyScheduled)
+            end
         else
             local page = GuildPage()
             sectionTitle:SetText(page and page.title or "Guild")
@@ -2555,6 +2758,16 @@ if ns.Monday then
         end
     end)
 end
+
+-- Closing the panel always leaves whatever board page it was on: reset the
+-- shown-board tracking so reopening it fires RequestRoster() again, and stop
+-- the repaint ticker rather than letting it keep firing UI_Refresh against a
+-- hidden frame (its own IsShown() guard would no-op the refresh anyway, but
+-- there's no reason to keep the timer running for a page nobody can see).
+frame:HookScript("OnHide", function()
+    lastShownBoard = nil
+    StopOpenRepaintTicker()
+end)
 
 ApplyTabLayout()
 BuildNav(nil)   -- start in dungeon-list mode until zone detection kicks in

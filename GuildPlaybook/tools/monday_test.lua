@@ -409,7 +409,7 @@ do
 
     local g = env.last("G")
     check(g ~= nil, "SignUp lead emits G")
-    check(g and g.text:match("^G " .. MON_PAT .. " %d+ 501 12 Vizzo%-" .. REALM .. ":D 0$") ~= nil,
+    check(g and g.text:match("^G " .. MON_PAT .. " %d+ 501 12 Vizzo%-" .. REALM .. ":D 0 %-$") ~= nil,
         "G lists the leader as its own member", g and g.text)
 
     local groups = env.M.Groups("monday")
@@ -669,7 +669,7 @@ do
     eq(p[1].name, "Bob-" .. REALM, "the pool sorts by bracket, then role")
     eq(p[2].name, "Ann-" .. REALM, "dps follow the tank inside a bracket")
     eq(p[3].name, "Zoe-" .. REALM, "and higher brackets come last")
-    eq(p[1].online, false, "online comes from the guild roster, not from hope")
+    eq(p[1].online, nil, "with no guild roster to ask, online is unknown - not a guessed false")
 end
 
 -- ------------------------------------------------------------------
@@ -1718,20 +1718,20 @@ do
     local e = env.last("E")
     check(e and e.text:match(" 250$") ~= nil, "the E we send carries it last", e and e.text)
     local g = env.last("G")
-    check(g and g.text:match(" Vizzo%-" .. REALM .. ":T 250$") ~= nil,
+    check(g and g.text:match(" Vizzo%-" .. REALM .. ":T 250 %-$") ~= nil,
         "and our G lists it against our own name", g and g.text)
 
     -- A joiner we have heard from contributes their spec to our roster.
     env.recv("E " .. MON .. " 100 D join any - - - 63", "Anna-" .. REALM)
     env.recv("J " .. MON, "Anna-" .. REALM, "WHISPER")
     local g2 = env.last("G")
-    check(g2 and g2.text:match(" 250,63$") ~= nil,
+    check(g2 and g2.text:match(" 250,63 %-$") ~= nil,
         "an accepted joiner's spec joins the list in roster order", g2 and g2.text)
 
     -- One we have not keeps its slot as a zero rather than vanishing.
     env.recv("J " .. MON, "Zed-" .. REALM, "WHISPER")
     local g3 = env.last("G")
-    check(g3 and g3.text:match(" 250,63,0$") ~= nil,
+    check(g3 and g3.text:match(" 250,63,0 %-$") ~= nil,
         "an unheard joiner holds its slot as a zero", g3 and g3.text)
 
     -- Respeccing within the same role used to be nothing to announce; now it
@@ -1743,7 +1743,7 @@ do
     local e2 = env.last("E")
     check(e2 and e2.text:match(" 251$") ~= nil, "and is broadcast", e2 and e2.text)
     local g4 = env.last("G")
-    check(g4 and g4.text:match(" 251,63,0$") ~= nil,
+    check(g4 and g4.text:match(" 251,63,0 %-$") ~= nil,
         "including in the roster we lead", g4 and g4.text)
 
     -- PLAYER_SPECIALIZATION_CHANGED also fires during login, before talent
@@ -1796,8 +1796,10 @@ end
 
 do
     -- The roster walk is shared and throttled: one pass fills both the online
-    -- set and the class cache, and a burst of GUILD_ROSTER_UPDATE costs one
-    -- walk per ROSTER_CACHE window rather than one per event.
+    -- set and the class cache. GUILD_ROSTER_UPDATE forces a fresh walk rather
+    -- than waiting out ROSTER_CACHE - online status is the whole point of the
+    -- event - but the repaint that triggers it is itself throttled to once
+    -- per five seconds, so a burst costs one extra walk, not one per event.
     local env = newEnv()
     local walks = 0
     local roster = { { "Anna-" .. REALM, "WARRIOR", true },
@@ -1816,13 +1818,14 @@ do
     eq(env.M.ClassOf("Anna-" .. REALM), "WARRIOR", "filling the class cache")
 
     for _ = 1, 20 do env.fire("GUILD_ROSTER_UPDATE") end
-    eq(walks, after, "a burst of roster events inside the window walks it no more")
+    eq(walks, after + 1, "a burst of roster events costs one fresh walk, not one per event")
+    local afterBurst = walks
 
-    -- Past the window the next event picks up a member who left the guild.
+    -- Past the five-second repaint throttle the next event walks again.
     roster[1] = { "Cid-" .. REALM, "MAGE", true }
-    env.now = env.now + 21
+    env.now = env.now + 6
     env.fire("GUILD_ROSTER_UPDATE")
-    check(walks > after, "past the window it walks again")
+    check(walks > afterBurst, "past the throttle window it walks again")
     eq(env.M.ClassOf("Cid-" .. REALM), "MAGE", "picking up the new member")
     eq(env.M.ClassOf("Anna-" .. REALM), nil, "and evicting the one who left")
     eq(env.error, nil, "with no errors along the way")
@@ -1881,8 +1884,525 @@ do
     legacy.clearSent()
     legacy.fire("PLAYER_ENTERING_WORLD", true, false)
     local lgSent = legacy.last("G", MON)
-    check(lgSent and lgSent.text:match(" 0,0$") ~= nil,
+    check(lgSent and lgSent.text:match(" 0,0 %-$") ~= nil,
         "rebroadcast with a placeholder per member", lgSent and lgSent.text)
+end
+
+-- ------------------------------------------------------------------
+-- 25. Scheduling wire: the `when` field on G
+-- ------------------------------------------------------------------
+
+do
+    -- Leading with a `when` stamps both the group and our own entry, and
+    -- broadcasts it as G's trailing token.
+    local env = newEnv({ key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.clearSent()
+
+    local when = env.now + 3600
+    eq(env.M.SignUp("open", { intent = "lead", when = when }), true,
+        "SignUp lead accepts a when")
+    eq(env.board("open").groups["Vizzo-" .. REALM].when, when, "and stamps it on the group")
+    eq(env.board("open").me.when, when, "and on our own entry")
+
+    local g = env.last("G", OPEN)
+    check(g and g.text:match(" " .. when .. "$") ~= nil,
+        "and broadcasts it as the trailing token", g and g.text)
+end
+
+do
+    -- The Monday board has nothing to schedule: its key IS the date, so a
+    -- `when` opt is simply ignored there.
+    local env = newEnv({ key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.clearSent()
+
+    eq(env.M.SignUp("monday", { intent = "lead", when = env.now + 3600 }), true,
+        "SignUp lead on monday ignores a when")
+    eq(env.board("monday").groups["Vizzo-" .. REALM].when, nil,
+        "the monday board never carries one")
+    local g = env.last("G", MON)
+    check(g and g.text:match(" %-$") ~= nil, "and its G ends with the nil token", g and g.text)
+end
+
+do
+    -- G's 8th field, read by fixed index like the two before it: an epoch
+    -- parses, and a dash, a zero, unparseable text, or the field simply not
+    -- being there at all all mean the same nil - "not told".
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+
+    local when = env.now + 7200
+    env.recv("G " .. OPEN .. " 100 501 12 Bob-" .. REALM .. ":D 0 " .. when, "Bob-" .. REALM)
+    eq(env.board("open").groups["Bob-" .. REALM].when, when, "an epoch in field 8 is read")
+
+    -- If a later G omits the field, the cached value is replaced by nil, same
+    -- as every other field a leader stops sending.
+    env.recv("G " .. OPEN .. " 101 501 12 Bob-" .. REALM .. ":D 0", "Bob-" .. REALM)
+    eq(env.board("open").groups["Bob-" .. REALM].when, nil,
+        "a client too old to send field 8 is read the same as nil")
+
+    env.recv("G " .. OPEN .. " 102 501 12 Bob-" .. REALM .. ":D 0 " .. when, "Bob-" .. REALM)
+    env.recv("G " .. OPEN .. " 103 501 12 Bob-" .. REALM .. ":D 0 -", "Bob-" .. REALM)
+    eq(env.board("open").groups["Bob-" .. REALM].when, nil, "a dash means nil")
+
+    env.recv("G " .. OPEN .. " 104 501 12 Bob-" .. REALM .. ":D 0 " .. when, "Bob-" .. REALM)
+    env.recv("G " .. OPEN .. " 105 501 12 Bob-" .. REALM .. ":D 0 0", "Bob-" .. REALM)
+    eq(env.board("open").groups["Bob-" .. REALM].when, nil, "so does a zero")
+
+    env.recv("G " .. OPEN .. " 106 501 12 Bob-" .. REALM .. ":D 0 " .. when, "Bob-" .. REALM)
+    env.recv("G " .. OPEN .. " 107 501 12 Bob-" .. REALM .. ":D 0 garbage", "Bob-" .. REALM)
+    eq(env.board("open").groups["Bob-" .. REALM].when, nil, "and unparseable text")
+end
+
+do
+    -- The trailing `when` token is reserved before pairs/specs are trimmed,
+    -- so even a roster cut down to nothing keeps its schedule.
+    local huge = string.rep("Q", 300)
+    local env = newEnv({ player = huge, key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.clearSent()
+
+    local when = env.now + 3600
+    eq(env.M.SignUp("open", { intent = "lead", when = when }), true,
+        "SignUp lead survives an unsendable name, when and all")
+    local g = env.last("G", OPEN)
+    check(g and #g.text <= 255, "inside the addon-message limit", g and #g.text)
+    check(g and g.text:match(" %- %- " .. when .. "$") ~= nil,
+        "with an empty roster but the schedule intact", g and g.text)
+end
+
+do
+    -- A full five-man roster of long Name-Realm strings, scheduled: the G
+    -- still fits inside 255 bytes, and a peer who only hears this one message
+    -- still reads the schedule back correctly.
+    local env = newEnv({ specRole = "TANK", key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    local when = env.now + 5400
+    env.M.SignUp("open", { intent = "lead", when = when })
+
+    for i, role in ipairs({ "H", "D", "D", "D" }) do
+        local name = string.rep("X", 40) .. i .. "-" .. REALM
+        env.recv("E " .. OPEN .. " " .. (100 + i) .. " " .. role .. " join any - - -", name)
+        env.recv("J " .. OPEN, name, "WHISPER")
+    end
+
+    local g = env.last("G", OPEN)
+    check(g and #g.text <= 255, "a full scheduled roster stays inside the limit", g and #g.text)
+    check(g and g.text:match(" " .. when .. "$") ~= nil, "and the schedule rides along", g and g.text)
+
+    local peer = newEnv({ player = "Peer" }).load()
+    peer.fire("PLAYER_ENTERING_WORLD", false, false)
+    peer.recv(g.text, "Vizzo-" .. REALM)
+    eq(peer.board("open").groups["Vizzo-" .. REALM].when, when,
+        "the schedule round-trips through the wire")
+end
+
+-- ------------------------------------------------------------------
+-- 26. Scheduling lifetime: grace vs the ordinary heartbeat rule
+-- ------------------------------------------------------------------
+
+do
+    -- A scheduled group outlives the ordinary 15-minute silence rule; only
+    -- the grace window past its own `when` can prune it.
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    local when = env.now + 3600
+    env.recv("G " .. OPEN .. " 100 501 12 Bob-" .. REALM .. ":D 0 " .. when, "Bob-" .. REALM)
+
+    env.tick(16 * 60)
+    eq(#env.M.Groups("open"), 1, "a scheduled group outlives the 15-minute heartbeat rule")
+
+    env.tick((when - env.now) + 60)
+    eq(#env.M.Groups("open"), 1, "and stays visible just after its start time, inside grace")
+
+    env.tick(2 * 60 * 60)
+    eq(#env.M.Groups("open"), 0, "but is pruned once the grace window runs out")
+end
+
+do
+    -- An unscheduled group is unaffected: the grace rule only ever applies
+    -- once `when` is actually set.
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.recv("G " .. OPEN .. " 100 501 12 Bob-" .. REALM .. ":D 0 -", "Bob-" .. REALM)
+    env.tick(15 * 60 + 1)
+    eq(#env.M.Groups("open"), 0, "an unscheduled group is still pruned after 15 minutes of silence")
+end
+
+do
+    -- Pool entries (non-lead sign-ups) are untouched by the scheduling rule:
+    -- a silent member still ages out on the ordinary clock even while their
+    -- leader's own group is scheduled hours in the future.
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    local when = env.now + 6 * 60 * 60
+    env.recv("G " .. OPEN .. " 100 501 12 Bob-" .. REALM .. ":D,Ann-" .. REALM .. ":D 0,0 " .. when,
+        "Bob-" .. REALM)
+    env.recv("E " .. OPEN .. " 100 D join any - - -", "Ann-" .. REALM)
+
+    env.tick(15 * 60 + 1)
+    local groups = env.M.Groups("open")
+    eq(#groups, 1, "the scheduled group is still there")
+    eq(#groups[1].members, 1, "but a silent member is hidden same as ever")
+end
+
+-- ------------------------------------------------------------------
+-- 27. M.SetWhen
+-- ------------------------------------------------------------------
+
+do
+    local env = newEnv({ key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+
+    eq(env.M.SetWhen("open", env.now + 3600), false, "a no-op before signing up to lead")
+
+    env.M.SignUp("open", { intent = "lead" })
+    env.clearSent()
+    local when = env.now + 3600
+    eq(env.M.SetWhen("open", when), true, "the leader may schedule the group")
+    eq(env.board("open").me.when, when, "on our own entry")
+    eq(env.board("open").groups["Vizzo-" .. REALM].when, when, "and the group record")
+    local g = env.last("G", OPEN)
+    check(g and g.text:match(" " .. when .. "$") ~= nil,
+        "and re-broadcasts the group with it", g and g.text)
+
+    eq(env.M.SetWhen("open", nil), true, "and clears it back to right-now")
+    eq(env.board("open").groups["Vizzo-" .. REALM].when, nil, "on the group")
+    eq(env.board("open").me.when, nil, "and on our own entry")
+
+    local joiner = newEnv({ player = "Ann" }).load()
+    joiner.fire("PLAYER_ENTERING_WORLD", false, false)
+    joiner.M.SignUp("open", { intent = "join", bracket = "any" })
+    eq(joiner.M.SetWhen("open", joiner.now + 60), false, "a non-leader cannot schedule")
+
+    local lead = newEnv({ key = { mapID = 501, level = 12 } }).load()
+    lead.fire("PLAYER_ENTERING_WORLD", false, false)
+    lead.M.SignUp("monday", { intent = "lead" })
+    eq(lead.M.SetWhen("monday", lead.now + 60), false, "the Monday board has nothing to schedule")
+end
+
+-- ------------------------------------------------------------------
+-- 28. FormatWhen, BuildWhen, DefaultWhen, IsScheduled
+-- ------------------------------------------------------------------
+
+do
+    -- Day/time parts, checked against the same date() the module itself uses
+    -- so the test holds regardless of the host's timezone.
+    local env = newEnv().load()
+    local now = env.now
+
+    eq(env.M.FormatWhen(nil, now), "", "no when, nothing to show")
+
+    local abbr = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
+    local months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" }
+
+    local today = env.M.BuildWhen(0, 20, 0, now)
+    local todayT = os.date("*t", today)
+    eq(env.M.FormatWhen(today, now):match("^(%a+ %d%d:%d%d)"),
+        string.format("Today %02d:%02d", todayT.hour, todayT.min),
+        "later the same local day is Today")
+
+    local tomorrow = env.M.BuildWhen(1, 9, 30, now)
+    local tomT = os.date("*t", tomorrow)
+    eq(env.M.FormatWhen(tomorrow, now):match("^(%a+ %d%d:%d%d)"),
+        string.format("Tomorrow %02d:%02d", tomT.hour, tomT.min),
+        "the next local day is Tomorrow")
+
+    local within = env.M.BuildWhen(4, 18, 0, now)
+    local withinT = os.date("*t", within)
+    eq(env.M.FormatWhen(within, now):match("^(.-%d%d:%d%d)"),
+        string.format("%s %02d:%02d", abbr[withinT.wday], withinT.hour, withinT.min),
+        "four days out is a bare weekday")
+
+    local far = env.M.BuildWhen(10, 12, 0, now)
+    local farT = os.date("*t", far)
+    eq(env.M.FormatWhen(far, now):match("^(.-%d%d:%d%d)"),
+        string.format("%s %d %s %02d:%02d", abbr[farT.wday], farT.day, months[farT.month],
+            farT.hour, farT.min),
+        "past a week out gets the full date")
+end
+
+do
+    -- The relative suffix: pure epoch arithmetic, so it holds regardless of
+    -- timezone.
+    local env = newEnv().load()
+    local now = env.now
+
+    local soon = now + 2 * 3600 + 15 * 60
+    check(env.M.FormatWhen(soon, now):find("(in 2h 15m)", 1, true) ~= nil,
+        "a couple hours out gets a relative suffix", env.M.FormatWhen(soon, now))
+
+    local far = now + 3 * 86400 + 4 * 3600
+    check(env.M.FormatWhen(far, now):find("(in 3d 4h)", 1, true) ~= nil,
+        "days out rounds to days and hours", env.M.FormatWhen(far, now))
+
+    local started = now - 12 * 60
+    check(env.M.FormatWhen(started, now):find("(started 12m ago)", 1, true) ~= nil,
+        "just started counts up instead of down", env.M.FormatWhen(started, now))
+
+    local longGone = now - (2 * 60 * 60 + 5 * 60)
+    check(env.M.FormatWhen(longGone, now):find("(", 1, true) == nil,
+        "past the grace window the relative suffix drops entirely",
+        env.M.FormatWhen(longGone, now))
+end
+
+do
+    -- BuildWhen round-trips against date("*t"): the requested clock time, and
+    -- the requested day expressed as local-midnight arithmetic so it holds
+    -- across a DST boundary too.
+    local env = newEnv().load()
+    local now = env.now
+    local w = env.M.BuildWhen(2, 14, 45, now)
+    local wt = os.date("*t", w)
+    local nowT = os.date("*t", now)
+    eq(wt.hour, 14, "BuildWhen lands on the requested hour")
+    eq(wt.min, 45, "and minute")
+    local expectedDay = os.time({ year = nowT.year, month = nowT.month, day = nowT.day + 2,
+        hour = 0, min = 0, sec = 0 })
+    local gotDay = os.time({ year = wt.year, month = wt.month, day = wt.day,
+        hour = 0, min = 0, sec = 0 })
+    eq(gotDay, expectedDay, "and the requested day, two days ahead of now")
+end
+
+do
+    -- DefaultWhen: the next full hour, at least half an hour out.
+    local env = newEnv().load()
+    local now = env.now
+    local w = env.M.DefaultWhen(now)
+    check(w >= now + 1800, "at least half an hour out", w - now)
+    check(w < now + 1800 + 3600, "and no more than an hour past that", w - now)
+    local wt = os.date("*t", w)
+    eq(wt.min, 0, "landing on the top of the hour")
+    eq(wt.sec, 0, "exactly")
+end
+
+do
+    local env = newEnv().load()
+    eq(env.M.IsScheduled(nil), false, "no group at all is not scheduled")
+    eq(env.M.IsScheduled({ when = nil }), false, "a group without when is not scheduled")
+    eq(env.M.IsScheduled({ when = env.now + 60 }), true, "a group with when is scheduled")
+end
+
+-- ------------------------------------------------------------------
+-- 29. M.Groups sort order with `when`
+-- ------------------------------------------------------------------
+
+do
+    local env = newEnv({ key = { mapID = 501, level = 5 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.M.SignUp("open", { intent = "lead", when = env.now + 7200 })
+
+    env.recv("G " .. OPEN .. " 100 502 20 Ann-" .. REALM .. ":T", "Ann-" .. REALM)
+    env.recv("G " .. OPEN .. " 100 503 15 Bob-" .. REALM .. ":T", "Bob-" .. REALM)
+    env.recv("G " .. OPEN .. " 100 504 8 Deb-" .. REALM .. ":T - " .. (env.now + 3600),
+        "Deb-" .. REALM)
+
+    local order = {}
+    for _, g in ipairs(env.M.Groups("open")) do order[#order + 1] = g.leader end
+    eq(order[1], "Vizzo-" .. REALM, "our own group leads regardless of its own schedule")
+    eq(order[2], "Ann-" .. REALM, "unscheduled groups (when=0) sort first among the rest")
+    eq(order[3], "Bob-" .. REALM, "tied on when, the higher level goes first")
+    eq(order[4], "Deb-" .. REALM, "a scheduled group sorts after every unscheduled one")
+end
+
+-- ------------------------------------------------------------------
+-- 30. A leader's own E or X drops their cached group
+-- ------------------------------------------------------------------
+
+do
+    -- Bob's own E now says "join" - his client thinks he left the group, with
+    -- no D ever having arrived to say so. His cached group goes with it.
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.M.SignUp("open", { intent = "join", bracket = "any" })
+
+    env.recv("G " .. OPEN .. " 100 501 12 Bob-" .. REALM .. ":T,Vizzo-" .. REALM .. ":D",
+        "Bob-" .. REALM)
+    eq(env.board("open").me.leader, "Bob-" .. REALM, "the G accepts our join")
+    check(env.board("open").groups["Bob-" .. REALM] ~= nil, "and caches Bob's group")
+
+    env.recv("E " .. OPEN .. " 200 D join any - - -", "Bob-" .. REALM)
+    eq(env.board("open").groups["Bob-" .. REALM], nil,
+        "Bob's cached group is dropped along with his own E")
+    eq(env.board("open").me.leader, nil, "and we are freed back to the pool")
+end
+
+do
+    -- Bob withdraws outright, with no preceding D either.
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.M.SignUp("open", { intent = "join", bracket = "any" })
+
+    env.recv("G " .. OPEN .. " 100 501 12 Bob-" .. REALM .. ":T,Vizzo-" .. REALM .. ":D",
+        "Bob-" .. REALM)
+    eq(env.board("open").me.leader, "Bob-" .. REALM, "we are in Bob's group")
+
+    env.recv("X " .. OPEN, "Bob-" .. REALM)
+    eq(env.board("open").groups["Bob-" .. REALM], nil,
+        "his cached group goes with his withdraw")
+    eq(env.board("open").me.leader, nil, "and we are freed back to the pool")
+    eq(#env.M.Groups("open"), 0, "no group remains for anyone to see")
+end
+
+-- ------------------------------------------------------------------
+-- 31. Online presence
+-- ------------------------------------------------------------------
+
+do
+    -- Tri-state: unknown before any scan, then explicitly true/false once the
+    -- roster has actually said so - never guessed at.
+    local env = newEnv().load()
+    eq(env.M.IsOnline("Nobody-" .. REALM), nil, "unscanned/unknown is nil, not false")
+
+    local roster = { { "Anna-" .. REALM, "WARRIOR", true },
+                     { "Bob-" .. REALM, "PRIEST", false } }
+    _G.GetNumGuildMembers = function() return #roster end
+    _G.GetGuildRosterInfo = function(i)
+        local row = roster[i]
+        if not row then return nil end
+        return row[1], "Member", 1, 80, "Class", "Zone", "", "", row[3], 0, row[2]
+    end
+    env.fire("GUILD_ROSTER_UPDATE")
+
+    eq(env.M.IsOnline("Anna-" .. REALM), true, "online comes back true")
+    eq(env.M.IsOnline("Bob-" .. REALM), false, "offline comes back false, not hidden")
+    eq(env.M.IsOnline("Cid-" .. REALM), nil, "someone not on the roster is still unknown")
+end
+
+do
+    -- GUILD_ROSTER_UPDATE invalidates the cached scan and repaints both
+    -- boards, throttled to once per five seconds.
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    local seen = {}
+    env.M.RegisterCallback(function(ev) seen[#seen + 1] = ev end)
+
+    local roster = { { "Anna-" .. REALM, "WARRIOR", true } }
+    _G.GetNumGuildMembers = function() return #roster end
+    _G.GetGuildRosterInfo = function(i)
+        local row = roster[i]
+        if not row then return nil end
+        return row[1], "Member", 1, 80, "Class", "Zone", "", "", row[3], 0, row[2]
+    end
+
+    env.fire("GUILD_ROSTER_UPDATE")
+    local firedOnce = #seen
+    check(firedOnce >= 2, "the first event repaints both boards", firedOnce)
+
+    for _ = 1, 10 do env.fire("GUILD_ROSTER_UPDATE") end
+    eq(#seen, firedOnce, "a burst inside the throttle repaints nothing further")
+
+    env.now = env.now + 6
+    env.fire("GUILD_ROSTER_UPDATE")
+    check(#seen > firedOnce, "past the throttle window it repaints again")
+end
+
+do
+    -- RequestRoster nudges C_GuildInfo.GuildRoster, guarded for a client
+    -- without it and for one where the call itself throws.
+    local env = newEnv().load()
+    local called = 0
+    _G.C_GuildInfo = { GuildRoster = function() called = called + 1 end }
+    env.M.RequestRoster()
+    eq(called, 1, "RequestRoster asks the client for a fresh roster")
+
+    _G.C_GuildInfo = nil
+    local ok1 = pcall(env.M.RequestRoster)
+    check(ok1, "and does nothing, quietly, without the API")
+
+    _G.C_GuildInfo = { GuildRoster = function() error("boom") end }
+    local ok2 = pcall(env.M.RequestRoster)
+    check(ok2, "or if the call itself throws")
+end
+
+do
+    -- Groups() and Pool() both surface it, tri-state, per member/entry.
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    local roster = { { "Bob-" .. REALM, "WARRIOR", true },
+                     { "Ann-" .. REALM, "PRIEST", false } }
+    _G.GetNumGuildMembers = function() return #roster end
+    _G.GetGuildRosterInfo = function(i)
+        local row = roster[i]
+        if not row then return nil end
+        return row[1], "Member", 1, 80, "Class", "Zone", "", "", row[3], 0, row[2]
+    end
+    env.fire("GUILD_ROSTER_UPDATE")
+
+    -- Ann needs a heard E or M.Groups hides her as an unheard ghost, same as
+    -- ever - nothing to do with online status. Zed stays unaffiliated, off
+    -- the guild roster entirely, to check Pool's nil case.
+    env.recv("E " .. OPEN .. " 100 D join any - - -", "Ann-" .. REALM)
+    env.recv("E " .. OPEN .. " 100 D join any - - -", "Zed-" .. REALM)
+    env.recv("G " .. OPEN .. " 100 501 12 Bob-" .. REALM .. ":T,Ann-" .. REALM .. ":D",
+        "Bob-" .. REALM)
+
+    local members = env.M.Groups("open")[1].members
+    local byName = {}
+    for _, m in ipairs(members) do byName[m.name] = m.online end
+    eq(byName["Bob-" .. REALM], true, "the leader's own online state shows in Groups")
+    eq(byName["Ann-" .. REALM], false, "and a member's")
+
+    local pool = env.M.Pool("open")
+    eq(pool[1] and pool[1].name, "Zed-" .. REALM, "Zed is the only one left in the pool")
+    eq(pool[1] and pool[1].online, nil, "and Pool for someone off the roster entirely")
+end
+
+-- ------------------------------------------------------------------
+-- 32. An own scheduled group past grace self-disbands
+-- ------------------------------------------------------------------
+
+do
+    -- Past `when` + the grace window, logging back in disbands it exactly as
+    -- a manual Disband would: a D goes out, and we land back in the pool
+    -- rather than vanishing outright.
+    local env = newEnv({ key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    local when = env.now + 3600
+    env.M.SignUp("open", { intent = "lead", when = when })
+    env.clearSent()
+
+    env.now = when + 2 * 60 * 60 + 60
+    env.fire("PLAYER_ENTERING_WORLD", true, false)
+
+    check(env.last("D", OPEN) ~= nil, "a D is broadcast for the overdue group")
+    eq(env.board("open").me.leader, nil, "we are no longer leading")
+    eq(env.board("open").me.intent, "join", "and are left looking, not withdrawn")
+    eq(#env.M.Groups("open"), 0, "the group is gone from the view")
+end
+
+do
+    -- Still inside the two-hour grace window: untouched.
+    local env = newEnv({ key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    local when = env.now + 3600
+    env.M.SignUp("open", { intent = "lead", when = when })
+    env.clearSent()
+
+    env.now = when + 60 * 60
+    env.fire("PLAYER_ENTERING_WORLD", true, false)
+
+    check(env.last("D", OPEN) == nil, "no D for a group still inside its grace window")
+    eq(env.board("open").me.leader, "Vizzo-" .. REALM, "still leading")
+    eq(#env.M.Groups("open"), 1, "and still shown")
+end
+
+do
+    -- An unscheduled own group: no `when`, so grace never applies, no matter
+    -- how long ago it was left running.
+    local env = newEnv({ key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.M.SignUp("open", { intent = "lead" })
+    env.clearSent()
+
+    env.now = env.now + 5 * 60 * 60
+    env.fire("PLAYER_ENTERING_WORLD", true, false)
+
+    check(env.last("D", OPEN) == nil, "no D for an unscheduled group")
+    eq(env.board("open").me.leader, "Vizzo-" .. REALM, "still leading")
+    eq(#env.M.Groups("open"), 1, "and still shown")
 end
 
 -- ------------------------------------------------------------------

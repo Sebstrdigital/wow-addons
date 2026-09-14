@@ -236,3 +236,105 @@ names a class. A `|T<icon>:14:14|t` spec icon follows the name, **outside** the
 closing `|h`, so the link markup and the line's hyperlink count are unchanged —
 past roughly nine links in one FontString the client drops every link in it,
 and the group line already runs to five. Unknown spec → no icon, no gap.
+
+---
+
+# Addendum v1.7.0 — Open board scheduling and online indicator (2026-09-14)
+
+Two independent additions, protocol-owned half done here: a leader can pin
+their open-board group to a start time instead of "right now", and both
+boards can show whether a name is actually online.
+
+## Protocol — still `GPMM2`
+
+One more trailing field, appended the same way the spec fields were: no
+prefix bump, read by fixed index with no arity check, so a client that
+predates it never looks and one whose sender omits it reads nil.
+
+| Msg | Field | Meaning |
+|---|---|---|
+| `G ev ts mapID level m1:R,m2:R,... s1,s2,... when` | 8th | leader-set start time, decimal server epoch, `-`/`0`/missing = "right now" |
+
+Only the open board ever sets it — the Monday board's key IS the date, so it
+has nothing to schedule. It never rides `E`: groups are leader-authoritative,
+so only a `G` may say when one starts. `SendGroup`'s 255-byte trim reserves
+this token *before* trimming the roster/spec lists, so an overlong roster
+never costs the schedule — it only ever costs members.
+
+## Lifetime
+
+A group carrying `when` is exempt from the ordinary 15-minute
+(`OPEN_STALE`) silence rule and instead lives until `Now() > when +
+OPEN_SCHEDULED_GRACE` (new constant, two hours) — regardless of how long its
+leader has been offline, so peers can plan around a scheduled run its leader
+hasn't logged in for yet. A group without `when` is unaffected: same
+15-minute rule as before. Pool entries (non-lead sign-ups) are untouched
+either way — a silent member still ages out on the ordinary clock even while
+their leader's group is scheduled hours out.
+
+Peers' *view* of our own group is exempt from this pruning, same as
+`OPEN_STALE` — nothing may hide the group out from under the leader looking
+at it. The leader's own client is not exempt, though: `PruneOwnSchedule`
+disbands an own scheduled group once it is past grace, through the same path
+`M.Disband` takes (own `D` broadcast, then back to the pool rather than gone
+outright), checked at login and on every heartbeat - the only two moments
+that may change state on our own initiative; deliberately not from
+`M.Groups`, a getter, since Firing a callback from inside the render that
+called it re-enters and corrupts the UI's button pool. A leader who logs back
+in days after a run they never started must not re-broadcast it as still on,
+and should not have to remember to withdraw by hand. It never fires mid-key
+(`InChallenge()`), so a run that started late is not disbanded out from under
+the person running it. An own *unscheduled* group is untouched either way,
+exactly as before.
+
+A leader's own `E` arriving with an intent other than `"lead"`, or their `X`,
+now drops their cached group the same way an explicit `D` does — covering a
+client that never sent the disband but has plainly moved on.
+
+## Contract additions
+
+```lua
+ns.Monday.SetWhen(ev, when)       -- leader-only, open-board-only; edits me.when,
+                                   -- the group, re-broadcasts G, Fires(ev)
+ns.Monday.FormatWhen(when, now)   -- "" | "Today 20:00 (in 2h 15m)" | "Sat 19 Sep 20:00" | ...
+ns.Monday.BuildWhen(dayOffset, hour, minute, now)  -- -> epoch, local calendar
+ns.Monday.DefaultWhen(now)        -- -> next full hour at least 30 min out
+ns.Monday.IsScheduled(g)          -- g.when ~= nil
+ns.Monday.Groups(ev)              -- group records gain `when`; members gain `online`
+ns.Monday.Pool(ev)                -- entries' `online` is now tri-state (was boolean)
+ns.Monday.IsOnline(fullName)      -- true / false / nil (nil = not in roster / unscanned)
+ns.Monday.RequestRoster()         -- nudges C_GuildInfo.GuildRoster(), guarded + pcall'd
+```
+
+`SignUp(ev, { ..., when = epoch|nil })` accepts the schedule at creation, only
+for `{ ev = "open", intent = "lead" }`; every other combination ignores it.
+`Groups(ev)` sorts own group first, then by `when` ascending (nil treated as
+0, so unscheduled groups lead), then the existing level-desc/leader-name
+rules.
+
+## Online indicator
+
+`ScanRoster` already walked `GetGuildRosterInfo` for the class cache; the
+same pass now also fills `onlineCache[fullName] = true|false`, so "in the
+roster but offline" is distinguishable from "never scanned" (nil) rather than
+collapsing both to false. `GUILD_ROSTER_UPDATE` now invalidates the cached
+scan and re-fires both boards' callbacks, throttled to once per five seconds
+— the scan itself keeps its existing 20-second guard, but the event's whole
+point is fresher presence, so the repaint forces past it rather than waiting
+out the window.
+
+## SavedVariables
+
+`groups[leader].when` and `entries[name].when` (the leader's own copy) are
+both new and both optional, riding the board tables `Persist` already stores
+whole. A board saved before this addendum has neither and loads as unknown,
+same as `specs` did in v1.5.1.
+
+## UI
+
+Covered by the UI half of this change (see `UI.lua`): a status-icon marker
+per row instead of the old Monday-only "(offline)" suffix, a `Now` /
+`Scheduled` toggle with plain-button day/hour/minute steppers in the lead
+flow (no EditBox, no dropdowns — both are unsafe in a raid-scoped addon; see
+the constraints above), and the leader line appending `FormatWhen(g.when)`
+when set.

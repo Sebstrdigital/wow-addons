@@ -32,7 +32,7 @@ local ADDON, ns = ...
 --   R ev                                          request  (GUILD)
 --   E ev ts role intent bracket mapID level leader spec own entry (GUILD)
 --   X ev                                          withdraw (GUILD)
---   G ev ts mapID level name:R,name:R,... s,s,... roster   (GUILD, leader)
+--   G ev ts mapID level name:R,name:R,... s,s,... when roster   (GUILD, leader)
 --   D ev                                          disband  (GUILD, leader)
 --   J ev                                          join req (WHISPER to leader)
 --   L ev                                          leave    (WHISPER to leader)
@@ -41,11 +41,19 @@ local ADDON, ns = ...
 -- The two `spec` fields are trailing additions, both carrying numeric
 -- specialization ids (GetSpecializationInfo's first return), and both
 -- optional by construction rather than by promise: E's peers read fields 3..9
--- by fixed index and G's read 3..6, so a client that predates these fields
+-- by fixed index and G's read 3..8, so a client that predates these fields
 -- simply never looks at them, and one that postdates a sender who omits them
 -- reads nil. "0" and a missing field mean the same thing - not told. G's list
 -- is positional against the member list in the field before it, one entry per
 -- member in the same order.
+--
+-- G's field 8 is one more trailing addition beyond its spec list: `when`, the
+-- open board's leader-set start time as a decimal server epoch, or "-" for
+-- "right now". Same fixed-index, no-arity-check rule as the rest, so an older
+-- client simply never looks at it. Only the open board ever sets it - the
+-- Monday board's key IS the date, so it has nothing to schedule - and it
+-- never rides E: groups are leader-authoritative, so only a G may say when
+-- one starts.
 --
 -- Bump the prefix to GPMM3 on any breaking change to those fields.
 
@@ -56,10 +64,12 @@ local PREFIX = "GPMM2"
 local MAX_BYTES = 255           -- hard addon-message payload limit
 local REFRESH_THROTTLE = 60     -- seconds between outbound R broadcasts, per board
 local ROSTER_CACHE = 20         -- seconds an online/offline roster scan is reused
+local ROSTER_FIRE_THROTTLE = 5  -- seconds between GUILD_ROSTER_UPDATE-driven repaints
 local REPLY_JITTER = 2          -- seconds; spreads replies to a broadcast R
 local KEY_DEBOUNCE = 2          -- seconds after the last BAG_UPDATE_DELAYED
 local OPEN_STALE = 15 * 60      -- an open-board record older than this is gone
 local OPEN_HEARTBEAT = 5 * 60   -- how often we prove we are still here
+local OPEN_SCHEDULED_GRACE = 2 * 60 * 60  -- grace past `when` before a scheduled group is pruned
 local POST_THROTTLE = 60        -- seconds between guild-chat posts, per board
 local MAX_CHAT = 255            -- SendChatMessage's payload limit
 local SLOTS = { T = 1, H = 1, D = 3 }
@@ -112,6 +122,8 @@ local myKey = nil               -- { mapID, level, name } or nil
 local keyTimer = nil            -- debounce guard for BAG_UPDATE_DELAYED
 local heartbeat = nil           -- C_Timer ticker for the open board
 local rosterOnline, rosterAt = nil, 0
+local onlineCache = {}          -- fullName -> true/false; absent = never scanned
+local lastRosterFire = 0        -- Now() of the last throttled GUILD_ROSTER_UPDATE repaint
 local summaryPrinted = false
 
 -- ------------------------------------------------------------------
@@ -150,6 +162,15 @@ end
 -- leave a gap), and a missing field is what every client older than these two
 -- trailing fields sends. Both mean "not told".
 local function SpecFromWire(v)
+    local n = tonumber(Unwire(v) or "")
+    if not n or n <= 0 then return nil end
+    return n
+end
+
+-- A schedule epoch off the wire, or nil for "not told" / "right now". "0" is
+-- a second spelling of nil here too - nobody's clock is truly epoch zero -
+-- and a missing field means the same, so one rule covers both.
+local function WhenFromWire(v)
     local n = tonumber(Unwire(v) or "")
     if not n or n <= 0 then return nil end
     return n
@@ -255,6 +276,96 @@ function M.TargetLabel()
         MONTH_ABBR[t.month] or "?")
 end
 
+-- ------------------------------------------------------------------
+-- Scheduling ("when" on an open-board group)
+-- ------------------------------------------------------------------
+-- A leader-set start time, nil unless someone picks one - nil still means
+-- "right now", today's behaviour, unchanged.
+
+-- "2h 15m" / "3d 4h" / "12m" - the coarsest two units that say something,
+-- because "2h 15m 3s" answers a question nobody asked and "0d 2h" makes the
+-- reader do the subtraction FormatWhen exists to avoid.
+local function FormatDuration(seconds)
+    seconds = math.max(0, math.floor(seconds))
+    local days = math.floor(seconds / 86400)
+    local hours = math.floor((seconds % 86400) / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    if days > 0 then
+        return string.format("%dd %dh", days, hours)
+    elseif hours > 0 then
+        return string.format("%dh %dm", hours, minutes)
+    end
+    return string.format("%dm", minutes)
+end
+
+-- A calendar-time table's own local midnight, so day-boundary arithmetic
+-- never has to reason about hours or DST directly - `time` does that.
+local function LocalMidnight(t)
+    return time({ year = t.year, month = t.month, day = t.day,
+        hour = 0, min = 0, sec = 0 })
+end
+
+-- `when == nil` -> "" (nothing to show; "right now" already says it on the
+-- page header). Otherwise a day part - "Today", "Tomorrow", a bare weekday
+-- inside a week, else a full date - plus the clock time, plus a relative
+-- suffix while it still means something: how long until a future start, or
+-- how long since a past one that has not yet run out its grace.
+function M.FormatWhen(when, now)
+    if not when then return "" end
+    now = now or Now()
+
+    local whenT = date("*t", when)
+    local dayDiff = math.floor(
+        (LocalMidnight(whenT) - LocalMidnight(date("*t", now))) / 86400 + 0.5)
+
+    local dayPart
+    if dayDiff == 0 then
+        dayPart = "Today"
+    elseif dayDiff == 1 then
+        dayPart = "Tomorrow"
+    elseif dayDiff >= 2 and dayDiff <= 6 then
+        dayPart = WEEKDAY_ABBR[whenT.wday] or "?"
+    else
+        dayPart = string.format("%s %d %s", WEEKDAY_ABBR[whenT.wday] or "?",
+            whenT.day, MONTH_ABBR[whenT.month] or "?")
+    end
+
+    local result = string.format("%s %02d:%02d", dayPart, whenT.hour, whenT.min)
+
+    local delta = when - now
+    if delta > 0 then
+        result = result .. " (in " .. FormatDuration(delta) .. ")"
+    elseif -delta <= OPEN_SCHEDULED_GRACE then
+        result = result .. " (started " .. FormatDuration(-delta) .. " ago)"
+    end
+    return result
+end
+
+-- `dayOffset` days from today (0 = today), local calendar, at `hour:minute`.
+-- Built with `time{}` on the calendar fields rather than arithmetic on `now`,
+-- so a span that crosses a DST boundary still lands on the wall-clock time
+-- asked for - the C library's job, not ours.
+function M.BuildWhen(dayOffset, hour, minute, now)
+    local t = date("*t", now or Now())
+    return time({ year = t.year, month = t.month, day = t.day + (dayOffset or 0),
+        hour = hour or 0, min = minute or 0, sec = 0 })
+end
+
+-- What the UI seeds its steppers with: the next full hour that is still at
+-- least half an hour away, so "Scheduled" never defaults to a time already
+-- half gone.
+function M.DefaultWhen(now)
+    now = now or Now()
+    local t = date("*t", now + 1800)
+    local hour = t.hour
+    if t.min > 0 or t.sec > 0 then hour = hour + 1 end
+    return time({ year = t.year, month = t.month, day = t.day, hour = hour, min = 0, sec = 0 })
+end
+
+function M.IsScheduled(g)
+    return g ~= nil and g.when ~= nil
+end
+
 local function WireKey(ev)
     if ev == "monday" then return "M" .. M.TargetDate() end
     if ev == "open" then return "open" end
@@ -301,6 +412,22 @@ local function IsStale(ev, seen, name, me)
     return not seen or (Now() - seen) > OPEN_STALE
 end
 
+-- A scheduled group's leader may be offline for hours before the run - the
+-- 15-minute heartbeat rule would hide it long before anyone could plan around
+-- it - so a group carrying `when` lives and dies by that time instead: still
+-- visible however long the leader has been offline, gone once the grace
+-- window past the start time has run out. Our own group is exempt from this
+-- exactly as it is from OPEN_STALE, for the same reason: nothing here may
+-- prune the group out from under the leader looking at it.
+local function IsGroupStale(ev, g, leader, me)
+    if ev ~= "open" then return false end
+    if leader and me and leader == me then return false end
+    if g and g.when then
+        return Now() > g.when + OPEN_SCHEDULED_GRACE
+    end
+    return IsStale(ev, g and g.seen, leader, me)
+end
+
 -- Returns changed, rosterChanged. The second flag means our *own* roster lost
 -- a member, which peers have to be told about; PruneOpen cannot send anything
 -- itself because it is defined above the senders.
@@ -316,7 +443,7 @@ local function PruneOpen()
         end
     end
     for leader, g in pairs(b.groups) do
-        if IsStale("open", g.seen, leader, me) then
+        if IsGroupStale("open", g, leader, me) then
             b.groups[leader] = nil
             changed = true
         end
@@ -498,12 +625,16 @@ local function SendGroup(ev)
     local head = table.concat({
         "G", b.key, tostring(g.ts or Now()), Wire(g.mapID), Wire(g.level),
     }, " ")
+    -- Measured and reserved before the roster is, so trimming below only ever
+    -- eats into pairs/specs - the trailing `when` token is never what a full
+    -- roster pushes out.
+    local whenToken = Wire(g.when and math.floor(g.when) or nil)
     local body, specBody = SerializeMembers(g, me, b.entries)
     -- The spec list is positional against the roster, so it is measured with
     -- it and trimmed with it - a body cut shorter than its spec list would
     -- hand every receiver the wrong icons rather than none.
     local function Overflows()
-        return #head + 1 + #body + 1 + #specBody > MAX_BYTES
+        return #head + 1 + #body + 1 + #specBody + 1 + #whenToken > MAX_BYTES
     end
     -- Five members of plausible name length fit inside 255 with room to spare;
     -- this only bites on pathological realm names, and losing the tail of the
@@ -524,7 +655,8 @@ local function SendGroup(ev)
         end
     end
     Send(head .. " " .. (body ~= "" and body or "-")
-              .. " " .. (specBody ~= "" and specBody or "-"), "GUILD")
+              .. " " .. (specBody ~= "" and specBody or "-")
+              .. " " .. whenToken, "GUILD")
 end
 
 local function SendWithdraw(ev)
@@ -572,6 +704,16 @@ local function StopHeartbeat()
     heartbeat = nil
 end
 
+-- Forward-declared: real body assigned below, once DisbandOwnGroup exists to
+-- do the actual work. Clears an own scheduled group that has sat past its
+-- grace window - checked at login and on every heartbeat, the only two
+-- moments that may change state on our own initiative - so a leader who
+-- never comes back online for their own run does not leave a stale group
+-- standing, or need to remember to withdraw by hand. Deliberately not called
+-- from M.Groups: a getter that Fires a callback can re-enter the very render
+-- that called it.
+local PruneOwnSchedule
+
 local function StartHeartbeat()
     if heartbeat then return end
     if not C_Timer or not C_Timer.NewTicker then return end
@@ -585,6 +727,7 @@ local function StartHeartbeat()
             -- Skip the beat rather than queue it: a heartbeat delivered after
             -- the dungeon says nothing useful about when we were last here.
             if InChallenge() then return end
+            PruneOwnSchedule("open")
             b.me.ts = Now()
             b.me.seen = Now()
             -- Prune before broadcasting, or the roster we send this beat still
@@ -742,6 +885,34 @@ local function DisbandOwnGroup(ev)
     return true
 end
 
+-- Only the open board's own group can be scheduled, so only it is ever
+-- checked. An unscheduled own group is untouched, same as ever - this is
+-- purely about a `when` nobody showed up for. A key in progress holds off
+-- entirely, same reasoning as the heartbeat's own skip: whatever the club
+-- decided two hours ago, disbanding out from under a live run would be worse
+-- than a stale one.
+PruneOwnSchedule = function(ev)
+    if ev ~= "open" or InChallenge() then return false end
+    local b = boards[ev]
+    local me = b and MyName()
+    if not me or not b or not b.me then return false end
+    local g = b.groups[me]
+    if not g or not g.when or Now() <= g.when + OPEN_SCHEDULED_GRACE then
+        return false
+    end
+
+    -- Exactly M.Disband's own path: drop the group, then stay on the board as
+    -- a looking pool entry rather than vanish outright.
+    DisbandOwnGroup(ev)
+    b.me.intent = "join"
+    b.me.bracket = b.me.bracket or "any"
+    b.me.ts = Now()
+    Persist()
+    SendEntry(ev)
+    Fire(ev)
+    return true
+end
+
 -- ------------------------------------------------------------------
 -- Public API
 -- ------------------------------------------------------------------
@@ -810,6 +981,14 @@ function M.SignUp(ev, opts)
     if intent == "lead" then
         entry.leader = me
     end
+    -- `when` is an open-board, leader-only concept: the Monday board's key IS
+    -- the date, so it has nothing to schedule, and a joiner has no group to
+    -- carry the field. Set here at creation; M.SetWhen edits it afterwards.
+    if ev == "open" and intent == "lead" then
+        local w = tonumber(opts.when)
+        if not w or w <= 0 then w = nil end
+        entry.when = w
+    end
     b.me = entry
     b.entries[me] = entry
 
@@ -824,6 +1003,7 @@ function M.SignUp(ev, opts)
         g.specs[me] = entry.spec
         g.mapID = entry.mapID
         g.level = entry.level
+        if ev == "open" then g.when = entry.when end
         g.ts = Now()
         g.seen = Now()
         b.groups[me] = g
@@ -833,6 +1013,31 @@ function M.SignUp(ev, opts)
     SendEntry(ev)
     if intent == "lead" then SendGroup(ev) end
     if ev == "open" then StartHeartbeat() end
+    Fire(ev)
+    return true
+end
+
+-- Leader-only: (re)schedules the open board's own group. `when` is a server
+-- epoch, or nil for "right now". A no-op for anyone not currently leading the
+-- open board - the Monday board has nothing to schedule, and a non-leader has
+-- no group to carry the field.
+function M.SetWhen(ev, when)
+    if ev ~= "open" then return false, "badevent" end
+    local ok, why = Ready(ev)
+    if not ok then return false, why end
+    local me = EnsureSelf(ev)
+    if not me or not IsLeading(ev) then return false, "nogroup" end
+
+    local w = tonumber(when)
+    if not w or w <= 0 then w = nil end
+
+    local b = boards[ev]
+    b.me.when = w
+    local g = b.groups[me]
+    g.when = w
+    g.ts = Now()
+    Persist()
+    SendGroup(ev)
     Fire(ev)
     return true
 end
@@ -986,20 +1191,22 @@ local classCache = {}
 local function ScanRoster()
     local now = Now()
     if rosterOnline and now - rosterAt < ROSTER_CACHE then return rosterOnline end
-    local set, classes = {}, {}
+    local set, classes, online = {}, {}, {}
     if GetNumGuildMembers and GetGuildRosterInfo then
         local total = GetNumGuildMembers() or 0
         for i = 1, total do
-            local fullName, _, _, _, _, _, _, _, online, _, classFileName =
+            local fullName, _, _, _, _, _, _, _, isOnline, _, classFileName =
                 GetGuildRosterInfo(i)
             if fullName then
-                if online then set[fullName] = true end
+                if isOnline then set[fullName] = true end
+                online[fullName] = isOnline == true
                 if classFileName then classes[fullName] = classFileName end
             end
         end
     end
     rosterOnline, rosterAt = set, now
     classCache = classes
+    onlineCache = online
     return set
 end
 
@@ -1014,6 +1221,25 @@ function M.ClassOf(name)
     return name and classCache[name] or nil
 end
 
+-- true/false once the roster has said so, nil for anyone not in it (or not
+-- scanned yet) - never guessed at, so a caller can tell "not shown" apart
+-- from "shown offline".
+function M.IsOnline(fullName)
+    if not fullName then return nil end
+    ScanRoster()
+    local v = onlineCache[fullName]
+    if v == nil then return nil end
+    return v
+end
+
+-- Nudges the client into a fresh guild-roster fetch; GUILD_ROSTER_UPDATE
+-- picks up the result. The server throttles this to about once per 10s on
+-- its own, so nothing here adds a second throttle on top of it.
+function M.RequestRoster()
+    if not C_GuildInfo or not C_GuildInfo.GuildRoster then return end
+    pcall(C_GuildInfo.GuildRoster)
+end
+
 function M.Groups(ev)
     if not Ready(ev) then return {} end
     local me = EnsureSelf(ev)
@@ -1022,7 +1248,7 @@ function M.Groups(ev)
     for leader, g in pairs(b.groups) do
         -- A leader we have not heard from takes the whole group with them:
         -- nobody else may edit that roster, so it can only go stale.
-        if not IsStale(ev, g.seen, leader, me) then
+        if not IsGroupStale(ev, g, leader, me) then
             local members = {}
             local counts = { T = 0, H = 0, D = 0 }
             for name, role in pairs(g.members or {}) do
@@ -1042,6 +1268,7 @@ function M.Groups(ev)
                         -- member's own entry first, the roster's sidecar
                         -- only for someone we have never heard from.
                         spec = (e and e.spec) or (g.specs and g.specs[name]) or nil,
+                        online = M.IsOnline(name),
                     }
                     if counts[role] then counts[role] = counts[role] + 1 end
                 end
@@ -1056,6 +1283,7 @@ function M.Groups(ev)
                 mapID = g.mapID,
                 level = g.level,
                 keyName = KeyName(g.mapID),
+                when = g.when,
                 members = members,
                 isMine = (leader == me),
                 -- Counted from what is actually shown, so the row cannot say
@@ -1072,6 +1300,8 @@ function M.Groups(ev)
     end
     table.sort(out, function(a, c)
         if a.isMine ~= c.isMine then return a.isMine end
+        local wa, wc = a.when or 0, c.when or 0
+        if wa ~= wc then return wa < wc end
         if (a.level or 0) ~= (c.level or 0) then return (a.level or 0) > (c.level or 0) end
         return a.leader < c.leader
     end)
@@ -1082,7 +1312,7 @@ function M.Pool(ev)
     if not Ready(ev) then return {} end
     local me = EnsureSelf(ev)
     local b = boards[ev]
-    local online = OnlineSet()
+    OnlineSet()
     local out = {}
     for name, e in pairs(b.entries) do
         if not e.leader and not IsStale(ev, e.seen, name, me) then
@@ -1094,7 +1324,7 @@ function M.Pool(ev)
                 mapID = e.mapID,
                 level = e.level,
                 keyName = KeyName(e.mapID),
-                online = online[name] == true,
+                online = M.IsOnline(name),
                 seen = e.seen,
             }
         end
@@ -1446,9 +1676,10 @@ function handlers.E(ev, sender, fields, isSelf)
         existing.seen = Now()
         return
     end
+    local intent = Unwire(fields[5])
     b.entries[sender] = {
         role = Unwire(fields[4]),
-        intent = Unwire(fields[5]),
+        intent = intent,
         bracket = Unwire(fields[6]),
         mapID = tonumber(Unwire(fields[7]) or ""),
         level = tonumber(Unwire(fields[8]) or ""),
@@ -1457,6 +1688,21 @@ function handlers.E(ev, sender, fields, isSelf)
         ts = ts,
         seen = Now(),
     }
+    -- A leader who now says "join" rather than "lead" - a client we never saw
+    -- disband, only heard from again afterwards - takes their cached group
+    -- with them, same as an explicit D. ClearLeader runs on b.entries before
+    -- EnsureSelf has necessarily re-linked ours to b.me, so our own leader
+    -- pointer is fixed up separately below, exactly as handlers.D does.
+    if intent ~= "lead" and b.groups[sender] then
+        b.groups[sender] = nil
+        ClearLeader(ev, sender, nil)
+        local me = EnsureSelf(ev)
+        if me and b.me and b.me.leader == sender then
+            b.me.leader = nil
+            b.me.ts = Now()
+            SendEntry(ev)
+        end
+    end
     Persist()
     Fire(ev)
 end
@@ -1478,7 +1724,21 @@ function handlers.X(ev, sender, fields, isSelf)
         g.ts = Now()
         SendGroup(ev)
     end
-    if not hadEntry and not wasMember then return end
+    -- A leader who withdraws takes their cached group with them, same as an
+    -- explicit D - nobody else may edit that roster, and leaving it behind
+    -- would show a group whose own leader denies ever having led it.
+    local hadGroup = b.groups[sender] ~= nil
+    if hadGroup then
+        b.groups[sender] = nil
+        ClearLeader(ev, sender, nil)
+        local myName = EnsureSelf(ev)
+        if myName and b.me and b.me.leader == sender then
+            b.me.leader = nil
+            b.me.ts = Now()
+            SendEntry(ev)
+        end
+    end
+    if not hadEntry and not wasMember and not hadGroup then return end
     Persist()
     Fire(ev)
 end
@@ -1520,6 +1780,9 @@ function handlers.G(ev, sender, fields, isSelf)
         seen = Now(),
         members = members,
         specs = specs,
+        -- Field 8, absent from anyone who predates it - WhenFromWire reads
+        -- nil the same as "-" or "0", so an older sender's G is unaffected.
+        when = WhenFromWire(fields[8]),
     }
 
     -- This is how a joiner learns their J was accepted. It has to run before
@@ -1714,6 +1977,11 @@ ef:SetScript("OnEvent", function(_, event, ...)
             -- After the queue, so a correction we make here goes out now
             -- rather than sitting behind messages from before the dungeon.
             PruneOpenAndSync()
+            -- A leader who logs back in days after their own scheduled run
+            -- must not re-broadcast it as if it were still on: past grace, it
+            -- is disbanded here rather than left for them to notice and
+            -- withdraw by hand.
+            PruneOwnSchedule("open")
             if not IsInInstance or not IsInInstance() then ReadKeystone() end
             if not IsInGuild or not IsInGuild() then return end
             -- A relog should keep us on the open board, so the saved entry is
@@ -1822,9 +2090,19 @@ ef:SetScript("OnEvent", function(_, event, ...)
         end)
 
     elseif event == "GUILD_ROSTER_UPDATE" then
-        -- Throttled inside, so a guild-wide login rush costs one roster walk
-        -- every 20 seconds rather than one per event.
-        ns.safecall(ScanRoster)
+        -- This fires in bursts - every login, logout and rank change anywhere
+        -- in the guild - so the repaint (not the scan itself; ScanRoster has
+        -- its own 20-second guard) is throttled to once per five seconds, and
+        -- only a repaint that actually runs invalidates the cached scan, so a
+        -- burst that lands inside the throttle still costs one roster walk.
+        ns.safecall(function()
+            local now = Now()
+            if now - lastRosterFire < ROSTER_FIRE_THROTTLE then return end
+            lastRosterFire = now
+            rosterAt = 0
+            ScanRoster()
+            for _, ev in ipairs(EVENTS) do Fire(ev) end
+        end)
     end
 end)
 
