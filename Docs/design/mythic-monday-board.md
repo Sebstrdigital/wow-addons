@@ -165,3 +165,74 @@ Two nav entries at top of the Guild handbook nav: **Mythic Monday**, **Open grou
 `ns.UI_ShowMonday(ev)`; slash `/gp monday` → monday page, `/gp now` → open page, `/gp monday dump` dumps both boards.
 
 Login line: `Mythic Monday (Mon 14 Sep): 3 groups, 7 in pool. Right now: 1 group, 2 in pool. You: ...` — "You:" summarises Monday status only if signed up there, else open, else "not signed up".
+
+---
+
+# Addendum v1.5.1 — Class colour and spec icons (2026-09-14)
+
+Board rows name a player and their role but not what they actually play. A
+guild roster class cache colours the name; the spec has to come off the wire,
+because nothing local knows a guildie's current spec.
+
+## Protocol — still `GPMM2`
+
+Two trailing fields, appended rather than inserted. No prefix bump: `handlers.E`
+reads fields 3..9 and `handlers.G` reads 3..6, both by fixed index with no
+arity check, so a client that predates these fields never looks at them and a
+client that postdates a sender who omits them reads nil.
+
+| Msg | Field | Meaning |
+|---|---|---|
+| `E ev ts role intent bracket mapID level leader spec` | 10th | own spec id, `0` = not told |
+| `G ev ts mapID level m1:R,m2:R,... s1,s2,...` | 7th | spec ids positional against the member list, `0` = not told |
+
+`spec` is `GetSpecializationInfo`'s first return — the spec's own id, not the
+1-4 index, which means nothing without the class the wire does not carry. `0`
+and a missing field are the same thing; `SpecFromWire` maps both to nil.
+
+The id is **never** folded into the member pair. `handlers.G` matches pairs on
+`^(.+):([THD])$`, so a third component would make every older client drop the
+member outright rather than ignore the extra.
+
+G's list is built in the same pass as the member list and trimmed with it when
+the roster overflows 255 bytes — a body cut shorter than its positional list
+would hand receivers the wrong icons rather than none. Cost: +5 bytes on E, at
+most +25 on G (five ids and their commas), against worst cases of 65 and 158.
+
+Comms are unchanged otherwise, so Secret Values need nothing new: spec rides
+existing `E`/`G` sends through the same `Send`, which still queues everything
+under an active key and flushes on `CHALLENGE_MODE_COMPLETED`.
+
+`PLAYER_SPECIALIZATION_CHANGED` now re-broadcasts on a spec change as well as a
+role change. Fire → Frost keeps the role and used to be nothing to announce.
+
+## Contract additions
+
+```lua
+ns.Monday.ClassOf(fullName)       -- "WARRIOR" etc from the guild roster, or nil
+ns.Monday.MySpec()                -- own spec id, or nil if the client will not say
+ns.Monday.Groups(ev)              -- members gain `spec`
+ns.Monday.Pool(ev)                -- entries gain `spec`
+```
+
+`ClassOf` is fed by `GUILD_ROSTER_UPDATE` plus one priming pass at login. It
+keys on `GetGuildRosterInfo`'s own `fullName`, the same `Name-Realm` form board
+entries already use.
+
+## SavedVariables
+
+`entries[name].spec` and `groups[leader].specs[name]` — both new, both optional.
+`Persist` stores the board tables whole, so neither needs listing to survive;
+a board saved before this addendum has no `specs` table and loads as unknown.
+
+Spec precedence is the same wherever it is read: the member's own entry first,
+the group's `specs` sidecar only for someone whose `E` we have never heard. A
+member respecs long after joining and only their own `E` will say so.
+
+## UI
+
+Name is class-coloured, link-blue only when neither the roster nor the spec
+names a class. A `|T<icon>:14:14|t` spec icon follows the name, **outside** the
+closing `|h`, so the link markup and the line's hyperlink count are unchanged —
+past roughly nine links in one FontString the client drops every link in it,
+and the group line already runs to five. Unknown spec → no icon, no gap.

@@ -30,13 +30,22 @@ local ADDON, ns = ...
 -- invention - is dropped rather than guessed at.
 --
 --   R ev                                          request  (GUILD)
---   E ev ts role intent bracket mapID level leader own entry (GUILD)
+--   E ev ts role intent bracket mapID level leader spec own entry (GUILD)
 --   X ev                                          withdraw (GUILD)
---   G ev ts mapID level name:R,name:R,...         roster   (GUILD, leader)
+--   G ev ts mapID level name:R,name:R,... s,s,... roster   (GUILD, leader)
 --   D ev                                          disband  (GUILD, leader)
 --   J ev                                          join req (WHISPER to leader)
 --   L ev                                          leave    (WHISPER to leader)
 --   N ev reason                                   denied   (WHISPER to joiner)
+--
+-- The two `spec` fields are trailing additions, both carrying numeric
+-- specialization ids (GetSpecializationInfo's first return), and both
+-- optional by construction rather than by promise: E's peers read fields 3..9
+-- by fixed index and G's read 3..6, so a client that predates these fields
+-- simply never looks at them, and one that postdates a sender who omits them
+-- reads nil. "0" and a missing field mean the same thing - not told. G's list
+-- is positional against the member list in the field before it, one entry per
+-- member in the same order.
 --
 -- Bump the prefix to GPMM3 on any breaking change to those fields.
 
@@ -133,6 +142,17 @@ end
 local function Wire(v)
     if v == nil or v == "" then return "-" end
     return tostring(v)
+end
+
+-- A specialization id off the wire. Unlike the other fields this one has a
+-- second spelling for nil: "0" is what a sender writes when it has a slot to
+-- fill but nothing to put in it (G's list is positional, so it cannot just
+-- leave a gap), and a missing field is what every client older than these two
+-- trailing fields sends. Both mean "not told".
+local function SpecFromWire(v)
+    local n = tonumber(Unwire(v) or "")
+    if not n or n <= 0 then return nil end
+    return n
 end
 
 local function MyName()
@@ -435,11 +455,25 @@ local function SendEntry(ev)
     Send(table.concat({
         "E", b.key, tostring(e.ts or Now()), Wire(e.role),
         Wire(e.intent), Wire(e.bracket), Wire(e.mapID), Wire(e.level),
-        Wire(e.leader),
+        Wire(e.leader), tostring(e.spec or 0),
     }, " "), "GUILD")
 end
 
-local function SerializeMembers(g, leader)
+-- The spec to publish for one member of a group we lead. A member's own E is
+-- the authority - they respec, they tell us, and that arrives long after they
+-- joined - so the roster's own sidecar is only the fallback for someone whose
+-- E we have never heard (the J handler's unknown joiner, or a roster restored
+-- from SavedVariables before anyone has spoken).
+local function SpecFor(g, entries, name)
+    local e = entries and entries[name]
+    if e and e.spec then return e.spec end
+    return (g.specs and g.specs[name]) or nil
+end
+
+-- Returns the roster body and the parallel spec list, in one pass so the two
+-- cannot drift out of order. `entries` is optional; without it the spec list
+-- falls back to the group's sidecar alone.
+local function SerializeMembers(g, leader, entries)
     -- Leader first, then alphabetical, so two clients rendering the same
     -- roster from the same message agree on the order.
     local names = {}
@@ -448,11 +482,12 @@ local function SerializeMembers(g, leader)
     end
     table.sort(names)
     if g.members and g.members[leader] then table.insert(names, 1, leader) end
-    local parts = {}
+    local parts, specs = {}, {}
     for i = 1, #names do
         parts[i] = names[i] .. ":" .. tostring(g.members[names[i]])
+        specs[i] = tostring(SpecFor(g, entries, names[i]) or 0)
     end
-    return table.concat(parts, ",")
+    return table.concat(parts, ","), table.concat(specs, ",")
 end
 
 local function SendGroup(ev)
@@ -463,25 +498,33 @@ local function SendGroup(ev)
     local head = table.concat({
         "G", b.key, tostring(g.ts or Now()), Wire(g.mapID), Wire(g.level),
     }, " ")
-    local body = SerializeMembers(g, me)
+    local body, specBody = SerializeMembers(g, me, b.entries)
+    -- The spec list is positional against the roster, so it is measured with
+    -- it and trimmed with it - a body cut shorter than its spec list would
+    -- hand every receiver the wrong icons rather than none.
+    local function Overflows()
+        return #head + 1 + #body + 1 + #specBody > MAX_BYTES
+    end
     -- Five members of plausible name length fit inside 255 with room to spare;
     -- this only bites on pathological realm names, and losing the tail of the
     -- roster silently would look like members randomly vanishing.
-    if #head + 1 + #body > MAX_BYTES then
+    if Overflows() then
         Warn("your group roster is too long to broadcast - some members were left out.")
         -- Drop trailing members while there is still a comma to cut at. The
         -- comma test is what bounds this: without it, a single member too long
         -- to fit leaves gsub matching nothing and the loop spinning forever.
-        while body:find(",", 1, true) and #head + 1 + #body > MAX_BYTES do
-            body = body:gsub(",[^,]*$", "")
+        while body:find(",", 1, true) and Overflows() do
+            body = (body:gsub(",[^,]*$", ""))
+            specBody = (specBody:gsub(",[^,]*$", ""))
         end
-        if #head + 1 + #body > MAX_BYTES then
+        if Overflows() then
             -- Not even one member fits. Send the group with an empty roster
             -- rather than nothing, so peers still see it exists.
-            body = ""
+            body, specBody = "", ""
         end
     end
-    Send(head .. " " .. (body ~= "" and body or "-"), "GUILD")
+    Send(head .. " " .. (body ~= "" and body or "-")
+              .. " " .. (specBody ~= "" and specBody or "-"), "GUILD")
 end
 
 local function SendWithdraw(ev)
@@ -631,6 +674,23 @@ function M.MyRole()
     return "D"
 end
 
+-- The specialization's own id (GetSpecializationInfo's first return), not the
+-- 1-4 index GetSpecialization hands back: the index is meaningless without the
+-- class, and the wire carries no class. nil whenever the client will not say -
+-- a character who has not picked a spec, a client without the getter, or a
+-- Secret Value inside an active key, tested for before it is touched the same
+-- way KeyName tests the map name.
+function M.MySpec()
+    if not GetSpecialization or not GetSpecializationInfo then return nil end
+    local index = GetSpecialization()
+    if not index or IsSecret(index) then return nil end
+    local id = GetSpecializationInfo(index)
+    if IsSecret(id) then return nil end
+    id = tonumber(id)
+    if not id or id <= 0 then return nil end
+    return id
+end
+
 -- ------------------------------------------------------------------
 -- Group bookkeeping (leader side)
 -- ------------------------------------------------------------------
@@ -734,6 +794,7 @@ function M.SignUp(ev, opts)
 
     local entry = b.me or {}
     entry.role = M.MyRole()
+    entry.spec = M.MySpec()
     entry.intent = intent
     -- A leader has no bracket: they are the group, not a preference. Written
     -- long-hand because `cond and nil or x` collapses to x in Lua.
@@ -756,6 +817,11 @@ function M.SignUp(ev, opts)
         local g = b.groups[me] or { members = {} }
         g.members = g.members or {}
         g.members[me] = entry.role
+        -- A sidecar rather than a third part of the member pair: the pair
+        -- pattern in handlers.G below anchors on "name:role", so anything
+        -- extra inside it makes an older client drop the member entirely.
+        g.specs = g.specs or {}
+        g.specs[me] = entry.spec
         g.mapID = entry.mapID
         g.level = entry.level
         g.ts = Now()
@@ -900,19 +966,52 @@ end
 -- Views
 -- ------------------------------------------------------------------
 
-local function OnlineSet()
+-- classCache[fullName] = classFileName ("WARRIOR", ...), fullName in
+-- GetGuildRosterInfo's own form. Board entries are always keyed "Name-Realm"
+-- (MyName/SenderKey above both guarantee it), and the online scan below
+-- already matches board names against the roster's fullName with no
+-- Ambiguate step - proof the two already agree on shape - so this reuses
+-- that same key rather than inventing a second one.
+local classCache = {}
+
+-- One pass fills both the online set and the class cache, because both come
+-- off the same GetGuildRosterInfo row and walking the roster is the expensive
+-- part. GUILD_ROSTER_UPDATE arrives in bursts - every login, logout and rank
+-- change anywhere in the guild fires one - so the 20-second guard that
+-- already kept the online scan off the hot path now covers the class cache
+-- too, instead of the cache paying O(roster) per event.
+--
+-- Both tables are rebuilt rather than merged into, so someone who left the
+-- guild stops being coloured as a guildie instead of lingering forever.
+local function ScanRoster()
     local now = Now()
     if rosterOnline and now - rosterAt < ROSTER_CACHE then return rosterOnline end
-    local set = {}
+    local set, classes = {}, {}
     if GetNumGuildMembers and GetGuildRosterInfo then
         local total = GetNumGuildMembers() or 0
         for i = 1, total do
-            local fullName, _, _, _, _, _, _, _, online = GetGuildRosterInfo(i)
-            if fullName and online then set[fullName] = true end
+            local fullName, _, _, _, _, _, _, _, online, _, classFileName =
+                GetGuildRosterInfo(i)
+            if fullName then
+                if online then set[fullName] = true end
+                if classFileName then classes[fullName] = classFileName end
+            end
         end
     end
     rosterOnline, rosterAt = set, now
+    classCache = classes
     return set
+end
+
+local function OnlineSet()
+    return ScanRoster()
+end
+
+-- nil until the roster has told us, or for anyone it never will (addon
+-- message senders outside the guild, roster still loading). Callers fall
+-- back to the name colour they always had.
+function M.ClassOf(name)
+    return name and classCache[name] or nil
 end
 
 function M.Groups(ev)
@@ -936,7 +1035,14 @@ function M.Groups(ev)
                 local e = b.entries[name]
                 local ghost = (name ~= leader) and IsStale(ev, e and e.seen, name, me)
                 if not ghost then
-                    members[#members + 1] = { name = name, role = role }
+                    members[#members + 1] = {
+                        name = name,
+                        role = role,
+                        -- Same precedence SpecFor publishes with: the
+                        -- member's own entry first, the roster's sidecar
+                        -- only for someone we have never heard from.
+                        spec = (e and e.spec) or (g.specs and g.specs[name]) or nil,
+                    }
                     if counts[role] then counts[role] = counts[role] + 1 end
                 end
             end
@@ -983,6 +1089,7 @@ function M.Pool(ev)
             out[#out + 1] = {
                 name = name,
                 role = e.role,
+                spec = e.spec,
                 bracket = e.bracket,
                 mapID = e.mapID,
                 level = e.level,
@@ -1276,8 +1383,9 @@ local function DumpBoard(ev)
         Say("  entry: none")
     end
     for name, e in pairs(b.entries) do
-        Say(("  entry %s: %s %s %s key=%s+%s leader=%s ts=%s seen=%s"):format(
-            name, tostring(e.role), tostring(e.intent), tostring(e.bracket),
+        Say(("  entry %s: %s spec=%s %s %s key=%s+%s leader=%s ts=%s seen=%s"):format(
+            name, tostring(e.role), tostring(e.spec), tostring(e.intent),
+            tostring(e.bracket),
             tostring(e.mapID), tostring(e.level), tostring(e.leader),
             tostring(e.ts), tostring(e.seen)))
     end
@@ -1345,6 +1453,7 @@ function handlers.E(ev, sender, fields, isSelf)
         mapID = tonumber(Unwire(fields[7]) or ""),
         level = tonumber(Unwire(fields[8]) or ""),
         leader = Unwire(fields[9]),
+        spec = SpecFromWire(fields[10]),
         ts = ts,
         seen = Now(),
     }
@@ -1365,6 +1474,7 @@ function handlers.X(ev, sender, fields, isSelf)
     local wasMember = g and g.members and g.members[sender] ~= nil
     if wasMember then
         g.members[sender] = nil
+        if g.specs then g.specs[sender] = nil end
         g.ts = Now()
         SendGroup(ev)
     end
@@ -1382,12 +1492,25 @@ function handlers.G(ev, sender, fields, isSelf)
     local existing = b.groups[sender]
     if existing and (existing.ts or 0) > ts then return end
 
-    local members = {}
+    local members, specs = {}, {}
     local raw = Unwire(fields[6])
     if raw then
-        for _, pair in ipairs(Split(raw, ",")) do
-            local name, role = pair:match("^(.+):([THD])$")
-            if name then members[name] = role end
+        -- The spec list is positional against the member list, so both are
+        -- walked by the same index. A sender too old to send one leaves
+        -- specList nil and every member simply unknown; a short list runs out
+        -- and the rest are unknown too. Indexing by the *pair* position, not
+        -- by how many pairs were accepted, keeps a malformed pair in the
+        -- middle from shifting everything after it.
+        local pairList = Split(raw, ",")
+        local rawSpecs = Unwire(fields[7])
+        local specList = rawSpecs and Split(rawSpecs, ",") or nil
+        for i = 1, #pairList do
+            local name, role = pairList[i]:match("^(.+):([THD])$")
+            if name then
+                members[name] = role
+                local s = specList and SpecFromWire(specList[i])
+                if s then specs[name] = s end
+            end
         end
     end
     b.groups[sender] = {
@@ -1396,6 +1519,7 @@ function handlers.G(ev, sender, fields, isSelf)
         ts = ts,
         seen = Now(),
         members = members,
+        specs = specs,
     }
 
     -- This is how a joiner learns their J was accepted. It has to run before
@@ -1471,6 +1595,11 @@ function handlers.J(ev, sender, fields, isSelf)
         return
     end
     g.members[sender] = role
+    -- Whatever their entry told us, if it told us anything. A joiner we have
+    -- never heard from gets no spec until their E arrives, at which point
+    -- SpecFor prefers it over this anyway.
+    g.specs = g.specs or {}
+    g.specs[sender] = entry and entry.spec or nil
     g.ts = Now()
     if entry then
         entry.leader = me
@@ -1495,6 +1624,7 @@ function handlers.L(ev, sender, fields, isSelf)
     local g = me and b.groups[me]
     if not g or not g.members or not g.members[sender] then return end
     g.members[sender] = nil
+    if g.specs then g.specs[sender] = nil end
     g.ts = Now()
     local entry = b.entries[sender]
     if entry and entry.leader == me then entry.leader = nil end
@@ -1551,6 +1681,7 @@ ef:RegisterEvent("CHAT_MSG_ADDON")
 ef:RegisterEvent("BAG_UPDATE_DELAYED")
 ef:RegisterEvent("CHALLENGE_MODE_COMPLETED")
 ef:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+ef:RegisterEvent("GUILD_ROSTER_UPDATE")
 
 ef:SetScript("OnEvent", function(_, event, ...)
     local a1, a2, a3, a4 = ...
@@ -1590,11 +1721,36 @@ ef:SetScript("OnEvent", function(_, event, ...)
             if boards.open and boards.open.me then StartHeartbeat() end
             if isLogin and not summaryPrinted then
                 summaryPrinted = true
+                -- Nudge the client into fetching the roster if nothing else
+                -- has yet; the scan below picks up whatever a guild frame
+                -- opened earlier this session left lying around, and
+                -- GUILD_ROSTER_UPDATE refreshes it for real once the request
+                -- lands.
+                if C_GuildInfo and C_GuildInfo.GuildRoster then
+                    C_GuildInfo.GuildRoster()
+                end
+                ScanRoster()
+                -- The entry about to go out came off SavedVariables, so its
+                -- spec is last session's. Talent data is usually ready by
+                -- now; when it is not, MySpec says nothing and the saved
+                -- value stands rather than being replaced by nothing.
+                local mySpec = M.MySpec()
+                local myName = MyName()
                 for _, ev in ipairs(EVENTS) do
+                    local b = boards[ev]
+                    if b and b.me and mySpec then
+                        b.me.spec = mySpec
+                        local g = myName and b.groups[myName]
+                        if g and g.members and g.members[myName] then
+                            g.specs = g.specs or {}
+                            g.specs[myName] = mySpec
+                        end
+                    end
                     M.Refresh(ev, true)
                     SendEntry(ev)
                     if IsLeading(ev) then SendGroup(ev) end
                 end
+                Persist()
                 -- Five seconds is enough for the replies to a login R to land,
                 -- so the summary counts a board rather than an empty table.
                 C_Timer.After(5, function()
@@ -1621,17 +1777,39 @@ ef:SetScript("OnEvent", function(_, event, ...)
 
     elseif event == "PLAYER_SPECIALIZATION_CHANGED" then
         ns.safecall(function()
-            local role = M.MyRole()
+            -- The role has the same login race as the spec below: with talent
+            -- data not yet loaded, GetSpecialization() is nil and MyRole falls
+            -- through to its "D" default, which would flip a saved tank to DPS
+            -- and broadcast it. A live index the client will not give is
+            -- treated as "no opinion" for the role too.
+            local liveIndex = GetSpecialization and GetSpecialization()
+            local role = nil
+            if liveIndex and not IsSecret(liveIndex) then role = M.MyRole() end
+            local spec = M.MySpec()
             local me = MyName()
             local changed = false
             for _, ev in ipairs(EVENTS) do
                 local b = boards[ev]
-                if b and b.me and b.me.role ~= role then
-                    b.me.role = role
+                -- This event also fires during login, before talent data is
+                -- ready, and MySpec is nil until it is. Treating that nil as
+                -- a change would wipe the spec restored from SavedVariables
+                -- and publish 0 for the rest of the session, so "the client
+                -- will not say" keeps what we already knew rather than
+                -- overwriting it.
+                local newSpec = (b and b.me and (spec or b.me.spec)) or spec
+                local newRole = (b and b.me and (role or b.me.role)) or role
+                -- Spec is checked as well as role, because the common respec
+                -- keeps the role: Fire to Frost is still D, and before the
+                -- spec rode the wire that was correctly nothing to announce.
+                if b and b.me and (b.me.role ~= newRole or b.me.spec ~= newSpec) then
+                    b.me.role = newRole
+                    b.me.spec = newSpec
                     b.me.ts = Now()
                     local g = me and b.groups[me]
                     if g and g.members and g.members[me] then
-                        g.members[me] = role
+                        g.members[me] = newRole
+                        g.specs = g.specs or {}
+                        g.specs[me] = newSpec
                         g.ts = Now()
                     end
                     SendEntry(ev)
@@ -1642,6 +1820,11 @@ ef:SetScript("OnEvent", function(_, event, ...)
             end
             if changed then Persist() end
         end)
+
+    elseif event == "GUILD_ROSTER_UPDATE" then
+        -- Throttled inside, so a guild-wide login rush costs one roster walk
+        -- every 20 seconds rather than one per event.
+        ns.safecall(ScanRoster)
     end
 end)
 

@@ -1591,6 +1591,40 @@ end
 local ROLE_FULL = { T = "Tank", H = "Healer", D = "DPS" }
 local ROLE_COLOR = { T = C.TANK, H = C.HEALER, D = C.DPS }
 
+-- LFG-style role glyphs. Spelling verified against two live-shipping
+-- addons (RaiderIO core.lua and EllesmereUIRaidFrames.lua, both of which
+-- draw member roles as CreateAtlasMarkup("roleicon-tiny-tank"/-healer/-dps))
+-- rather than guessed - the "groupfinder-icon-role-large-*" family named in
+-- the design brief does not appear in any addon actually shipping on this
+-- client; those two live addons are the closest match found. Verified against
+-- the client via C_Texture.GetAtlasInfo below, not assumed to exist.
+local ROLE_ATLAS = { T = "roleicon-tiny-tank", H = "roleicon-tiny-healer", D = "roleicon-tiny-dps" }
+
+-- `|A:atlas:height:width|a` inline texture escape - same field order RaiderIO
+-- itself builds it with (core.lua:1304: `format("|A:%s:%d:%d|a", atlas,
+-- height, width)`). Returns nil (never a broken escape) when the role is
+-- unrecognised or the atlas isn't present on this client, so every caller
+-- has a real fallback to fall back to.
+--
+-- GetAtlasInfo builds a table per call and these three are asked for on every
+-- row of every redraw, so the answer is resolved once per role and kept.
+-- Negative answers are kept too - `false`, distinguishable from the unasked
+-- `nil` - or a client without the atlas would pay the lookup forever.
+local roleAtlasOk = {}
+
+local function MondayRoleIcon(role, size)
+    local atlas = ROLE_ATLAS[role]
+    if not atlas then return nil end
+    local ok = roleAtlasOk[role]
+    if ok == nil then
+        ok = not not (C_Texture and C_Texture.GetAtlasInfo and C_Texture.GetAtlasInfo(atlas))
+        roleAtlasOk[role] = ok
+    end
+    if not ok then return nil end
+    size = size or 14
+    return ("|A:%s:%d:%d|a"):format(atlas, size, size)
+end
+
 -- InviteAll()'s per-skip reason code, turned into the word Invite()'s own
 -- failure messages already use ("in party", not "inparty").
 local MONDAY_SKIP_REASON = { inparty = "in party", offline = "offline", self = "self" }
@@ -1648,15 +1682,73 @@ local function ShortName(full)
     return (full and full:match("^[^%-]+")) or full or "?"
 end
 
+-- Class-coloured name text (no hyperlink markup), LFG-list style: guild
+-- roster colour when ns.Monday knows the player's class, today's link-blue
+-- otherwise. ns.Monday.ClassOf keys its cache the same "Name-Realm" form
+-- every board name already arrives in, so no Ambiguate step is needed here
+-- either. C_ClassColor is the modern getter; RAID_CLASS_COLORS is its
+-- always-available table fallback for a client where the namespace is
+-- missing. Either one hands back a ColorMixin, so WrapTextInColorCode does
+-- the |c.../|r wrapping in one call.
+-- GetSpecializationInfoByID returns id, name, description, icon, role,
+-- classFile. Two of those are wanted - the icon to draw and the class to
+-- colour by - and both are absent together on a client that has never heard
+-- of the id, so one guarded call serves both. pcall rather than a plain call
+-- because the id arrived off the wire: a peer on a later build can name a
+-- spec this client has no row for, and that must cost an icon, not the panel.
+local function MondaySpecInfo(specID)
+    if not specID or not GetSpecializationInfoByID then return nil end
+    local ok, _, _, _, icon, _, classFile = pcall(GetSpecializationInfoByID, specID)
+    if not ok then return nil end
+    return icon, classFile
+end
+
+-- `|T<texture>:h:w|t` inline texture escape, the same one the ability lines
+-- already use for spell icons. Returns nil rather than a broken escape when
+-- the spec is unknown, so every caller can simply concatenate "" instead.
+local function MondaySpecIcon(specID, size)
+    local icon = MondaySpecInfo(specID)
+    if not icon then return nil end
+    size = size or 14
+    return ("|T%s:%d:%d|t"):format(tostring(icon), size, size)
+end
+
+-- `spec` is optional and only consulted when the guild roster has nothing to
+-- say: a pool entry from someone outside the guild still names their spec on
+-- the wire, and the spec names the class, so the name can be coloured from
+-- that rather than falling all the way back to link-blue.
+local function MondayClassColoredName(fullName, spec)
+    local text = ShortName(fullName)
+    local classFile = ns.Monday and ns.Monday.ClassOf and ns.Monday.ClassOf(fullName)
+    if not classFile and spec then
+        local _, specClass = MondaySpecInfo(spec)
+        classFile = specClass
+    end
+    if classFile then
+        local color = (C_ClassColor and C_ClassColor.GetClassColor and C_ClassColor.GetClassColor(classFile))
+                      or (RAID_CLASS_COLORS and RAID_CLASS_COLORS[classFile])
+        if color and color.WrapTextInColorCode then
+            return color:WrapTextInColorCode(text)
+        end
+    end
+    return LINK .. text .. "|r"
+end
+
 -- Renders a roster/pool name as a clickable custom link carrying the full
--- "Name-Realm" key: `|Hgpmm:Name-Realm|h|cff<LINK>Name|r|h`. Handled by the
+-- "Name-Realm" key: `|Hgpmm:Name-Realm|h<coloured name>|h`. Handled by the
 -- OnHyperlinkClick script set on `content` below (left-click invite,
 -- right-click menu) via the "gpmm:" prefix, same mechanism RenderAbilityLinks
--- already uses for spell links on this same frame. LINK is the same
--- link-blue every other clickable thing in this addon uses, so "blue text"
--- keeps meaning the same thing everywhere in the panel.
-local function MondayNameLink(fullName)
-    return "|Hgpmm:" .. fullName .. "|h" .. LINK .. ShortName(fullName) .. "|r|h"
+-- already uses for spell links on this same frame. The link itself is
+-- unchanged by the name's colour - only the visible text inside it is.
+--
+-- The spec icon sits *outside* the closing |h, so the link markup is byte for
+-- byte what it always was and the line's hyperlink count is unchanged. That
+-- matters more than making the icon clickable: past roughly nine links in one
+-- FontString the client silently drops every link in it, and the group line
+-- below already runs to five.
+local function MondayNameLink(fullName, spec)
+    return "|Hgpmm:" .. fullName .. "|h" .. MondayClassColoredName(fullName, spec) .. "|h"
+           .. (MondaySpecIcon(spec, 14) or "")
 end
 
 local function FormatMondayAge(seconds)
@@ -1712,12 +1804,19 @@ end
 -- module rather than flagged, so `e.online` there carries nothing worth
 -- printing (and would misleadingly imply the flag is meaningful there).
 local function PoolEntryLine(e, showOffline)
-    local roleColor = ROLE_COLOR[e.role] or C.BODY
+    -- Icon when the atlas resolved, today's coloured role word otherwise -
+    -- same fallback the group member line below uses.
+    local roleStr = MondayRoleIcon(e.role, 14)
+                     or ((ROLE_COLOR[e.role] or C.BODY) .. (ROLE_FULL[e.role] or "?") .. C.R)
     local keyStr = (e.level and e.keyName)
                    and (C.BODY .. FormatMondayKey(e.level, e.keyName) .. C.R)
                    or (C.DIM .. "no key" .. C.R)
-    local entryLine = MondayNameLink(e.name) .. "  "
-                       .. roleColor .. (ROLE_FULL[e.role] or "?") .. C.R .. "  " .. keyStr
+    -- Role first, the way the LFG list and the group rows below both read:
+    -- the eye scans a column of roles for the one slot it cares about, and a
+    -- name-first row makes it hunt. The fallback word leads in the same place
+    -- the icon would, so the column holds either way.
+    local entryLine = roleStr .. "  " .. MondayNameLink(e.name, e.spec)
+                       .. "  " .. keyStr
     if showOffline and not e.online then
         entryLine = entryLine .. C.DIM .. " (offline)" .. C.R
     end
@@ -1962,7 +2061,18 @@ local function SetMondayBody(ev)
         -- the client/server offset is.
         local now = GetServerTime()
         for _, g in ipairs(groups) do
-            local leaderLine = C.LEAD .. ShortName(g.leader) .. C.R .. "  "
+            -- One pass for both: the leader's own member row carries the spec
+            -- the header needs to colour by when the guild roster has nothing
+            -- to say, and the membership test below wants the same list.
+            local isMember, leaderSpec = false, nil
+            for _, m in ipairs(g.members or {}) do
+                if m.name == myPlayerKey then isMember = true end
+                if m.name == g.leader then leaderSpec = m.spec end
+            end
+            -- Class-coloured like every other name on the board. No link and
+            -- no spec icon here: the leader is also their own group's member
+            -- row just below, which already carries both.
+            local leaderLine = MondayClassColoredName(g.leader, leaderSpec) .. "  "
                                 .. C.BODY .. FormatMondayKey(g.level, g.keyName) .. C.R
             -- Open-board groups are pruned (leader unseen > 15 min just drops
             -- the group) rather than flagged, so there's nothing meaningful
@@ -1971,10 +2081,6 @@ local function SetMondayBody(ev)
                 leaderLine = leaderLine .. C.DIM .. " (offline " .. FormatMondayAge(now - g.seen) .. ")" .. C.R
             end
 
-            local isMember = false
-            for _, m in ipairs(g.members or {}) do
-                if m.name == myPlayerKey then isMember = true end
-            end
             -- Right-aligned buttons stack from the panel's right edge inward
             -- in the order pushed, so Disband goes first (keeps its original
             -- rightmost spot) and Invite all lands just to its left.
@@ -2019,7 +2125,7 @@ local function SetMondayBody(ev)
                 -- overwrites the last), so those two stay capped at one link
                 -- each by construction. DPS accumulates into a list instead,
                 -- so it needs an explicit cap below.
-                local shortN = MondayNameLink(m.name)
+                local shortN = MondayNameLink(m.name, m.spec)
                 if m.role == "T" then tankName = shortN
                 elseif m.role == "H" then healerName = shortN
                 elseif m.role == "D" then dpsMembers[#dpsMembers + 1] = shortN end
@@ -2053,9 +2159,18 @@ local function SetMondayBody(ev)
             if dpsOverflow > 0 then
                 dpsStr = dpsStr .. C.DIM .. " +" .. dpsOverflow .. C.R
             end
-            line(C.TANK .. "T " .. C.R .. tankStr .. C.DIM .. " · " .. C.R ..
-                 C.HEALER .. "H " .. C.R .. healerStr .. C.DIM .. " · " .. C.R ..
-                 C.DPS .. "D " .. C.R .. dpsStr)
+            -- Icon-plus-space when the atlas resolved, today's coloured
+            -- letter-plus-space otherwise - each label already carries its
+            -- own trailing space either way, so nothing extra goes between
+            -- it and the name that follows.
+            local tankIcon, healerIcon, dpsIcon =
+                MondayRoleIcon("T", 14), MondayRoleIcon("H", 14), MondayRoleIcon("D", 14)
+            local tankLabel = tankIcon and (tankIcon .. " ") or (C.TANK .. "T " .. C.R)
+            local healerLabel = healerIcon and (healerIcon .. " ") or (C.HEALER .. "H " .. C.R)
+            local dpsLabel = dpsIcon and (dpsIcon .. " ") or (C.DPS .. "D " .. C.R)
+            line(tankLabel .. tankStr .. C.DIM .. " · " .. C.R ..
+                 healerLabel .. healerStr .. C.DIM .. " · " .. C.R ..
+                 dpsLabel .. dpsStr)
         end
     end
 

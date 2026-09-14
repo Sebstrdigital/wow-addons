@@ -79,6 +79,15 @@ local function newEnv(opts)
     _G.IsInInstance = function() return false end
     _G.GetSpecialization = function() return 1 end
     _G.GetSpecializationRole = function() return env.specRole end
+    -- The numeric spec id, which is a *different* thing from the 1-4 index
+    -- GetSpecialization returns. nil by default, modelling a client that will
+    -- not say: every existing test therefore goes on sending the wire's "not
+    -- told" value, and only the tests that opt in exercise a real id.
+    env.specID = opts.specID
+    _G.GetSpecializationInfo = function(index)
+        if index ~= 1 then return nil end
+        return env.specID
+    end
     _G.GetNumGuildMembers = function() return 0 end
     _G.GetGuildRosterInfo = function() return nil end
 
@@ -390,14 +399,17 @@ do
 
     local e = env.last("E")
     check(e ~= nil, "SignUp lead emits E")
-    check(e and e.text:match("^E " .. MON_PAT .. " %d+ D lead %- 501 12 Vizzo%-" .. REALM .. "$") ~= nil,
+    -- The trailing 0 is the spec field with nothing in it: this env's
+    -- GetSpecializationInfo says nothing, which is exactly what a client too
+    -- old to have the getter does.
+    check(e and e.text:match("^E " .. MON_PAT .. " %d+ D lead %- 501 12 Vizzo%-" .. REALM .. " 0$") ~= nil,
         "E has the documented field order", e and e.text)
     eq(e and e.chattype, "GUILD", "E goes to GUILD")
     eq(e and e.prefix, "GPMM2", "E uses the bumped GPMM2 prefix")
 
     local g = env.last("G")
     check(g ~= nil, "SignUp lead emits G")
-    check(g and g.text:match("^G " .. MON_PAT .. " %d+ 501 12 Vizzo%-" .. REALM .. ":D$") ~= nil,
+    check(g and g.text:match("^G " .. MON_PAT .. " %d+ 501 12 Vizzo%-" .. REALM .. ":D 0$") ~= nil,
         "G lists the leader as its own member", g and g.text)
 
     local groups = env.M.Groups("monday")
@@ -1014,7 +1026,9 @@ do
         "SignUp lead survives an unsendable name")
     local g = env.last("G")
     check(g ~= nil, "the group is still broadcast")
-    check(g and g.text:sub(-2) == " -",
+    -- Roster and spec list both emptied, and emptied together: a roster cut
+    -- shorter than its positional spec list would mis-icon every member.
+    check(g and g.text:sub(-4) == " - -",
         "with an empty roster rather than an endless trim", g and g.text)
     check(g and #g.text <= 255, "and inside the addon-message limit", g and #g.text)
 
@@ -1531,6 +1545,344 @@ do
     for _, s in ipairs(skips) do
         check(s.name ~= "Vizzo-" .. REALM, "the leader never invites themselves")
     end
+end
+
+-- ------------------------------------------------------------------
+-- 23. Guild roster class cache
+-- ------------------------------------------------------------------
+-- Backs UI.lua's class-coloured names. GetNumGuildMembers/GetGuildRosterInfo
+-- are already stubbed to an empty roster by newEnv (see above); these tests
+-- override them the same way test 21 overrides C_ChatInfo.SendChatMessage,
+-- to model a roster actually arriving.
+
+do
+    local env = newEnv().load()
+
+    eq(env.M.ClassOf("Anna-" .. REALM), nil, "unknown before the roster has been read")
+
+    local classOf = { ["Anna-" .. REALM] = "WARRIOR", ["Bob-" .. REALM] = "PRIEST" }
+    local names = { "Anna-" .. REALM, "Bob-" .. REALM }
+    _G.GetNumGuildMembers = function() return #names end
+    _G.GetGuildRosterInfo = function(i)
+        local name = names[i]
+        -- name, rank, rankIndex, level, class, zone, note, officernote,
+        -- online, status, classFileName - GetGuildRosterInfo's real shape;
+        -- classFileName is the 11th return, not the 9th (online).
+        return name, "Member", 1, 80, "Warrior", "Zone", "", "", true, 0, classOf[name]
+    end
+
+    env.fire("GUILD_ROSTER_UPDATE")
+    eq(env.M.ClassOf("Anna-" .. REALM), "WARRIOR", "GUILD_ROSTER_UPDATE populates the cache")
+    eq(env.M.ClassOf("Bob-" .. REALM), "PRIEST", "for every member the roster carries")
+    eq(env.M.ClassOf("Stranger-" .. REALM), nil, "a name the roster never listed stays unknown")
+    eq(env.error, nil, "and none of it raised an error")
+end
+
+do
+    -- The once-at-login pass: C_GuildInfo is deliberately not stubbed by
+    -- newEnv, so this also proves the roster request is optional, not
+    -- assumed to exist, on a client old enough to lack it.
+    local env = newEnv()
+    _G.GetNumGuildMembers = function() return 1 end
+    _G.GetGuildRosterInfo = function()
+        return "Cid-" .. REALM, "Member", 1, 80, "Priest", "Zone", "", "", true, 0, "PRIEST"
+    end
+    env.load()
+    env.fire("PLAYER_ENTERING_WORLD", true, false)
+    eq(env.M.ClassOf("Cid-" .. REALM), "PRIEST", "the login pass primes the cache immediately")
+    eq(env.error, nil, "even with no C_GuildInfo on this client")
+end
+
+-- ------------------------------------------------------------------
+-- 24. Specialization ids on the wire
+-- ------------------------------------------------------------------
+-- Two trailing fields, E's tenth and G's seventh, both added after the
+-- protocol shipped and both therefore optional in both directions: a message
+-- without them must read as "not told" rather than as a parse failure, and a
+-- message with them must not disturb anything a client reading only the older
+-- fields would see. 63/65/66 are Fire/Frost/Arcane Mage; 250 is Blood Death
+-- Knight. Real ids, so a reader can tell at a glance that the field carries a
+-- spec id and not the 1-4 index.
+
+do
+    -- (a)+(b) E, with and without the field.
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+
+    env.recv("E " .. MON .. " 100 D join mid 111 8 - 63", "Anna-" .. REALM)
+    local anna = env.board("monday").entries["Anna-" .. REALM]
+    eq(anna and anna.spec, 63, "a tenth field on E is kept as the entry's spec")
+    eq(anna and anna.role, "D", "and the fields before it are untouched")
+    eq(anna and anna.bracket, "mid", "every one of them")
+    eq(anna and anna.level, 8, "including the key")
+
+    env.recv("E " .. MON .. " 100 T join low 222 4 -", "Bob-" .. REALM)
+    local bob = env.board("monday").entries["Bob-" .. REALM]
+    eq(bob and bob.spec, nil, "an E from a client too old to send it has no spec")
+    eq(bob and bob.role, "T", "and is otherwise read exactly as before")
+    eq(bob and bob.bracket, "low", "in every field")
+
+    -- "0" is what this client itself writes for "not told", so it has to read
+    -- back as nil rather than as a spec whose id happens to be zero.
+    env.recv("E " .. MON .. " 100 H join high - - - 0", "Cid-" .. REALM)
+    local cid = env.board("monday").entries["Cid-" .. REALM]
+    eq(cid and cid.spec, nil, "a zero in the field means the same as no field")
+    eq(cid and cid.role, "H", "without costing the entry anything else")
+
+    -- The pool is what the UI actually renders from, so the spec has to
+    -- survive the trip through it.
+    local seen = {}
+    for _, e in ipairs(env.M.Pool("monday")) do seen[e.name] = e end
+    eq(seen["Anna-" .. REALM] and seen["Anna-" .. REALM].spec, 63,
+        "and the pool hands the spec on to the UI")
+    eq(seen["Bob-" .. REALM] and seen["Bob-" .. REALM].spec, nil,
+        "leaving it nil for the entry that never carried one")
+end
+
+do
+    -- (c)+(d)+(e) G's positional spec list.
+    local function membersOf(env, leader)
+        for _, g in ipairs(env.M.Groups("monday")) do
+            if g.leader == leader then
+                local by = {}
+                for _, m in ipairs(g.members) do by[m.name] = m end
+                return by
+            end
+        end
+        return {}
+    end
+
+    local roster = "Ann-" .. REALM .. ":T,Bob-" .. REALM .. ":H,Cid-" .. REALM .. ":D"
+
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.recv("G " .. MON .. " 100 501 12 " .. roster .. " 250,65,66", "Ann-" .. REALM)
+    local g = env.board("monday").groups["Ann-" .. REALM]
+    eq(g and g.specs and g.specs["Ann-" .. REALM], 250, "G's spec list is read positionally")
+    eq(g and g.specs and g.specs["Bob-" .. REALM], 65, "second member, second id")
+    eq(g and g.specs and g.specs["Cid-" .. REALM], 66, "third member, third id")
+    local m = membersOf(env, "Ann-" .. REALM)
+    eq(m["Bob-" .. REALM] and m["Bob-" .. REALM].spec, 65,
+        "and Groups hands each member's spec to the UI")
+    eq(m["Cid-" .. REALM] and m["Cid-" .. REALM].role, "D",
+        "with the roles still where they were")
+
+    -- A member's own E outranks the roster's copy: they respec long after
+    -- they joined, and only their E will say so.
+    env.recv("E " .. MON .. " 200 H join any - - - 64", "Bob-" .. REALM)
+    local m2 = membersOf(env, "Ann-" .. REALM)
+    eq(m2["Bob-" .. REALM] and m2["Bob-" .. REALM].spec, 64,
+        "a later E outranks the roster's copy of the same member's spec")
+
+    local old = newEnv().load()
+    old.fire("PLAYER_ENTERING_WORLD", false, false)
+    old.recv("G " .. MON .. " 100 501 12 " .. roster, "Ann-" .. REALM)
+    local og = old.board("monday").groups["Ann-" .. REALM]
+    eq(og and og.members and og.members["Ann-" .. REALM], "T",
+        "a G with no spec list still lists every member")
+    eq(og and og.members and og.members["Cid-" .. REALM], "D", "with their roles intact")
+    eq(og and og.specs and next(og.specs), nil, "and simply knows no specs")
+    eq(#(old.M.Groups("monday")[1] or {}).members, 3, "all three still reach the UI")
+
+    local short = newEnv().load()
+    short.fire("PLAYER_ENTERING_WORLD", false, false)
+    short.recv("G " .. MON .. " 100 501 12 " .. roster .. " 250,65", "Ann-" .. REALM)
+    local sg = short.board("monday").groups["Ann-" .. REALM]
+    eq(sg and sg.specs and sg.specs["Ann-" .. REALM], 250, "a short spec list fills what it covers")
+    eq(sg and sg.specs and sg.specs["Bob-" .. REALM], 65, "as far as it goes")
+    eq(sg and sg.specs and sg.specs["Cid-" .. REALM], nil, "and leaves the rest unknown")
+    eq(sg and sg.members and sg.members["Cid-" .. REALM], "D",
+        "without dropping the member it could not describe")
+
+    -- A zero in the middle is the placeholder for a member whose spec the
+    -- leader does not know; it must not shift the ones after it.
+    local gap = newEnv().load()
+    gap.fire("PLAYER_ENTERING_WORLD", false, false)
+    gap.recv("G " .. MON .. " 100 501 12 " .. roster .. " 250,0,66", "Ann-" .. REALM)
+    local gg = gap.board("monday").groups["Ann-" .. REALM]
+    eq(gg and gg.specs and gg.specs["Bob-" .. REALM], nil, "a zero in the list is a known gap")
+    eq(gg and gg.specs and gg.specs["Cid-" .. REALM], 66, "that does not shift what follows it")
+end
+
+do
+    -- (f) Our own spec, captured at sign-up and published.
+    local env = newEnv({ specID = 250, specRole = "TANK",
+                         key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.clearSent()
+
+    eq(env.M.MySpec(), 250, "MySpec reports the id, not the 1-4 index")
+    eq(env.M.SignUp("monday", { intent = "lead" }), true, "SignUp lead succeeds")
+    eq(env.board("monday").me.spec, 250, "and stamps our spec on our own entry")
+
+    local e = env.last("E")
+    check(e and e.text:match(" 250$") ~= nil, "the E we send carries it last", e and e.text)
+    local g = env.last("G")
+    check(g and g.text:match(" Vizzo%-" .. REALM .. ":T 250$") ~= nil,
+        "and our G lists it against our own name", g and g.text)
+
+    -- A joiner we have heard from contributes their spec to our roster.
+    env.recv("E " .. MON .. " 100 D join any - - - 63", "Anna-" .. REALM)
+    env.recv("J " .. MON, "Anna-" .. REALM, "WHISPER")
+    local g2 = env.last("G")
+    check(g2 and g2.text:match(" 250,63$") ~= nil,
+        "an accepted joiner's spec joins the list in roster order", g2 and g2.text)
+
+    -- One we have not keeps its slot as a zero rather than vanishing.
+    env.recv("J " .. MON, "Zed-" .. REALM, "WHISPER")
+    local g3 = env.last("G")
+    check(g3 and g3.text:match(" 250,63,0$") ~= nil,
+        "an unheard joiner holds its slot as a zero", g3 and g3.text)
+
+    -- Respeccing within the same role used to be nothing to announce; now it
+    -- is, because the spec itself rides the wire.
+    env.clearSent()
+    env.specID = 251
+    env.fire("PLAYER_SPECIALIZATION_CHANGED")
+    eq(env.board("monday").me.spec, 251, "a same-role respec updates our entry")
+    local e2 = env.last("E")
+    check(e2 and e2.text:match(" 251$") ~= nil, "and is broadcast", e2 and e2.text)
+    local g4 = env.last("G")
+    check(g4 and g4.text:match(" 251,63,0$") ~= nil,
+        "including in the roster we lead", g4 and g4.text)
+
+    -- PLAYER_SPECIALIZATION_CHANGED also fires during login, before talent
+    -- data is ready, and MySpec is nil until it is. Treating that as a change
+    -- would wipe the spec restored from SavedVariables and publish 0 for the
+    -- rest of the session.
+    env.clearSent()
+    local roleBefore = env.board("monday").me.role
+    local realGetSpec = _G.GetSpecialization
+    _G.GetSpecialization = function() return nil end
+    env.fire("PLAYER_SPECIALIZATION_CHANGED")
+    eq(env.M.MySpec(), nil, "MySpec says nothing before talent data is ready")
+    eq(env.board("monday").me.spec, 251, "and a silent client does not clear a known spec")
+    eq(env.board("monday").groups["Vizzo-" .. REALM].specs["Vizzo-" .. REALM], 251,
+        "nor the roster's copy of it")
+    -- The role shares the race: MyRole would fall through to "D" here, and
+    -- that must not count as a role change either, so nothing is sent.
+    eq(env.board("monday").me.role, roleBefore, "and a silent client does not change the role")
+    eq(env.last("E", MON), nil, "so a silent client sends no E at all")
+    _G.GetSpecialization = realGetSpec
+end
+
+do
+    -- The same hazard by its real route: a relog restores the spec from
+    -- SavedVariables, and the login re-broadcast must carry it even though
+    -- nothing this session has called SignUp.
+    local db = {}
+    local first = newEnv({ db = db, specID = 250, specRole = "TANK",
+                           key = { mapID = 501, level = 12 } }).load()
+    first.fire("PLAYER_ENTERING_WORLD", false, false)
+    first.M.SignUp("open", { intent = "join", bracket = "any" })
+
+    local relog = newEnv({ db = db, specRole = "DAMAGER" }).load()
+    _G.GetSpecialization = function() return nil end
+    relog.fire("PLAYER_ENTERING_WORLD", true, false)
+    local e = relog.last("E", OPEN)
+    check(e and e.text:match(" 250$") ~= nil,
+        "a relog re-broadcasts the saved spec, not a zero", e and e.text)
+    check(e and e.text:match("^E %S+ %S+ T ") ~= nil,
+        "and the saved tank role, not MyRole's D default", e and e.text)
+    eq(relog.board("open").me.role, "T", "the saved role survives the login event")
+
+    -- And once talents do load, the real value replaces the saved one.
+    local later = newEnv({ db = db, specID = 63, specRole = "DAMAGER" }).load()
+    later.fire("PLAYER_ENTERING_WORLD", true, false)
+    local e2 = later.last("E", OPEN)
+    check(e2 and e2.text:match(" 63$") ~= nil,
+        "and a live spec outranks the saved one", e2 and e2.text)
+end
+
+do
+    -- The roster walk is shared and throttled: one pass fills both the online
+    -- set and the class cache, and a burst of GUILD_ROSTER_UPDATE costs one
+    -- walk per ROSTER_CACHE window rather than one per event.
+    local env = newEnv()
+    local walks = 0
+    local roster = { { "Anna-" .. REALM, "WARRIOR", true },
+                     { "Bob-" .. REALM, "PRIEST", false } }
+    _G.GetNumGuildMembers = function() return #roster end
+    _G.GetGuildRosterInfo = function(i)
+        local row = roster[i]
+        if not row then return nil end
+        if i == 1 then walks = walks + 1 end
+        return row[1], "Member", 1, 80, "Class", "Zone", "", "", row[3], 0, row[2]
+    end
+    env.load()
+    env.fire("PLAYER_ENTERING_WORLD", true, false)
+    local after = walks
+    check(after > 0, "the login pass walks the roster once")
+    eq(env.M.ClassOf("Anna-" .. REALM), "WARRIOR", "filling the class cache")
+
+    for _ = 1, 20 do env.fire("GUILD_ROSTER_UPDATE") end
+    eq(walks, after, "a burst of roster events inside the window walks it no more")
+
+    -- Past the window the next event picks up a member who left the guild.
+    roster[1] = { "Cid-" .. REALM, "MAGE", true }
+    env.now = env.now + 21
+    env.fire("GUILD_ROSTER_UPDATE")
+    check(walks > after, "past the window it walks again")
+    eq(env.M.ClassOf("Cid-" .. REALM), "MAGE", "picking up the new member")
+    eq(env.M.ClassOf("Anna-" .. REALM), nil, "and evicting the one who left")
+    eq(env.error, nil, "with no errors along the way")
+end
+
+do
+    -- (g) Both fields ride SavedVariables, which stores the board tables
+    -- whole rather than copying named fields out of them.
+    local db = {}
+    local env = newEnv({ db = db, specID = 250, specRole = "TANK",
+                         key = { mapID = 501, level = 12 } }).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    env.M.SignUp("monday", { intent = "lead" })
+    env.recv("E " .. MON .. " 100 D join any - - - 63", "Anna-" .. REALM)
+    env.recv("J " .. MON, "Anna-" .. REALM, "WHISPER")
+
+    local saved = db.monday and db.monday.boards and db.monday.boards.monday
+    eq(saved and saved.me and saved.me.spec, 250, "our own spec is saved")
+    eq(saved and saved.entries["Anna-" .. REALM].spec, 63, "and so is a peer's")
+    eq(saved and saved.groups["Vizzo-" .. REALM].specs["Anna-" .. REALM], 63,
+        "and the roster sidecar with it")
+
+    local relog = newEnv({ db = db, specID = 250, specRole = "TANK" }).load()
+    eq(relog.board("monday").me.spec, 250, "a relog reads our own spec back")
+    eq(relog.board("monday").entries["Anna-" .. REALM].spec, 63, "and the peer's")
+    eq(relog.board("monday").groups["Vizzo-" .. REALM].specs["Anna-" .. REALM], 63,
+        "and the sidecar")
+
+    -- A board saved before either field existed has no `spec` anywhere and no
+    -- `specs` table at all, and must load without either being missed.
+    local oldDb = { monday = { boards = {
+        monday = {
+            key = MON,
+            me = { role = "T", intent = "lead", leader = "Vizzo-" .. REALM, ts = 1 },
+            entries = {
+                ["Vizzo-" .. REALM] = { role = "T", intent = "lead",
+                                        leader = "Vizzo-" .. REALM, ts = 1 },
+                ["Anna-" .. REALM] = { role = "D", intent = "join", ts = 1 },
+            },
+            groups = {
+                ["Vizzo-" .. REALM] = {
+                    ts = 1, seen = 1757332800,
+                    members = { ["Vizzo-" .. REALM] = "T", ["Anna-" .. REALM] = "D" },
+                },
+            },
+        },
+        open = { key = OPEN, entries = {}, groups = {} },
+    } } }
+    local legacy = newEnv({ db = oldDb, specRole = "TANK" }).load()
+    eq(legacy.error, nil, "a pre-spec saved board loads without error")
+    local lg = legacy.M.Groups("monday")[1]
+    eq(lg and #lg.members, 2, "with its roster whole")
+    local bySpec = {}
+    for _, mem in ipairs(lg and lg.members or {}) do bySpec[mem.name] = mem.spec end
+    eq(bySpec["Anna-" .. REALM], nil, "and every spec simply unknown")
+    legacy.clearSent()
+    legacy.fire("PLAYER_ENTERING_WORLD", true, false)
+    local lgSent = legacy.last("G", MON)
+    check(lgSent and lgSent.text:match(" 0,0$") ~= nil,
+        "rebroadcast with a placeholder per member", lgSent and lgSent.text)
 end
 
 -- ------------------------------------------------------------------
