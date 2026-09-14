@@ -7,7 +7,7 @@ ns.RegisterDungeon({
   ["slug"] = "temple-of-sethraliss",
   ["season"] = "midnight-s2",
   ["patch"] = "12.1.0",
-  ["sourceVersion"] = "1.6",
+  ["sourceVersion"] = "1.7",
   ["instanceID"] = nil,
   ["mdtRoutes"] = {
     {
@@ -20,11 +20,35 @@ ns.RegisterDungeon({
       ["TANK"] = "OPENING: Control Shrouded Fang — [Poisoned Cheap Shot]; face Sandfury Stonefist — [Ground Pound] away.; POSITION: Keep charge lines, Burrow paths and beam lanes clear of the party.; DEFENSIVE: Plan for [Overload], [Serpentstorm], [Consume Charge] and Guardian pressure.",
       ["HEALER"] = "OPENING: Prepare for Sandswept Hunter — [Arrow Barrage] and Stonefist tank pressure.; DISPEL: Confirm Poison removals live; fewer dungeon abilities remain dispellable.; COOLDOWN: Plan [Gale Force] > soak, [Serpentstorm], three beams and [Corruption Burst].",
       ["DPS"] = "INTERRUPT: Shrouded Fang — [Poisoned Cheap Shot]; Agitated Nimbus — [Accumulate Charge].; KILL FIRST: Burrow adds; the single Essence Defiler; active Faithless Tormentors.; CONTROL: Break A Knot of Snakes; stop [Essence Disruption] in the Eye gauntlet.; DEFENSIVE: Use personals for [Arrow Barrage], [Serpentstorm], beams and [Corruption Burst].",
-      ["ROUTE"] = "33-minute PTR timer; reduced Enemy Forces allow more routing choice — confirm the live route.; Keep the Eye carrier stable; final gauntlet cast names remain pre-release, requiring live verification.",
+      ["ROUTE"] = "33-minute PTR timer; reduced Enemy Forces allow more routing choice — confirm the live route.; Keep the Eye carrier stable; cast names are now live-verified — see overview.interrupts.",
     },
   },
   ["overview"] = {
     ["interrupts"] = {
+      {
+        ["spell"] = "Poisoned Cheap Shot",
+        ["note"] = "Shrouded Fang — poison stun; Poison-dispel if missed",
+      },
+      {
+        ["spell"] = "Addle Mind",
+        ["note"] = "Faithless Subjugator — disorients a player; Curse-dispel if missed",
+      },
+      {
+        ["spell"] = "Venom Bolt",
+        ["note"] = "Brood Tender — random-target poison damage",
+      },
+      {
+        ["spell"] = "Lightning Bolt",
+        ["note"] = "Imbued Stormcaller — random-target magic damage; maintain an interrupt rotation",
+      },
+      {
+        ["spell"] = "Essence Disruption",
+        ["note"] = "Temple Disruptor — stops Eye energy gain; interrupt or stop immediately",
+      },
+      {
+        ["spell"] = "Flame Shock",
+        ["note"] = "Twisted Hexxer — heavy damage over time; interrupt every cast",
+      },
       {
         ["spell"] = "Healing Surge",
         ["note"] = "Charged Dust Devil — interrupt first",
@@ -32,18 +56,6 @@ ns.RegisterDungeon({
       {
         ["spell"] = "Accumulate Charge",
         ["note"] = "Agitated Nimbus — interrupt first; assign kicks, purge the buff if it lands — each stack is 8%",
-      },
-      {
-        ["spell"] = "Poisoned Cheap Shot",
-        ["note"] = "Shrouded Fang — control the reworked ambush window",
-      },
-      {
-        ["spell"] = "Shock",
-        ["note"] = "Imbued Stormcaller — interrupt after Nimbus coverage",
-      },
-      {
-        ["spell"] = "Flame Shock",
-        ["note"] = "Twisted Hexxer — interrupt / priority",
       },
     },
     ["killPriority"] = {
@@ -58,7 +70,7 @@ ns.RegisterDungeon({
         "Adderis/Aspix — [Overload].",
         "Merektha — [Serpentstorm] and add pressure.",
         "Galvazzt — [Galvanized] vulnerability or [Consume Charge] (missed beams now feed a 60%-stronger [Consume Charge]).",
-        "Corrupted Guardian — [Vile Charge] (renamed from Tainted Strike).",
+        "Corrupted Guardian — [Tainted Strike]; caps at two applications and lasts 25 seconds.",
       },
       ["pullWarnings"] = {
         "Do not combine summon waves or charged Nimbuses without cooldowns.",
@@ -91,7 +103,7 @@ ns.RegisterDungeon({
     },
     ["dps"] = {
       ["purges"] = {
-        "Agitated Nimbus — [Accumulate Charge]: purge the buff if it lands.",
+        "Agitated Nimbus — [Accumulate Charge]: purge before the group hit.",
         "Break A Knot of Snakes.",
         "Protect the Eye carrier.",
         "Dutiful Tamer — [Swarming Krolusks]: kill summons quickly.",
@@ -112,8 +124,8 @@ ns.RegisterDungeon({
       "Tank: Set the fight location first; use short, predictable movement.",
       "Healer: Anchor cooldowns to mechanics, not falling health bars.",
       "DPS: One correct interrupt or soak is worth more than one extra global.",
-      "Standard 1.6, reviewed 9 August 2026 against Patch 12.1 PTR notes. Confirm on live before applying blindly.",
-      "Requires live verification: final Eyes-gauntlet cast names, [Shadowlash] execute threshold, Tormentor execute threshold, and the live dungeon route (33-minute PTR timer, reduced Enemy Forces).",
+      "Standard 1.7, verified 12 September 2026 against Patch 12.1 Live (hotfixes verified through 11 September 2026). Corrupted Guardian's tank-damage ability reverts to [Tainted Strike].",
+      "Requires live verification: Faithless Tormentor execute threshold and per-Tormentor healing value remain inconsistent across current guides; follow the live tooltip.",
     },
   },
   ["trashSegments"] = {
@@ -136,22 +148,36 @@ ns.RegisterDungeon({
           ["npcID"] = 134600,
           ["displayID"] = 83780,
         },
+        {
+          ["name"] = "Barbed Krolusk",
+          ["npcID"] = 134616,
+          ["displayID"] = 83787,
+        },
       },
       ["roles"] = {
         ["TANK"] = {
           "Shrouded Fang — [Poisoned Cheap Shot]: Control and stop the ambush cast.",
-          "Sandfury Stonefist — [Ground Pound]: Face away and dodge the frontal; damage reduced 5% on PTR.",
+          "Sandfury Stonefist — [Ground Pound]: Face away and dodge the frontal; damage reduced 5% on PTR; brace for damage and knockback.",
           "Sandswept Hunter — [Arrow Barrage]: Expect tank pressure alongside the caster's spread mechanic.",
+          "Sandswept Hunter — [Sandburst Arrow]: Step out of the impact circle.",
+          "Barbed Krolusk — [Serrated Charge]: Defensive or bleed removal on overlaps.",
+          "Sandfury Stonefist — [Sunder Slam]: Tank defensive; healer watches the damage amp.",
         },
         ["HEALER"] = {
           "Sandswept Hunter — [Arrow Barrage]: Prepare for spread damage and Stonefist tank pressure together; now 9 seconds with lower damage.",
           "Shrouded Fang — [Poisoned Cheap Shot]: Stop the ambush cast before it lands.",
-          "Sandfury Stonefist — [Ground Pound]: Dodge the frontal; damage reduced 5% on PTR.",
+          "Sandfury Stonefist — [Ground Pound]: Face away and dodge the frontal; damage reduced 5% on PTR; brace for damage and knockback.",
+          "Sandswept Hunter — [Sandburst Arrow]: Step out of the impact circle.",
+          "Barbed Krolusk — [Serrated Charge]: Defensive or bleed removal on overlaps.",
+          "Sandfury Stonefist — [Sunder Slam]: Tank defensive; healer watches the damage amp.",
         },
         ["DPS"] = {
           "Shrouded Fang — [Poisoned Cheap Shot]: Interrupt the ambush cast.",
           "Sandswept Hunter — [Arrow Barrage]: Spread and use a personal if targeted; now 9 seconds with lower damage.",
-          "Sandfury Stonefist — [Ground Pound]: Dodge the frontal; damage reduced 5% on PTR.",
+          "Sandfury Stonefist — [Ground Pound]: Face away and dodge the frontal; damage reduced 5% on PTR; brace for damage and knockback.",
+          "Sandswept Hunter — [Sandburst Arrow]: Step out of the impact circle.",
+          "Barbed Krolusk — [Serrated Charge]: Defensive or bleed removal on overlaps.",
+          "Sandfury Stonefist — [Sunder Slam]: Tank defensive; healer watches the damage amp.",
         },
       },
     },
@@ -170,28 +196,50 @@ ns.RegisterDungeon({
           ["displayID"] = 84761,
         },
         {
-          ["name"] = "Barbed Krolusk",
-          ["npcID"] = 134616,
-          ["displayID"] = 83787,
-        },
-        {
           ["name"] = "Swarming Krolusk",
           ["npcID"] = 264785,
           ["displayID"] = 83787,
+        },
+        {
+          ["name"] = "Poisonous Viper",
+          ["npcID"] = 135562,
+          ["displayID"] = 78250,
+        },
+        {
+          ["name"] = "Lightning Serpent",
+          ["npcID"] = 135846,
+          ["displayID"] = 78247,
+        },
+        {
+          ["name"] = "Faithless Subjugator",
+          ["npcID"] = 134364,
+          ["displayID"] = 86510,
         },
       },
       ["roles"] = {
         ["TANK"] = {
           "Dutiful Tamer / Sand-Sworn Rider — [Swarming Krolusks]: Group the summons for cleave; summon health reduced.",
-          "Barbed Krolusk / Swarming Krolusk — [Serrated Charge]: Keep charge lines away from allies; impact and duration reduced.",
+          "Swarming Krolusk — [Serrated Charge]: Keep charge lines away from allies; impact and duration reduced.",
+          "Sand-Sworn Rider — [Scouring Sand]: Stay close, bait cleanly, then sidestep.",
+          "Poisonous Viper — [Cytotoxin]: Poison-dispel or use a defensive.",
+          "Lightning Serpent — [Serpent's Stormcall]: Tank defensive; focus the serpent.",
+          "Faithless Subjugator — [Addle Mind]: Interrupt; Curse-dispel if missed.",
         },
         ["HEALER"] = {
           "Dutiful Tamer / Sand-Sworn Rider — [Swarming Krolusks]: Prepare for summon-wave damage; summon health reduced.",
-          "Barbed Krolusk / Swarming Krolusk — [Serrated Charge]: Stabilise the charge target's damage-over-time effect; impact and duration reduced.",
+          "Swarming Krolusk — [Serrated Charge]: Stabilise the charge target's damage-over-time effect; impact and duration reduced.",
+          "Sand-Sworn Rider — [Scouring Sand]: Stay close, bait cleanly, then sidestep.",
+          "Poisonous Viper — [Cytotoxin]: Poison-dispel or use a defensive.",
+          "Lightning Serpent — [Serpent's Stormcall]: Tank defensive; focus the serpent.",
+          "Faithless Subjugator — [Addle Mind]: Interrupt; Curse-dispel if missed.",
         },
         ["DPS"] = {
           "Dutiful Tamer / Sand-Sworn Rider — [Swarming Krolusks]: Control and cleave the summons quickly; summon health reduced.",
-          "Barbed Krolusk / Swarming Krolusk — [Serrated Charge]: Avoid the line; impact and duration reduced.",
+          "Swarming Krolusk — [Serrated Charge]: Avoid the line; impact and duration reduced.",
+          "Sand-Sworn Rider — [Scouring Sand]: Stay close, bait cleanly, then sidestep.",
+          "Poisonous Viper — [Cytotoxin]: Poison-dispel or use a defensive.",
+          "Lightning Serpent — [Serpent's Stormcall]: Tank defensive; focus the serpent.",
+          "Faithless Subjugator — [Addle Mind]: Interrupt; Curse-dispel if missed.",
         },
       },
     },
@@ -204,19 +252,30 @@ ns.RegisterDungeon({
           ["npcID"] = 136076,
           ["displayID"] = 65631,
         },
+        {
+          ["name"] = "Imbued Stormcaller",
+          ["npcID"] = 134599,
+          ["displayID"] = 83779,
+        },
       },
       ["roles"] = {
         ["TANK"] = {
           "Agitated Nimbus — [Accumulate Charge]: Assign kicks or purge; each stack is 8%.",
           "Agitated Nimbus — [Release Charge]: Prepare recovery if charges remain; the clear bug was fixed.",
+          "Imbued Stormcaller — [Imbued Conduction]: Magic-dispel every application.",
+          "Imbued Stormcaller — [Lightning Bolt]: Maintain an interrupt rotation.",
         },
         ["HEALER"] = {
           "Agitated Nimbus — [Accumulate Charge]: Assign kicks or purge; each stack is 8%.",
           "Agitated Nimbus — [Release Charge]: Prepare recovery if charges remain; the clear bug was fixed.",
+          "Imbued Stormcaller — [Imbued Conduction]: Magic-dispel every application.",
+          "Imbued Stormcaller — [Lightning Bolt]: Maintain an interrupt rotation.",
         },
         ["DPS"] = {
           "Agitated Nimbus — [Accumulate Charge]: Assign kicks or purge; each stack is 8%.",
           "Agitated Nimbus — [Release Charge]: Prepare recovery if charges remain; the clear bug was fixed.",
+          "Imbued Stormcaller — [Imbued Conduction]: Magic-dispel every application.",
+          "Imbued Stormcaller — [Lightning Bolt]: Maintain an interrupt rotation.",
         },
       },
     },
@@ -234,19 +293,41 @@ ns.RegisterDungeon({
           ["npcID"] = 240681,
           ["displayID"] = 169,
         },
+        {
+          ["name"] = "Orb Watcher",
+          ["npcID"] = 135007,
+          ["displayID"] = 84503,
+        },
+        {
+          ["name"] = "Twisted Hexxer",
+          ["npcID"] = 136250,
+          ["displayID"] = 84676,
+        },
       },
       ["roles"] = {
         ["TANK"] = {
           "Temple Disruptor — [Essence Disruption]: Interrupt to keep the Eye from gaining energy.",
           "Eye of Sethraliss — [Siphon Energy]: Protect the nearest carrier and finish both Eyes.",
+          "Orb Watcher — [Venomous Slash]: Tank defensive; move from spawned circles.",
+          "Orb Watcher — [Caustic Stomp]: Use group healing and defensives.",
+          "Twisted Hexxer — [Flame Shock]: Interrupt every cast.",
+          "Twisted Hexxer — [Latent Hex]: Move out; drop away from the group.",
         },
         ["HEALER"] = {
           "Temple Disruptor — [Essence Disruption]: Interrupt to keep the Eye from gaining energy.",
           "Eye of Sethraliss — [Siphon Energy]: Protect the nearest carrier and finish both Eyes.",
+          "Orb Watcher — [Venomous Slash]: Tank defensive; move from spawned circles.",
+          "Orb Watcher — [Caustic Stomp]: Use group healing and defensives.",
+          "Twisted Hexxer — [Flame Shock]: Interrupt every cast.",
+          "Twisted Hexxer — [Latent Hex]: Move out; drop away from the group.",
         },
         ["DPS"] = {
           "Temple Disruptor — [Essence Disruption]: Interrupt to keep the Eye from gaining energy.",
           "Eye of Sethraliss — [Siphon Energy]: Protect the nearest carrier and finish both Eyes.",
+          "Orb Watcher — [Venomous Slash]: Tank defensive; move from spawned circles.",
+          "Orb Watcher — [Caustic Stomp]: Use group healing and defensives.",
+          "Twisted Hexxer — [Flame Shock]: Interrupt every cast.",
+          "Twisted Hexxer — [Latent Hex]: Move out; drop away from the group.",
         },
       },
     },
@@ -276,12 +357,14 @@ ns.RegisterDungeon({
           ["job"] = {
             "Keep a clean [Gale Force] route to Thunder and Lightning.",
             "Hold a clean push-to-soak route; hit only the unshielded boss — Storm Blessed is immune.",
+            "Hold both bosses near a wall; attack the target without Adderis and Aspix — [Storm Blessed].",
           },
           ["avoid"] = {
             "[Tempest Winds] zones — they pacify for 4 seconds, not silence.",
           },
           ["defensive"] = {
             "Mitigate [Overload]; save mobility for the push.",
+            "Expect faster casts during Aspix — [Frenzy].",
           },
           ["reminder"] = "Edge [Tempest Winds] zones > same push > 4.5-sec soak > move out.",
         },
@@ -289,6 +372,7 @@ ns.RegisterDungeon({
           ["job"] = {
             "Top the group before [Gale Force] and the 4.5-second group soak.",
             "Cover the soak and its follow-up explosion.",
+            "Spot-heal Aspix — [Gust] targets.",
           },
           ["avoid"] = {
             "[Tempest Winds]; it pacifies for 4 seconds (two zones on Mythic).",
@@ -330,18 +414,20 @@ ns.RegisterDungeon({
         "Prolonged Burrow overwhelms the group.",
         "Missed casts or living adds extend Burrow.",
         "Missed casts prolong Burrow.",
+        "A living Toxic Viper — [Poison Spit] or Storm Serpent — [Storm Catalyst] extends Burrow — kill them quickly.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
             "Hold Merektha stable; gather Burrow adds tightly.",
-            "Stack Burrow adds away from her path.",
+            "Gather Burrow adds under the boss.",
           },
           ["avoid"] = {
             "[Thunder Spit], [Serpentstorm] and the marked Burrow path.",
           },
           ["defensive"] = {
             "Cover [Serpentstorm] and add pressure.",
+            "Use a defensive for Merektha — [Lightning Bite] and Merektha — [Serpentstorm].",
           },
           ["reminder"] = "Stable boss > tight adds > fast Burrow.",
         },
@@ -350,6 +436,7 @@ ns.RegisterDungeon({
             "Top the group before [Serpentstorm].",
             "Stabilise Knot targets and Burrow add damage.",
             "Move in Burrow.",
+            "Poison-dispel Toxic Viper — [Poison Spit].",
           },
           ["avoid"] = {
             "[Thunder Spit] trails, swirlies and the Burrow path.",
@@ -362,6 +449,7 @@ ns.RegisterDungeon({
         ["DPS"] = {
           ["job"] = {
             "Stack Knot targets; break the Knot; burn Burrow adds.",
+            "Pre-position in melee for Merektha — A Knot of Snakes; AoE CC the coils.",
             "Storm Serpent — [Storm Catalyst] (interrupt/priority).",
           },
           ["avoid"] = {
@@ -393,7 +481,7 @@ ns.RegisterDungeon({
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
-            "Start near the edge; preserve three beam lanes.",
+            "Move Galvazzt to keep three Lightning Spire lanes short and clear.",
           },
           ["avoid"] = {
             "[Induction] and unplanned beam soaking.",
@@ -436,7 +524,7 @@ ns.RegisterDungeon({
     {
       ["name"] = "Avatar of Sethraliss",
       ["sheet"] = {
-        ["TANK"] = "Control one Guardian per main phase and sustain [Vile Charge].",
+        ["TANK"] = "Control one Guardian per main phase and sustain [Tainted Strike].",
         ["HEALER"] = "Heal the Avatar when the single Defiler dies; line of sight is ignored.",
         ["DPS"] = "Kill the one Defiler; cleanse the Lifeforce without knockback.",
         ["WIPE"] = "Repeated Corruption Bursts amplify sharply.",
@@ -450,34 +538,39 @@ ns.RegisterDungeon({
         "[Shadowlash] stacks or the Defiler suppress healing.",
         "Each remaining Lifeforce stack causes a Burst.",
         "Each remaining orb stack causes a Burst.",
-        "Repeated Corruption Bursts gain a stacking vulnerability, now up to 300%, and can chain-wipe; [Shadowlash] and Tormentor execute thresholds require live verification.",
+        "Cleansed Lifeforce caps at three stacks and ticks every three seconds.",
+        "Repeated Corruption Bursts gain a stacking vulnerability, now up to 300%, and can chain-wipe; Faithless Tormentor execute threshold and per-Tormentor healing value remain inconsistent across current guides — follow the live tooltip.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
             "Protect the Eye carrier; control knockbacks (Eyes gauntlet — live cast names require verification).",
-            "Pick up Guardians; control [Vile Charge] stacks (renamed from Tainted Strike).",
+            "Pick up Guardians; control [Tainted Strike] stacks.",
             "Essence Defiler — [Defiling Taint] (priority).",
           },
           ["avoid"] = {
             "Agony impacts and moving Lifeforce away.",
+            "Exit 20 yards before the Corrupted Guardian dies.",
           },
           ["defensive"] = {
             "Use a major for stacked Guardian damage.",
+            "Mitigate [Tainted Strike]; it caps at two applications and lasts 25 seconds.",
           },
-          ["reminder"] = "Protect the Eye carrier > pick up Guardians > control [Vile Charge] > major for stacked Guardian damage.",
+          ["reminder"] = "Protect the Eye carrier > pick up Guardians > control [Tainted Strike] > major for stacked Guardian damage.",
         },
         ["HEALER"] = {
           ["job"] = {
             "Keep the Eye carrier stable through projectiles (Eyes gauntlet — live cast names require verification).",
             "Heal the Avatar only after the Defiler dies.",
             "Use cleansed Lifeforce and Siphon the Weak to accelerate progress.",
+            "The Defiling Taint debuff is now visible on her frame.",
           },
           ["avoid"] = {
             "Tormentor fixates, [Hex Muck] and Agony.",
           },
           ["cooldowns"] = {
             "Commit throughput only when [Defiling Taint] is gone.",
+            "Heal Corrupted Lifeforce soakers; periodic damage increased 33%.",
           },
           ["reminder"] = "Defiler dead > avoid Tormentors > heal Avatar.",
         },
@@ -491,9 +584,11 @@ ns.RegisterDungeon({
           },
           ["avoid"] = {
             "[Hex Muck], Agony and unassigned Lifeforce contact.",
+            "Exit 20 yards before the Corrupted Guardian dies.",
           },
           ["defensive"] = {
             "Use a personal for [Corruption Burst].",
+            "Take one Corrupted Lifeforce; never double-soak casually.",
           },
           ["reminder"] = "Kick > Defiler > cleanse > Tormentors.",
         },

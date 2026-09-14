@@ -7,7 +7,7 @@ ns.RegisterDungeon({
   ["slug"] = "murder-row",
   ["season"] = "midnight-s2",
   ["patch"] = "12.1.0",
-  ["sourceVersion"] = "1.0",
+  ["sourceVersion"] = "Standard 1.7",
   ["instanceID"] = nil,
   ["mdtRoutes"] = {
     {
@@ -25,37 +25,42 @@ ns.RegisterDungeon({
   ["overview"] = {
     ["interrupts"] = {
       {
-        ["spell"] = "Curse of Doom",
-        ["note"] = "Corrupted Warlock (trash) — highest interrupt priority; kick before [Dark Pact].",
+        ["spell"] = "Fel Missiles",
+        ["note"] = "Felonious Mage (opening trash) — interruptible group damage; interrupt the channel.",
       },
       {
-        ["spell"] = "Dark Pact",
-        ["note"] = "Corrupted Warlock (trash) — interrupt or purge the defensive if it lands.",
+        ["spell"] = "Seduction",
+        ["note"] = "Seductive Sayaad (opening trash) — dangerous crowd control; interrupt or hard stop.",
       },
       {
-        ["spell"] = "Blade Dance",
-        ["note"] = "Felmaster Lucsei (trash) — priority stop or move clear; never stack avoidable damage into it.",
+        ["spell"] = "Felfire Burst",
+        ["note"] = "Unleashed Imp (Xathuux trash) — random player damage; interrupt random-target damage.",
       },
       {
-        ["spell"] = "Felstorm",
-        ["note"] = "Kystia Manaheart — assign one interrupt to each image; both casts must be stopped (two interrupts per image on Mythic/Mythic+).",
+        ["spell"] = "Fel Rage",
+        ["note"] = "Wrathguard Flayer (Xathuux trash) — interrupt or soothe buff.",
+      },
+      {
+        ["spell"] = "Health Funnel",
+        ["note"] = "Fel Invoker (Xathuux trash) — heals an enemy; interrupt the heal.",
       },
       {
         ["spell"] = "Chaos Bolt",
-        ["note"] = "Lithiel Cinderfury — interrupt when assigned; adds before boss; do not turn the boss unpredictably.",
+        ["note"] = "Lithiel Cinderfury — heavy random-target damage; maintain an interrupt rotation.",
       },
     },
     ["killPriority"] = {
       "Corrupted Warlock and Defiled Golem — kill first among trash.",
-      "Nibbles — bring to 20% without wasting burst on Kystia's [Felshield], then swap to Mirror Images.",
+      "Nibbles — bring to 20% until friendly, without wasting burst on Kystia's [Felshield], then swap to Mirror Images.",
       "Mirror Images — both [Felstorm] casts must be stopped before bursting Kystia in [Destabilized].",
-      "Lithiel's summoned demons — hard swap and cleave; prioritise empowered demons before [Malefic Wave].",
+      "Lithiel's Furious Vilefiend and Wild Imps — hard swap and cleave; prioritise empowered demons before [Malefic Wave].",
     },
     ["tank"] = {
       ["damage"] = {
         "[Chaos Barrage] (Kystia Manaheart) — active mitigation; keep nearby players clear of the jump where positioning allows.",
         "[Envenom] (Zaen Bladesorrow) — mitigate the tank hit and call for [Heartstop Poison] removal.",
         "[Legion Strike] (Xathuux the Annihilator) — active mitigation; keep the frontal away from allies.",
+        "[Infernal Crush] (Xathuux the Annihilator) — keep it away from allies; mitigate the overlap with [Demonic Rage].",
         "Vilefiend pressure (Lithiel Cinderfury) — cover Vilefiend and stacked add pressure.",
         "Felmaster Lucsei — [Blade Dance] (trash): priority stop or move clear; never stack avoidable damage into it.",
         "Defiled Golem — [Defiled Slam] (trash): leave the impact and use mitigation if targeted.",
@@ -64,8 +69,8 @@ ns.RegisterDungeon({
         "Avoid combining Corrupted Warlock and Defiled Golem danger without a planned stop.",
         "Corrupted Warlock — [Curse of Doom]: highest interrupt priority; kick before [Dark Pact]. Hold the pack still for the live split-damage visual.",
         "Corrupted Warlock — [Dark Pact]: interrupt or purge the defensive if it lands; keep control of the pack while the shield is down.",
-        "Bribed Captain / Bribed Guard — live cast list: use visible danger cues and stop assigned casts; exact late-PTR cast priority requires live verification.",
-        "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
+        "Bribed Captain — [Deep Corruption]: kill first; it buffs nearby enemies. Bribed Guard's cast priority still needs live verification.",
+        "Warehouse Worker — [Sharp Nail]: random-target bleed. Warehouse Worker — [Workplace Accident]: dodge the ground danger; workers no longer flee at 30%.",
       },
     },
     ["healer"] = {
@@ -78,15 +83,15 @@ ns.RegisterDungeon({
       ["pressure"] = {
         "[Destabilized] (Kystia Manaheart) — sustain heavy party damage for the 15-sec window while the group bursts Kystia.",
         "[Killing Spree] (Zaen Bladesorrow) — top the group before the sequence and use a cooldown if players are uneven.",
-        "[Demonic Rage] (Xathuux the Annihilator) — use a planned group cooldown and personals.",
+        "[Infernal Crush] and [Demonic Rage] (Xathuux the Annihilator) — use a planned group cooldown and personals; prepare major healing for the overlap.",
         "Post-gateway Fire damage (Lithiel Cinderfury) — take the gateway immediately while maintaining healing range; heal lingering Fire damage after.",
         "Felmaster Lucsei — [Blade Dance] (trash): priority stop or move clear; never stack avoidable damage into it. Pre-heal the group hit and damage-over-time effect if the stop is missed.",
         "Defiled Golem — [Defiled Slam] (trash): prepare a direct tank heal.",
       },
       ["pullWarnings"] = {
         "Prepare a response for Felmaster Lucsei — [Blade Dance].",
-        "Bribed Captain / Bribed Guard — live cast list: use visible danger cues; exact late-PTR cast priority requires live verification.",
-        "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
+        "Bribed Captain — [Deep Corruption]: kill first; it buffs nearby enemies. Bribed Guard's cast priority still needs live verification.",
+        "Warehouse Worker — [Sharp Nail]: random-target bleed. Warehouse Worker — [Workplace Accident]: dodge the ground danger; workers no longer flee at 30%.",
       },
     },
     ["dps"] = {
@@ -102,18 +107,23 @@ ns.RegisterDungeon({
         "Use personals for [Killing Spree] and add-heavy overlaps.",
       },
       ["pullWarnings"] = {
-        "Exact trash kick and stop ranking needs live verification.",
-        "Bribed Captain / Bribed Guard — live cast list: use visible danger cues; exact late-PTR cast priority requires live verification.",
-        "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
+        "Priority interrupts now follow the documents' table: [Fel Missiles], [Seduction], [Felfire Burst], [Fel Rage], [Health Funnel], then [Chaos Bolt].",
+        "Bribed Captain — [Deep Corruption]: kill first; it buffs nearby enemies. Bribed Guard's cast priority still needs live verification.",
+        "Warehouse Worker — [Sharp Nail]: random-target bleed. Warehouse Worker — [Workplace Accident]: dodge the ground danger; workers no longer flee at 30%.",
       },
     },
     ["tip"] = {
       "Tank: Position, mitigation and pace — face trash and bosses away, plan mitigation for [Chaos Barrage]/[Envenom]/[Legion Strike] without overlapping every cooldown, and avoid combining Corrupted Warlock and Defiled Golem danger without a planned stop.",
       "Healer: Dispels and cooldowns — prioritise [Heartstop Poison] and [Corroding Spittle] when removable, plan around [Curse of Doom], and cover Kystia's 15-sec [Destabilized] pulse and Xathuux's [Demonic Rage].",
       "DPS: Interrupts and burst — assign both Mirror Image — [Felstorm] casts, stop [Curse of Doom] and [Chaos Bolt], and save damage for [Destabilized] and Lithiel's empowered demons.",
-      "Version 1.0, reviewed and verified 9 August 2026 against Blizzard PTR/launch notes, Wowhead, Wowhead Dungeon Journal data and Icy Veins; Syndicate Guild cross-checked only. [Destabilized] corrected from 20 sec to 15 sec; no other verified gameplay changes since 27 July 2026.",
-      "Pre-launch verified for Midnight Season 2, Patch 12.1 PTR. Patch 12.1 launches 11 August; Mythic+ Season 2 opens 18 August 2026.",
-      "Requires live verification: the 34:00 PTR timer, [Burning Steps] duration, opening/Warehouse Worker live cast priority, and any late PTR tuning.",
+      "Live-verified for Midnight Season 2, Patch 12.1, Standard 1.7, reviewed 12 September 2026 against Blizzard hotfixes and Season 2 overview, Wowhead, Method and Icy Veins; biggest change is Lithiel Cinderfury's Fingers of the Legion renamed to [Fingers of Gul'dan] (prefers non-tanks, targets 4 players, summons 4 Wild Imps).",
+      "Requires live verification: confirm current in-game tooltip wording where guide sources use different labels for Kystia's burst phase.",
+      "Requires live verification: [Burning Steps] duration (120 seconds on PTR).",
+      "Timer: 34 minutes; interrogate four Row Snitches before Kystia.",
+      "Trade Faceted Crystalline Fel to vendors for single-use dungeon items.",
+      "After Kystia, take the disguise and complete the cantina jobs quickly.",
+      "Five Star Review grants 10% damage and healing for 5 minutes.",
+      "Current Enemy Forces requirement: 655.",
       "Tank: Plan Zaen cover and Xathuux movement space before each fight.",
       "Healer: Keep movement tools available so mechanics do not stop healing.",
       "DPS: Mechanic execution is worth more than boss uptime.",
@@ -134,20 +144,52 @@ ns.RegisterDungeon({
           ["npcID"] = 236071,
           ["displayID"] = 126157,
         },
+        {
+          ["name"] = "Felonious Mage",
+          ["npcID"] = 236084,
+          ["displayID"] = 129784,
+        },
+        {
+          ["name"] = "Seductive Sayaad",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Felwyrm",
+          ["npcID"] = 236085,
+          ["displayID"] = 139997,
+        },
+        {
+          ["name"] = "Massive Felwyrm",
+          ["npcID"] = 236902,
+          ["displayID"] = 139996,
+        },
       },
       ["roles"] = {
         ["TANK"] = {
-          "Bribed Captain / Bribed Guard — live cast list: use visible danger cues and stop assigned casts; exact late-PTR cast priority requires live verification.",
+          "Felonious Mage — [Fel Missiles]: interrupt the channel.",
+          "Seductive Sayaad — [Seduction]: interrupt or hard stop.",
+          "Felwyrm — [Fel Infused]: move away on death.",
+          "Bribed Captain — [Deep Corruption]: kill first; it buffs nearby enemies.",
+          "Massive Felwyrm — [Corroding Spittle]: magic dispel quickly.",
           "Cantina — Five Star Review: complete the shortened event cleanly; do not pull extra civilians.",
           "Positioning — keep enemies faced away and leave room for Fel effects.",
         },
         ["HEALER"] = {
-          "Bribed Captain / Bribed Guard — live cast list: use visible danger cues and stop assigned casts; exact late-PTR cast priority requires live verification.",
+          "Felonious Mage — [Fel Missiles]: interrupt the channel.",
+          "Seductive Sayaad — [Seduction]: interrupt or hard stop.",
+          "Felwyrm — [Fel Infused]: move away on death.",
+          "Bribed Captain — [Deep Corruption]: kill first; it buffs nearby enemies.",
+          "Massive Felwyrm — [Corroding Spittle]: magic dispel quickly.",
           "Cantina — Five Star Review: complete the shortened event cleanly; do not pull extra civilians.",
           "Positioning — keep enemies faced away and leave room for Fel effects.",
         },
         ["DPS"] = {
-          "Bribed Captain / Bribed Guard — live cast list: use visible danger cues and stop assigned casts; exact late-PTR cast priority requires live verification.",
+          "Felonious Mage — [Fel Missiles]: interrupt the channel.",
+          "Seductive Sayaad — [Seduction]: interrupt or hard stop.",
+          "Felwyrm — [Fel Infused]: move away on death.",
+          "Bribed Captain — [Deep Corruption]: kill first; it buffs nearby enemies.",
+          "Massive Felwyrm — [Corroding Spittle]: magic dispel quickly.",
           "Cantina — Five Star Review: complete the shortened event cleanly; do not pull extra civilians.",
           "Positioning — keep enemies faced away and leave room for Fel effects.",
         },
@@ -162,20 +204,39 @@ ns.RegisterDungeon({
           ["npcID"] = 236893,
           ["displayID"] = 136834,
         },
+        {
+          ["name"] = "Influential Reviewer",
+          ["npcID"] = nil,
+          ["displayID"] = nil,
+        },
+        {
+          ["name"] = "Keen Taskmaster",
+          ["npcID"] = 236897,
+          ["displayID"] = 136657,
+        },
       },
       ["roles"] = {
         ["TANK"] = {
-          "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
+          "Influential Reviewer — [Scathing Review]: interrupt or crowd control.",
+          "Warehouse Worker — [Sharp Nail]: random-target bleed.",
+          "Warehouse Worker — [Workplace Accident]: dodge the ground danger; workers no longer flee at 30%.",
+          "Keen Taskmaster — [Back to Work!]: soothe the worker enrage.",
           "Freight — do not destroy cover needed for Zaen's [Murder in a Row].",
           "[Heartstop Poison] — use dispel/personal support when encountered.",
         },
         ["HEALER"] = {
-          "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
+          "Influential Reviewer — [Scathing Review]: interrupt or crowd control.",
+          "Warehouse Worker — [Sharp Nail]: random-target bleed.",
+          "Warehouse Worker — [Workplace Accident]: dodge the ground danger; workers no longer flee at 30%.",
+          "Keen Taskmaster — [Back to Work!]: soothe the worker enrage.",
           "Freight — do not destroy cover needed for Zaen's [Murder in a Row].",
           "[Heartstop Poison] — use dispel/personal support when encountered.",
         },
         ["DPS"] = {
-          "Warehouse Worker — live cast list: interrupt or CC dangerous casts shown on live; workers no longer flee at 30%.",
+          "Influential Reviewer — [Scathing Review]: interrupt or crowd control.",
+          "Warehouse Worker — [Sharp Nail]: random-target bleed.",
+          "Warehouse Worker — [Workplace Accident]: dodge the ground danger; workers no longer flee at 30%.",
+          "Keen Taskmaster — [Back to Work!]: soothe the worker enrage.",
           "Freight — do not destroy cover needed for Zaen's [Murder in a Row].",
           "[Heartstop Poison] — use dispel/personal support when encountered.",
         },
@@ -190,19 +251,60 @@ ns.RegisterDungeon({
           ["npcID"] = 236905,
           ["displayID"] = 138787,
         },
+        {
+          ["name"] = "Unleashed Imp",
+          ["npcID"] = 234849,
+          ["displayID"] = 65901,
+        },
+        {
+          ["name"] = "Shivan Punisher",
+          ["npcID"] = 235465,
+          ["displayID"] = 76712,
+        },
+        {
+          ["name"] = "Wrathguard Flayer",
+          ["npcID"] = 235267,
+          ["displayID"] = 63968,
+        },
+        {
+          ["name"] = "Fel Invoker",
+          ["npcID"] = 235268,
+          ["displayID"] = 124770,
+        },
       },
       ["roles"] = {
         ["TANK"] = {
+          "Unleashed Imp — [Felfire Burst]: interrupt random-target damage.",
+          "Shivan Punisher — [Demonic Frenzy]: kill first below 50%.",
+          "Shivan Punisher — [Whirlwind]: leave melee range.",
+          "Wrathguard Flayer — [Fel Rage]: interrupt or soothe.",
+          "Fel Invoker — [Health Funnel]: interrupt the heal.",
           "Felmaster Lucsei — [Blade Dance]: priority stop or move clear; never stack avoidable damage into it.",
+          "Felmaster Lucsei — [Eye Beam]: dodge the frontal.",
           "Pack control — stagger stops and avoid pulling through unsafe ground.",
+          "A pre-Xathuux warlock pack was removed from the route.",
         },
         ["HEALER"] = {
+          "Unleashed Imp — [Felfire Burst]: interrupt random-target damage.",
+          "Shivan Punisher — [Demonic Frenzy]: kill first below 50%.",
+          "Shivan Punisher — [Whirlwind]: leave melee range.",
+          "Wrathguard Flayer — [Fel Rage]: interrupt or soothe.",
+          "Fel Invoker — [Health Funnel]: interrupt the heal.",
           "Felmaster Lucsei — [Blade Dance]: priority stop or move clear; never stack avoidable damage into it.",
+          "Felmaster Lucsei — [Eye Beam]: dodge the frontal.",
           "Pack control — stagger stops and avoid pulling through unsafe ground.",
+          "A pre-Xathuux warlock pack was removed from the route.",
         },
         ["DPS"] = {
+          "Unleashed Imp — [Felfire Burst]: interrupt random-target damage.",
+          "Shivan Punisher — [Demonic Frenzy]: kill first below 50%.",
+          "Shivan Punisher — [Whirlwind]: leave melee range.",
+          "Wrathguard Flayer — [Fel Rage]: interrupt or soothe.",
+          "Fel Invoker — [Health Funnel]: interrupt the heal.",
           "Felmaster Lucsei — [Blade Dance]: priority stop or move clear; never stack avoidable damage into it.",
+          "Felmaster Lucsei — [Eye Beam]: dodge the frontal.",
           "Pack control — stagger stops and avoid pulling through unsafe ground.",
+          "A pre-Xathuux warlock pack was removed from the route.",
         },
       },
     },
@@ -226,16 +328,19 @@ ns.RegisterDungeon({
           "Corrupted Warlock — [Curse of Doom]: highest interrupt priority.",
           "Corrupted Warlock — [Dark Pact]: interrupt or purge the defensive if it lands.",
           "Defiled Golem — [Defiled Slam]: leave the impact and use mitigation if targeted.",
+          "Defiled Golem — [Fel Beam]: dodge lines and lingering puddles.",
         },
         ["HEALER"] = {
           "Corrupted Warlock — [Curse of Doom]: highest interrupt priority.",
           "Corrupted Warlock — [Dark Pact]: interrupt or purge the defensive if it lands.",
           "Defiled Golem — [Defiled Slam]: leave the impact and use mitigation if targeted.",
+          "Defiled Golem — [Fel Beam]: dodge lines and lingering puddles.",
         },
         ["DPS"] = {
           "Corrupted Warlock — [Curse of Doom]: highest interrupt priority.",
           "Corrupted Warlock — [Dark Pact]: interrupt or purge the defensive if it lands.",
           "Defiled Golem — [Defiled Slam]: leave the impact and use mitigation if targeted.",
+          "Defiled Golem — [Fel Beam]: dodge lines and lingering puddles.",
         },
       },
     },
@@ -256,11 +361,14 @@ ns.RegisterDungeon({
         "Missed [Felstorm] interrupts or failed healing during [Destabilized] can end the pull.",
         "[Felstorm] overlaps [Destabilized].",
         "Slow swaps allow several Felstorms together.",
+        "Kystia Mirror Image — [Felstorm] must be stopped while group damage is high.",
+        "An undispelled [Corroding Spittle] during the image phase can overwhelm a player.",
+        "Uncontrolled images pulse lethal group damage.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
-            "Hold Kystia steady while the group drains Nibbles to 20%; keep her positioned away from Nibbles.",
+            "Stack Kystia with Nibbles; face Nibbles away from the group. Build mitigation for [Chaos Barrage] while the group drains Nibbles to 20% until friendly.",
             "Kick Mirror Image — [Felstorm]; both images must be stopped.",
           },
           ["avoid"] = {
@@ -268,7 +376,7 @@ ns.RegisterDungeon({
             "Move out after the [Fel Nova] teleport and avoid the knockback.",
           },
           ["defensive"] = {
-            "Mitigate [Chaos Barrage]; keep nearby players clear of the jump where positioning allows.",
+            "Mitigate [Chaos Barrage]; keep nearby players clear of the jump where positioning allows. Use a defensive if [Chaos Barrage] overlaps the mirror images.",
           },
           ["reminder"] = "Nibbles 20% > kick images twice > burst Kystia.",
         },
@@ -288,16 +396,19 @@ ns.RegisterDungeon({
         },
         ["DPS"] = {
           ["job"] = {
-            "Push Nibbles below 20% without wasting burst on Kystia's [Felshield], then swap to images and burst Kystia.",
+            "Push Nibbles below 20% until friendly, without wasting burst on Kystia's [Felshield], then swap to images and burst Kystia during [Destabilized].",
             "Mirror Image — [Felstorm]: assign one interrupt to each image; two interrupts required on Mythic/Mythic+.",
           },
           ["avoid"] = {
             "[Fel Nova] and [Fel Spray] — leave the cone and teleport impact.",
             "Melee save mobility.",
             "Ranged own far kicks.",
+            "Melee: stay behind Nibbles.",
+            "Ranged: keep room to move.",
           },
           ["defensive"] = {
             "Personal during [Destabilized] if images remain; otherwise commit offensive cooldowns during the 15-sec window.",
+            "Use a personal if targeted during images or [Chaos Barrage].",
           },
           ["reminder"] = "Nibbles 20% > kick images twice > burst boss.",
         },
@@ -322,13 +433,13 @@ ns.RegisterDungeon({
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
-            "Keep Zaen near safe Forbidden Freight.",
-            "Call [Envenom] and mitigate the tank hit; call for [Heartstop Poison] removal.",
+            "Keep Zaen clear of usable cover.",
+            "Call [Envenom] and mitigate the tank hit; remove [Heartstop Poison] yourself if able, otherwise call for removal.",
             "Re-engage cleanly after the [Killing Spree] cover sequence; keep Zaen positioned away from the group.",
           },
           ["avoid"] = {
             "Hide behind intact freight for [Murder in a Row] at 100 energy.",
-            "Keep [Fire Bomb] away from planned cover.",
+            "Keep [Fire Bomb] away from planned cover; do not stand near Fire Bomb targets or volatile freight.",
           },
           ["defensive"] = {
             "Major defensive for [Envenom] while maximum health is reduced.",
@@ -337,7 +448,7 @@ ns.RegisterDungeon({
         },
         ["HEALER"] = {
           ["job"] = {
-            "Track [Envenom] and [Heartstop Poison]; dispel promptly when supported, otherwise commit focused healing.",
+            "Track [Envenom] and [Heartstop Poison] from the tank; dispel promptly when supported, otherwise commit focused healing.",
             "Reach cover early; keep line-of-sight considerations in mind.",
             "Top the group before [Killing Spree] and use a cooldown if players are uneven; stabilise the tank after.",
           },
@@ -381,6 +492,8 @@ ns.RegisterDungeon({
         "[Demonic Rage] plus [Burning Steps] punishes poor spacing and late defensives.",
         "[Legion Strike] hits the group and applies 80% healing reduction.",
         "A Strike clip applies 80% healing reduction for 12 seconds; several players taking it becomes difficult to heal.",
+        "Poor [Demonic Rage] movement fills the arena and removes safe space.",
+        "A living Legion Axe deals escalating [Fel Lightning] damage to the group — kill axes quickly.",
       },
       ["roles"] = {
         ["TANK"] = {
@@ -388,20 +501,23 @@ ns.RegisterDungeon({
             "Face [Legion Strike] away and use active mitigation.",
             "Edge-kite [Demonic Rage]; keep control of boss position during the damage spike.",
             "[Burning Steps] last 120 seconds on PTR — move deliberately and preserve safe floor.",
+            "Bring the boss onto each Legion Axe.",
           },
           ["avoid"] = {
             "[Axe Toss], persistent axe zones and pointing [Legion Strike] at allies.",
+            "Move from Burning Steps and keep [Infernal Crush] away from allies.",
           },
           ["defensive"] = {
             "Mitigate [Legion Strike].",
             "Major defensive for Rage's faster melees.",
+            "Mitigate the [Infernal Crush] plus [Demonic Rage] overlap.",
           },
           ["reminder"] = "Front away > edge-kite Rage > preserve room.",
         },
         ["HEALER"] = {
           ["job"] = {
             "Pre-heal the tank before [Legion Strike] and watch for overlap with avoidable damage.",
-            "Prepare for [Demonic Rage].",
+            "Prepare major healing for [Infernal Crush] and [Demonic Rage].",
             "Keep moving and heal without standing in [Burning Steps]; do not cast from unsafe ground.",
           },
           ["avoid"] = {
@@ -424,6 +540,7 @@ ns.RegisterDungeon({
           },
           ["defensive"] = {
             "Personal during [Demonic Rage]; keep dealing damage if safe.",
+            "Use a personal for [Infernal Crush] overlapping [Demonic Rage].",
           },
           ["reminder"] = "Behind boss > dodge axe > burst Rage.",
         },
@@ -444,6 +561,7 @@ ns.RegisterDungeon({
         "Missing the gateway or leaving empowered demons alive can overwhelm the group.",
         "Surviving demons gain 100% haste if the boss tunnels through the gateway.",
         "Missed gateway or empowered demons create lethal pressure.",
+        "Adds touched by [Malefic Wave] gain [Malefic Empowerment].",
       },
       ["roles"] = {
         ["TANK"] = {
@@ -452,9 +570,11 @@ ns.RegisterDungeon({
             "Help kick [Chaos Bolt] when assigned; do not turn the boss unpredictably.",
             "Kill adds before [Malefic Wave].",
             "Use the gateway promptly, then re-establish boss position.",
+            "Kite the unkillable Summoned Infernal and pick up Furious Vilefiend.",
+            "Keep both gateway ends clear.",
           },
           ["avoid"] = {
-            "Spread 6+ yards for [Fingers of the Legion] without dragging the boss through allies.",
+            "Spread 6+ yards for [Fingers of Gul'dan], which now prefers non-tanks, targets 4 players and summons 4 Wild Imps, without dragging the boss through allies.",
             "Keep Infernal aura away.",
           },
           ["defensive"] = {
@@ -466,12 +586,12 @@ ns.RegisterDungeon({
           ["job"] = {
             "Pre-position by the gateway.",
             "Track add damage and help control empowered demons during pressure.",
-            "Top before crossing; heal lingering Fire damage after.",
+            "Top before crossing; heal constant [Searing Fel Flame].",
             "Prepare a spot heal if [Chaos Bolt] lands.",
             "Take the gateway immediately while maintaining healing range.",
           },
           ["avoid"] = {
-            "Spread 6+ yards.",
+            "Spread 6+ yards for [Fingers of Gul'dan], which now prefers non-tanks, targets 4 players and summons 4 Wild Imps.",
             "Avoid Infernal aura.",
           },
           ["cooldowns"] = {
@@ -481,13 +601,13 @@ ns.RegisterDungeon({
         },
         ["DPS"] = {
           ["job"] = {
-            "Kill Imps, Vilefiend and Infernal before the wave.",
+            "Kill Furious Vilefiend and Wild Imps before [Malefic Wave].",
             "Hard swap onto summoned demons and cleave; prioritise empowered demons.",
             "[Chaos Bolt]: maintain an interrupt rotation; adds before boss for cleave priority.",
             "Pre-position for the gateway; take it immediately.",
           },
           ["avoid"] = {
-            "Spread at least 6 yd for [Fingers of the Legion] and avoid clipping allies.",
+            "Spread at least 6 yd for [Fingers of Gul'dan], which now prefers non-tanks, targets 4 players and summons 4 Wild Imps, and avoid clipping allies.",
             "Melee avoid Infernal aura.",
           },
           ["defensive"] = {

@@ -7,7 +7,7 @@ ns.RegisterDungeon({
   ["slug"] = "the-blinding-vale",
   ["season"] = "midnight-s2",
   ["patch"] = "12.1.0",
-  ["sourceVersion"] = "0.10",
+  ["sourceVersion"] = "0.11",
   ["instanceID"] = nil,
   ["mdtRoutes"] = {
     {
@@ -17,21 +17,29 @@ ns.RegisterDungeon({
   },
   ["quicksheet"] = {
     ["trash"] = {
-      ["TANK"] = "INTERRUPT: Radiant Spellsower — [Frantic Blooming]; Lightwarden Ruia — [Warden's Wrath].; MITIGATE: Luminous Thornmaw — [Grievous Gash]; Virid Grovekeeper — [Earthrupture Strike].; POSITION: Luminous Thornmaw — [Solar Breath]; Sporeblight Belcher — [Lightwarden's Blight].",
-      ["HEALER"] = "HEAL: Sporeblight Belcher — [Spouting Floret]; Potatoad Matriarch — [Toxic Spew].; TOP TO FULL: Luminous Thornmaw — [Grievous Gash]; Lightwarden Ruia — [Grievous Thrash].; MOVE: Virid Grovekeeper — [Uproot]; Overgrown Hydra — [Lightmaw Beams].; LIVE CHECK: Bloodthorn Roots dispel type and final tuning.",
-      ["DPS"] = "INTERRUPT: Radiant Spellsower — [Frantic Blooming]; Lightwarden Ruia — [Warden's Wrath].; STOP DAMAGE: Spineshield Beetle — [Spiny Shield] reflects attacks.; KILL FIRST: Pollinating Lashers, roots, Potadpole eggs and boss shields.; MOVE: Thorny Saptor — [Hunting Leap]; Overgrown Hydra — [Lightmaw Beams].",
-      ["ROUTE"] = "Current PTR left path; final placement requires live verification.",
+      ["TANK"] = "INTERRUPT: Radiant Spellsower — [Light Bolt Volley]; Lightwarden Ruia — [Warden's Wrath].; MITIGATE: Luminous Thornmaw — [Grievous Gash]; Virid Grovekeeper — [Earthrupture Strike].; POSITION: Luminous Thornmaw — [Solar Breath]; Sporeblight Belcher — [Lightwarden's Blight].",
+      ["HEALER"] = "HEAL: Sporeblight Belcher — [Spouting Floret]; Potatoad Matriarch — [Toxic Spew].; TOP TO FULL: Luminous Thornmaw — [Grievous Gash]; Lightwarden Ruia — [Grievous Thrash].; MOVE: Virid Grovekeeper — [Earthrupture Strike]; Overgrown Hydra — [Lightmaw Beams].; DISPEL: Potatoad Matriarch — [Toxic Spew] poison; Ikuzz — Bloodthorn Roots magic.",
+      ["DPS"] = "INTERRUPT: Radiant Spellsower — [Light Bolt Volley]; Lightwarden Ruia — [Warden's Wrath].; STOP DAMAGE: Spineshield Beetle — [Spiny Shield] reflects attacks.; KILL FIRST: Pollinating Lashers, roots, Potadpole eggs and boss shields.; MOVE: Thorny Saptor — [Hunting Leap]; Overgrown Hydra — [Lightmaw Beams].",
+      ["ROUTE"] = "Current left path; final placement requires live verification.",
     },
   },
   ["overview"] = {
     ["interrupts"] = {
       {
-        ["spell"] = "Frantic Blooming",
+        ["spell"] = "Light Bolt Volley",
         ["note"] = "Radiant Spellsower — must stop",
       },
       {
         ["spell"] = "Warden's Wrath",
         ["note"] = "Lightwarden Ruia — must stop",
+      },
+      {
+        ["spell"] = "Disorienting Screech",
+        ["note"] = "Lightfeather Petalwing — must stop",
+      },
+      {
+        ["spell"] = "Lightspore Shot",
+        ["note"] = "Lightspawn Lasher — must stop",
       },
     },
     ["killPriority"] = {
@@ -54,7 +62,7 @@ ns.RegisterDungeon({
     },
     ["healer"] = {
       ["dispels"] = {
-        "Bloodthorn Roots dispel type and final tuning need live confirmation.",
+        "Dispel priority: Potatoad Matriarch — [Toxic Spew] — poison; Ikuzz — Bloodthorn Roots — magic.",
       },
       ["pressure"] = {
         "Heal first: [Spouting Floret], [Bedrock Surge], [Lightcrazed Frenzy], [Grievous Thrash] and [Oozing Xylem].",
@@ -63,7 +71,7 @@ ns.RegisterDungeon({
       },
       ["pullWarnings"] = {
         "[Toxic Spew] plus [Spouting Floret] can create a dangerous party-damage overlap.",
-        "Move for Virid Grovekeeper — [Uproot] and Overgrown Hydra — [Lightmaw Beams].",
+        "Move for Virid Grovekeeper — [Earthrupture Strike] and Overgrown Hydra — [Lightmaw Beams].",
       },
     },
     ["dps"] = {
@@ -80,13 +88,18 @@ ns.RegisterDungeon({
       },
     },
     ["tip"] = {
-      "Tank: Use the current left-path PTR route; keep death pools and frontals away from the party.",
+      "Tank: Use the left path; keep death pools and frontals away from the party.",
       "Healer: Pre-position for beam mechanics so movement does not interrupt recovery healing.",
       "DPS: Save personals for scheduled party damage; do not spend them after the hit.",
       "Timer: 31 minutes, reduced from 33 minutes in the 28 July PTR update.",
       "Tuning: Lightblossom Trinity and Lightwarden Ruia boss health are both 10% lower; Trinity's [Thornblade] bleed now lasts 12 sec.",
-      "Version 0.10, review and verified 9 August 2026 against Blizzard PTR updates and release schedule, Wowhead, Icy Veins, Warcraft Wiki and the current PTR community guide.",
-      "Requires live verification after Patch 12.1: final tuning, pack placement and Bloodthorn Roots dispel type.",
+      "Opening fork: either Lightblossom Trinity or Ikuzz can be pulled first; both must die before the flight to Ruia.",
+      "Enemy Forces: 686 total after the 9 September hotfix; Potatoad Matriarch contributes 60 of that total and has 10% less health.",
+      "Lindormi's Guidance, at keystone levels 2-5, marks selected route enemies and reduces their health and damage by 5%.",
+      "Left-path utility: Paladin, Priest or 25-point Midnight Herbalist can grant 20% speed and 5% haste for 2 minutes.",
+      "The final area before Ziekket has lower creature density and no Radiant Spellsower pull.",
+      "Version 0.11, reviewed and verified 12 September 2026 against Blizzard hotfixes through 10 September, Blizzard patch notes, Wowhead, Method, Icy Veins and live community route data. Biggest live change: Ziekket's Lasher mechanic reworked from bring-to-1%-Dormant to kill-and-beam-the-corpses.",
+      "Bloodthorn Roots dispel type is confirmed (magic). Pack placement for the newly-reported opening-pull trash merge still needs live route confirmation before this file's trashSegments are restructured further.",
     },
   },
   ["trashSegments"] = {
@@ -109,22 +122,33 @@ ns.RegisterDungeon({
           ["npcID"] = 254850,
           ["displayID"] = 126462,
         },
+        {
+          ["name"] = "Lightgorged Lasher",
+          ["npcID"] = 245345,
+          ["displayID"] = 125875,
+        },
       },
       ["roles"] = {
         ["TANK"] = {
-          "Radiant Spellsower — [Frantic Blooming]: Stop the 8 sec channel before dormant Lashers awaken.",
-          "Virid Grovekeeper — [Uproot]: Move out before the roots erupt and knock back.",
+          "Radiant Spellsower — [Light Bolt Volley]: Interrupt every cast; stop or kill it before it reaches dormant Lashers.",
+          "Radiant Spellsower — [Call The Grove]: Use crowd control and focus damage to prevent extra Lashers.",
+          "Virid Grovekeeper — [Earthrupture Strike]: Tank defensively and place the puddle away from the group.",
           "Sporeblight Belcher — [Spouting Floret]: Prepare for repeated party damage.",
+          "Lightgorged Lasher — [Lightbloom Pollination]: Break the shield immediately, before nearby enemies gain 50% damage and haste.",
         },
         ["HEALER"] = {
-          "Radiant Spellsower — [Frantic Blooming]: Stop the 8 sec channel before dormant Lashers awaken.",
-          "Virid Grovekeeper — [Uproot]: Move out before the roots erupt and knock back.",
+          "Radiant Spellsower — [Light Bolt Volley]: Interrupt every cast; stop or kill it before it reaches dormant Lashers.",
+          "Radiant Spellsower — [Call The Grove]: Use crowd control and focus damage to prevent extra Lashers.",
+          "Virid Grovekeeper — [Earthrupture Strike]: Tank defensively and place the puddle away from the group.",
           "Sporeblight Belcher — [Spouting Floret]: Prepare for repeated party damage.",
+          "Lightgorged Lasher — [Lightbloom Pollination]: Break the shield immediately, before nearby enemies gain 50% damage and haste.",
         },
         ["DPS"] = {
-          "Radiant Spellsower — [Frantic Blooming]: Stop the 8 sec channel before dormant Lashers awaken.",
-          "Virid Grovekeeper — [Uproot]: Move out before the roots erupt and knock back.",
+          "Radiant Spellsower — [Light Bolt Volley]: Interrupt every cast; stop or kill it before it reaches dormant Lashers.",
+          "Radiant Spellsower — [Call The Grove]: Use crowd control and focus damage to prevent extra Lashers.",
+          "Virid Grovekeeper — [Earthrupture Strike]: Tank defensively and place the puddle away from the group.",
           "Sporeblight Belcher — [Spouting Floret]: Prepare for repeated party damage.",
+          "Lightgorged Lasher — [Lightbloom Pollination]: Break the shield immediately, before nearby enemies gain 50% damage and haste.",
         },
       },
     },
@@ -147,22 +171,30 @@ ns.RegisterDungeon({
           ["npcID"] = 245527,
           ["displayID"] = 110392,
         },
+        {
+          ["name"] = "Lightfeather Petalwing",
+          ["npcID"] = 245484,
+          ["displayID"] = 136758,
+        },
       },
       ["roles"] = {
         ["TANK"] = {
-          "Underbrush Stalker — [Thornblade]: Watch the backstab and 6 sec bleed.",
+          "Underbrush Stalker — [Thornblade]: Use a defensive or bleed removal; avoid stacking these enemies.",
           "Thorny Saptor — [Hunting Leap]: Sidestep the fixed channel path; it should no longer turn during the cast.",
           "Spineshield Beetle — [Spiny Shield]: Stop attacking into the reflect; break the absorb.",
+          "Lightfeather Petalwing — [Disorienting Screech]: Interrupt every cast.",
         },
         ["HEALER"] = {
-          "Underbrush Stalker — [Thornblade]: Watch the backstab and 6 sec bleed.",
+          "Underbrush Stalker — [Thornblade]: Use a defensive or bleed removal; avoid stacking these enemies.",
           "Thorny Saptor — [Hunting Leap]: Sidestep the fixed channel path; it should no longer turn during the cast.",
           "Spineshield Beetle — [Spiny Shield]: Stop attacking into the reflect; break the absorb.",
+          "Lightfeather Petalwing — [Disorienting Screech]: Interrupt every cast.",
         },
         ["DPS"] = {
-          "Underbrush Stalker — [Thornblade]: Watch the backstab and 6 sec bleed.",
+          "Underbrush Stalker — [Thornblade]: Use a defensive or bleed removal; avoid stacking these enemies.",
           "Thorny Saptor — [Hunting Leap]: Sidestep the fixed channel path; it should no longer turn during the cast.",
           "Spineshield Beetle — [Spiny Shield]: Stop attacking into the reflect; break the absorb.",
+          "Lightfeather Petalwing — [Disorienting Screech]: Interrupt every cast.",
         },
       },
     },
@@ -180,27 +212,22 @@ ns.RegisterDungeon({
           ["npcID"] = 245513,
           ["displayID"] = 142839,
         },
-        {
-          ["name"] = "Lightgorged Lasher",
-          ["npcID"] = 245345,
-          ["displayID"] = 125875,
-        },
       },
       ["roles"] = {
         ["TANK"] = {
           "Luminous Thornmaw — [Grievous Gash]: Clear the tank bleed by reaching full health.",
+          "Luminous Thornmaw — [Solar Breath]: Move out of the random-target frontal.",
           "Overgrown Hydra — [Lightmaw Beams]: Spread and keep moving out of the 4 yd beams.",
-          "Lightgorged Lasher — [Lightboom Pollination]: Break the shield before nearby enemies gain 50% damage and haste.",
         },
         ["HEALER"] = {
           "Luminous Thornmaw — [Grievous Gash]: Clear the tank bleed by reaching full health.",
+          "Luminous Thornmaw — [Solar Breath]: Move out of the random-target frontal.",
           "Overgrown Hydra — [Lightmaw Beams]: Spread and keep moving out of the 4 yd beams.",
-          "Lightgorged Lasher — [Lightboom Pollination]: Break the shield before nearby enemies gain 50% damage and haste.",
         },
         ["DPS"] = {
           "Luminous Thornmaw — [Grievous Gash]: Clear the tank bleed by reaching full health.",
+          "Luminous Thornmaw — [Solar Breath]: Move out of the random-target frontal.",
           "Overgrown Hydra — [Lightmaw Beams]: Spread and keep moving out of the 4 yd beams.",
-          "Lightgorged Lasher — [Lightboom Pollination]: Break the shield before nearby enemies gain 50% damage and haste.",
         },
       },
     },
@@ -218,22 +245,41 @@ ns.RegisterDungeon({
           ["npcID"] = 254850,
           ["displayID"] = 126462,
         },
+        {
+          ["name"] = "Newborn Potadpole",
+          ["npcID"] = 250202,
+          ["displayID"] = 131772,
+        },
+        {
+          ["name"] = "Overgrown Hydra",
+          ["npcID"] = 245513,
+          ["displayID"] = 142839,
+        },
       },
       ["roles"] = {
         ["TANK"] = {
           "Potatoad Matriarch — [Toxic Spew]: Prepare for party damage and a 9 sec toxin.",
-          "Potatoad Matriarch — [Toadspawn]: Kill eggs and newborn Potadpoles quickly.",
+          "Potatoad Matriarch — [Tongue Toss]: Tank faces safely and avoids a dangerous launch path.",
+          "Potatoad Matriarch — [Toadspawn]: Kill all three eggs before they hatch.",
+          "Newborn Potadpole — [Potad-Toss]: Brace for a random hit and push.",
           "Sporeblight Belcher — [Belch Spores]: Move from every impact during the channel.",
+          "Overgrown Hydra — [Bullet Seeds]: Dodge every ground line.",
         },
         ["HEALER"] = {
           "Potatoad Matriarch — [Toxic Spew]: Prepare for party damage and a 9 sec toxin.",
-          "Potatoad Matriarch — [Toadspawn]: Kill eggs and newborn Potadpoles quickly.",
+          "Potatoad Matriarch — [Tongue Toss]: Tank faces safely and avoids a dangerous launch path.",
+          "Potatoad Matriarch — [Toadspawn]: Kill all three eggs before they hatch.",
+          "Newborn Potadpole — [Potad-Toss]: Brace for a random hit and push.",
           "Sporeblight Belcher — [Belch Spores]: Move from every impact during the channel.",
+          "Overgrown Hydra — [Bullet Seeds]: Dodge every ground line.",
         },
         ["DPS"] = {
           "Potatoad Matriarch — [Toxic Spew]: Prepare for party damage and a 9 sec toxin.",
-          "Potatoad Matriarch — [Toadspawn]: Kill eggs and newborn Potadpoles quickly.",
+          "Potatoad Matriarch — [Tongue Toss]: Tank faces safely and avoids a dangerous launch path.",
+          "Potatoad Matriarch — [Toadspawn]: Kill all three eggs before they hatch.",
+          "Newborn Potadpole — [Potad-Toss]: Brace for a random hit and push.",
           "Sporeblight Belcher — [Belch Spores]: Move from every impact during the channel.",
+          "Overgrown Hydra — [Bullet Seeds]: Dodge every ground line.",
         },
       },
     },
@@ -242,9 +288,9 @@ ns.RegisterDungeon({
     {
       ["name"] = "Lightblossom Trinity",
       ["sheet"] = {
-        ["TANK"] = "Steady bosses, mitigate Slam, block the beam.",
-        ["HEALER"] = "Heal Surge, support the bleed, protect the soak.",
-        ["DPS"] = "Kick [Light Bolt]; dodge plants; block beam.",
+        ["TANK"] = "Stack bosses, soak flowers, move off scorched ground.",
+        ["HEALER"] = "Pre-heal Slam, cover the bleed, protect each soak.",
+        ["DPS"] = "Spread, kick Light Bolt, soak the flower, dodge Dash.",
         ["WIPE"] = "Block [Lightblossom Beam]; Light-Gorged becomes Overgrowth after 10 sec.",
       },
       ["encounterID"] = nil,
@@ -256,53 +302,57 @@ ns.RegisterDungeon({
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
-            "Keep the trio steady for cleave.",
-            "Point movement away.",
-            "Assign the beam intercept.",
+            "Stack the trio for cleave.",
+            "Use active mitigation for [Bedrock Slam].",
+            "Reposition after the soak.",
           },
           ["avoid"] = {
             "[Fertile Loam], seed impacts and [Fan of Thorns] within 15 yd.",
+            "Dodge [Lightsower Dash] line attacks.",
           },
           ["defensive"] = {
             "Mitigate [Bedrock Slam].",
             "Use a personal during [Bedrock Surge] overlaps.",
           },
-          ["reminder"] = "Steady bosses, mitigate Slam, block the beam.",
+          ["reminder"] = "Stack bosses, soak flowers, move off scorched ground.",
         },
         ["HEALER"] = {
           ["job"] = {
-            "Stabilise shared-health pressure and protect the assigned beam interceptor.",
+            "Stabilise [Bedrock Surge] and protect the assigned flower soakers.",
             "[Bedrock Surge] pulses for 8 sec; recover the stronger 12 sec [Thornblade] bleed.",
           },
           ["avoid"] = {
             "[Fertile Loam], seeds, [Fan of Thorns] and unassigned beam contact.",
+            "Spread for Thornblade before the jump.",
           },
           ["cooldowns"] = {
             "Use a group cooldown for a poor [Bedrock Surge] overlap.",
+            "Spot-heal and use bleed removal for the stronger 12 sec [Thornblade] bleed when available.",
           },
-          ["reminder"] = "Heal Surge, support the bleed, protect the soak.",
+          ["reminder"] = "Pre-heal Slam, cover the bleed, protect each soak.",
         },
         ["DPS"] = {
           ["job"] = {
-            "Cleave the shared health pool and execute the assigned beam intercept.",
-            "Priority: Kezkitt — [Light Bolt]; beam intercept before damage.",
+            "Maintain spread and execute the assigned flower soak.",
+            "Priority: Kezkitt — [Light Bolt]; soak the flower before damage greed.",
           },
           ["avoid"] = {
-            "[Fertile Loam], seeds, Dash lanes and [Fan of Thorns].",
+            "[Fertile Loam], seeds, [Lightsower Dash] and [Fan of Thorns].",
+            "Spread before the jump.",
           },
           ["defensive"] = {
             "Use a personal during [Bedrock Surge] or while intercepting; respect the stronger 12 sec [Thornblade] bleed.",
           },
-          ["reminder"] = "Kick [Light Bolt], dodge plants, block the beam.",
+          ["reminder"] = "Spread, kick Light Bolt, soak the flower, dodge Dash.",
         },
       },
     },
     {
       ["name"] = "Ikuzz the Light Hunter",
       ["sheet"] = {
-        ["TANK"] = "Clear roots, open the lane, never let Ikuzz connect.",
-        ["HEALER"] = "Pre-heal, support the kite, avoid Footfalls.",
-        ["DPS"] = "Open lane; kite Gaze; avoid Footfalls.",
+        ["TANK"] = "Clear roots, open the lane, never block the kite.",
+        ["HEALER"] = "Dispel roots, pre-heal Roar, protect the fixate target.",
+        ["DPS"] = "Kill roots, stay wide, kite cleanly, never get caught.",
         ["WIPE"] = "If Ikuzz catches the fixate, [Incise] and [Crunched] add a bleed and 5 sec stun.",
       },
       ["encounterID"] = nil,
@@ -311,12 +361,13 @@ ns.RegisterDungeon({
       ["wipe"] = {
         "If Ikuzz catches the fixate, [Incise] and [Crunched] add a bleed and 5 sec stun.",
         "A trapped or caught Gaze target can die during [Crunched].",
+        "[Bloodthirsty Gaze] contact causes massive damage and a 5 sec stun; kite through roots and never block the lane.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
             "Keep roots out of the kite lane.",
-            "Use [Crushing Footfalls] to destroy them.",
+            "Keep Ikuzz near roots for cleave and leave a clean [Bloodthirsty Gaze] lane.",
           },
           ["avoid"] = {
             "Standing within 7 yd during [Bloodthirsty Gaze].",
@@ -325,22 +376,23 @@ ns.RegisterDungeon({
           ["defensive"] = {
             "Use a personal for [Lightcrazed Frenzy] or a bad [Verdant Stomp] recovery.",
           },
-          ["reminder"] = "Clear roots, open the lane, never let Ikuzz connect.",
+          ["reminder"] = "Clear roots, open the lane, never block the kite.",
         },
         ["HEALER"] = {
           ["job"] = {
             "Support the Gaze target and pre-heal [Thorncaller Roar] and Frenzy.",
             "[Lightcrazed Frenzy] pulses; a caught target is stunned for 5 sec.",
+            "Magic-dispel Bloodthorn Roots when safe.",
           },
           ["avoid"] = {
             "[Verdant Stomp] roots after 4 sec on Mythic.",
-            "Avoid [Crushing Footfalls].",
+            "Avoid [Crushing Footfalls] and the kite lane.",
           },
           ["cooldowns"] = {
             "Plan a group cooldown for Frenzy.",
             "External a trapped fixate target.",
           },
-          ["reminder"] = "Pre-heal, support the kite, avoid Footfalls.",
+          ["reminder"] = "Dispel roots, pre-heal Roar, protect the fixate target.",
         },
         ["DPS"] = {
           ["job"] = {
@@ -354,7 +406,7 @@ ns.RegisterDungeon({
           ["defensive"] = {
             "Use a personal during Frenzy or when targeted by Gaze.",
           },
-          ["reminder"] = "Open the lane, kite Gaze, avoid Footfalls.",
+          ["reminder"] = "Kill roots, stay wide, kite cleanly, never get caught.",
         },
       },
     },
@@ -364,13 +416,13 @@ ns.RegisterDungeon({
         ["TANK"] = "Kick Wrath, walk the cones, let the healer top.",
         ["HEALER"] = "Top to full, move for [Lightfire], cooldown below 40%.",
         ["DPS"] = "Kick Wrath; place beams wide; clean below 40%.",
-        ["WIPE"] = "[Grievous Thrash] clears only at full health; [Lightfire] damages and silences.",
+        ["WIPE"] = "[Grievous Thrash] clears only at full health; overlapping [Lightfire] beams damage, silence and trap.",
       },
       ["encounterID"] = nil,
       ["npcID"] = 245912,
       ["displayID"] = 129856,
       ["wipe"] = {
-        "[Grievous Thrash] clears only at full health; [Lightfire] damages and silences.",
+        "[Grievous Thrash] clears only at full health; overlapping [Lightfire] beams damage, silence and trap.",
         "Multiple uncleared [Grievous Thrash] bleeds quickly snowball.",
         "Missed [Warden's Wrath] overwhelms the healer.",
       },
@@ -383,10 +435,13 @@ ns.RegisterDungeon({
           },
           ["avoid"] = {
             "Leave [Lightfire] before it forms; non-creators inside are hit immediately on creation.",
+            "[Pulverizing Strikes]: targeted cones.",
+            "[Lightfall]: ground damage.",
           },
           ["defensive"] = {
             "Rotate mitigation through [Pulverizing Strikes].",
             "Major personal below 40%.",
+            "[Mangling Claws]: sustained tank pressure; use strong mitigation in bear form.",
           },
           ["reminder"] = "Kick Wrath, walk the cones, let the healer top.",
         },
@@ -398,6 +453,7 @@ ns.RegisterDungeon({
           },
           ["avoid"] = {
             "Leave [Lightfire] before it forms; non-creators inside are hit immediately on creation.",
+            "Avoid [Lightfall].",
           },
           ["cooldowns"] = {
             "Save a group cooldown for the sub-40% sequence.",
@@ -411,6 +467,7 @@ ns.RegisterDungeon({
           },
           ["avoid"] = {
             "Leave [Lightfire] before it forms; non-creators inside are hit immediately on creation.",
+            "Separate [Pulverizing Strikes] targeted cones.",
           },
           ["defensive"] = {
             "Use a personal below 40% or while waiting to be topped.",
@@ -422,9 +479,9 @@ ns.RegisterDungeon({
     {
       ["name"] = "Ziekket",
       ["sheet"] = {
-        ["TANK"] = "Beam Lashers, manage orbs, brace for [Thornspike].",
-        ["HEALER"] = "Heal the pulse, watch orb stacks, protect [Thornspike].",
-        ["DPS"] = "Dormant at 1%; beam Lashers; catch assigned orbs.",
+        ["TANK"] = "Group adds, beam corpses, manage orbs, brace for [Thornspike].",
+        ["HEALER"] = "Heal the pulse, watch orb stacks, keep the beam lane clear.",
+        ["DPS"] = "Kick adds, kill them, beam corpses, soak assigned orbs.",
         ["WIPE"] = "Essence reaching Ziekket triggers [Fluorescent Outburst], shield and damage gain.",
       },
       ["encounterID"] = nil,
@@ -433,26 +490,27 @@ ns.RegisterDungeon({
       ["wipe"] = {
         "Essence reaching Ziekket triggers [Fluorescent Outburst], shield and damage gain.",
         "Uncaught Essence empowers Ziekket; excessive stacks can kill the interceptor.",
+        "[Lightbloom's Essence]: missed orbs shield the boss and damage the group; never let them reach the boss.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
-            "Aim [Concentrated Lightbeam] through dormant Lashers.",
-            "Control boss and orb lanes.",
+            "Group Lashers and aim [Concentrated Lightbeam] through the corpses.",
+            "Control puddle placement.",
           },
           ["avoid"] = {
             "Lightsap puddles and unassigned Essence orbs.",
           },
           ["defensive"] = {
-            "Mitigate [Thornspike] and its bleed.",
+            "Mitigate [Thornspike], which hits, knocks back and applies a bleed.",
             "Personal during [Oozing Xylem].",
           },
-          ["reminder"] = "Beam Lashers, manage orbs, brace for [Thornspike].",
+          ["reminder"] = "Group adds, beam corpses, manage orbs, brace for [Thornspike].",
         },
         ["HEALER"] = {
           ["job"] = {
             "Heal [Oozing Xylem] and support assigned Essence interceptors.",
-            "Each orb grants 10% output but adds a stacking 12 sec self-DoT.",
+            "Each orb grants 10% output but adds a stacking 12 sec self-DoT; periodic damage is 25% lower than launch tuning.",
           },
           ["avoid"] = {
             "Lightsap puddles, unassigned orbs and the beam lane.",
@@ -460,12 +518,12 @@ ns.RegisterDungeon({
           ["cooldowns"] = {
             "Plan group healing for Xylem with orb DoTs active.",
           },
-          ["reminder"] = "Heal the pulse, watch orb stacks, protect [Thornspike].",
+          ["reminder"] = "Heal the pulse, watch orb stacks, keep the beam lane clear.",
         },
         ["DPS"] = {
           ["job"] = {
-            "Bring Lashers to 1% Dormant, beam through them and intercept assigned orbs.",
-            "Priority: Dormant Lasher setup; break Ziekket's shield if an orb reaches him.",
+            "Interrupt [Lightspore Shot], kill Lashers and aim the targeted beam through corpses.",
+            "Priority: kill Lightspawn Lashers and break Ziekket's shield if an orb reaches him.",
           },
           ["avoid"] = {
             "Lightsap puddles, unassigned orbs and the beam lane.",
@@ -473,7 +531,14 @@ ns.RegisterDungeon({
           ["defensive"] = {
             "Use a personal during Xylem or with multiple orb stacks.",
           },
-          ["reminder"] = "Dormant at 1%, beam Lashers, catch assigned orbs.",
+          ["reminder"] = "Kick adds, kill them, beam corpses, soak assigned orbs.",
+        },
+      },
+      ["adds"] = {
+        {
+          ["name"] = "Lightspawn Lasher",
+          ["npcID"] = 247755,
+          ["displayID"] = 131589,
         },
       },
     },

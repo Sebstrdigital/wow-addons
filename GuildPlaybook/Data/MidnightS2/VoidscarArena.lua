@@ -7,7 +7,7 @@ ns.RegisterDungeon({
   ["slug"] = "voidscar-arena",
   ["season"] = "midnight-s2",
   ["patch"] = "12.1.0",
-  ["sourceVersion"] = "0.10",
+  ["sourceVersion"] = "0.12",
   ["instanceID"] = nil,
   ["mdtRoutes"] = {
     {
@@ -17,29 +17,49 @@ ns.RegisterDungeon({
   },
   ["quicksheet"] = {
     ["trash"] = {
-      ["TANK"] = "Raj'kess the Spellstorm — [Thundering Storm]: Hold the pack steady; leave room for targeted strikes.; Watchful Harrower — Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss.; Devouring Brutalizer — [Devour]: Protect and help free the target before the cast completes.; Brutal Overseer — [Brutal Slam]: Mitigate the tank hit and DoT.",
-      ["HEALER"] = "Raj'kess the Spellstorm — [Thundering Storm]: Prepare spot healing for targeted strikes.; Watchful Harrower — Live Verification: Expect a long, high-pressure miniboss pull.; Devouring Brutalizer — [Devour]: Keep the target stable while the group breaks it free.; Brutal Overseer — [Brutal Slam]: Prepare focused tank healing for the hit and DoT.",
-      ["DPS"] = "Raj'kess the Spellstorm — [Orb of Disruption]: Kill immediately before [Disrupting Blast].; Watchful Harrower — Live Verification: Commit priority damage to shorten the pull.; Devouring Brutalizer — [Devour]: Swap immediately and free the target.; Brutal Overseer — [Brutal Slam]: Use a personal if other damage overlaps.",
-      ["ROUTE"] = "Opening miniboss choice > Taz'Rah > Watchful Harrower section > Atroxus > Domanaar lieutenants > Charonus.",
+      ["TANK"] = "Raj'kess the Spellstorm — [Thundering Storm]: Hold the pack steady; leave room for targeted strikes.; Watchful Harrower — [Sky Strike]: Join the soak, then move out.; Devouring Brutalizer — [Devour]: Kill its low-health enemy target before the cast ends.; Brutal Overseer — [Brutal Slams]: Hold the enemy steady while DPS break the shield.",
+      ["HEALER"] = "Raj'kess the Spellstorm — [Thundering Storm]: Prepare spot healing for targeted strikes.; Watchful Harrower — [Void Beam]: Commit focused healing or a save.; Devouring Brutalizer — [Devour]: Kill its low-health enemy target before the cast ends.; Brutal Overseer — [Brutal Slams]: Prepare focused tank healing for the hit and DoT.",
+      ["DPS"] = "Raj'kess the Spellstorm — [Orb of Disruption]: Destroy the orbs within 13 seconds.; Watchful Harrower — [Sky Strike]: Commit priority damage to shorten the pull, then move out after the soak.; Devouring Brutalizer — [Devour]: Kill its low-health enemy target before the cast ends.; Brutal Overseer — [Brutal Slams]: Use a personal if other damage overlaps.",
+      ["ROUTE"] = "Opening Trash Before Taz'Rah (miniboss choice) > Taz'Rah > Trash Between Taz'Rah and Atroxus > Lieutenant Choice Before Atroxus (Watchful Harrower) > Atroxus > Trash Between Atroxus and Charonus > Charonus.",
     },
   },
   ["overview"] = {
     ["interrupts"] = {
       {
+        ["spell"] = "Demoralizing Shout",
+        ["note"] = "Dominated Brawler — weakens party damage",
+      },
+      {
+        ["spell"] = "Shadowbolt Volley",
+        ["note"] = "Voidtouched Magi — heavy group damage",
+      },
+      {
+        ["spell"] = "Violent Sand",
+        ["note"] = "Angry Krolusk — heavy group damage",
+      },
+      {
+        ["spell"] = "Mad Shriek",
+        ["note"] = "Killvore Screamer — six-second group fear",
+      },
+      {
+        ["spell"] = "Mending Void",
+        ["note"] = "Voidminder — heals nearby enemies",
+      },
+      {
         ["spell"] = "Orb of Disruption",
-        ["note"] = "kill the orb before [Disrupting Blast]",
+        ["note"] = "Raj'kess the Spellstorm — destroy the orbs within 13 seconds",
       },
     },
     ["killPriority"] = {
       "[Orb of Disruption]",
       "Toxic Creeper",
-      "Any target trapped by [Devour]",
+      "Devouring Brutalizer's low-health [Devour] target — kill it before the cast ends",
     },
     ["tank"] = {
       ["damage"] = {
         "Taz'Rah — [Cosmic Spike]",
         "Atroxus — [Hulking Claw]",
-        "Brutal Overseer — [Brutal Slam]",
+        "Brutal Overseer — [Brutal Slams]",
       },
       ["pullWarnings"] = {
         "Do not combine Watchful Harrower with nearby packs until release tuning is confirmed.",
@@ -52,7 +72,7 @@ ns.RegisterDungeon({
       ["pressure"] = {
         "[Nether Dash] DoTs",
         "[Hulking Claw]",
-        "[Sickening Roar]",
+        "[Monstrous Roar]",
         "[Cosmic Blast]",
       },
       ["pullWarnings"] = {
@@ -61,24 +81,24 @@ ns.RegisterDungeon({
     },
     ["dps"] = {
       ["defensives"] = {
-        "Use personals for [Sickening Roar], [Cosmic Blast] and dangerous overlaps.",
+        "Use personals for [Monstrous Roar], [Cosmic Blast] and dangerous overlaps.",
       },
       ["pullWarnings"] = {
         "Raj'kess the Spellstorm — [Thundering Storm]: Avoid targeted lightning strikes.",
-        "Agitated Voidscythe — [Corrosive Essence]: Separate from other targeted players.",
-        "Watchful Harrower — Live Verification: Commit priority damage to shorten the pull.",
+        "Agitated Voidscythe — [Corrosive Essence]: Three poison debuffs — spread, dispel poisons and use defensives.",
+        "Watchful Harrower — [Sky Strike]: Commit priority damage to shorten the pull.",
         "Position: Avoid adding nearby packs; the miniboss has true sight.",
-        "Devouring Brutalizer — [Devour]: Swap immediately and free the target.",
-        "Brutal Overseer — [Brutal Slam]: Use a personal if other damage overlaps.",
+        "Devouring Brutalizer — [Devour]: Kill its low-health enemy target before the cast ends.",
+        "Brutal Overseer — [Brutal Slams]: Use a personal if other damage overlaps.",
       },
     },
     ["tip"] = {
       "Tank: Preserve movement for gravity pulls and knockbacks.",
       "Healer: Enter Watchful Harrower with mana and a cooldown ready.",
       "DPS: Priority mechanics are worth more than boss uptime.",
-      "Version 0.10, five-source review verified 9 August 2026. One gameplay change found since 27 July: Atroxus — [Noxious Breath] cast time increased 3 sec > 4 sec.",
-      "Version note: current live game remains Midnight Season 1 / Patch 12.0.7 as of 9 Aug; this guide targets Season 2 / Patch 12.1 PTR.",
-      "Requires live verification: final 12.1 trash placements, Enemy Forces values, miniboss buffs, lieutenant casts, crowd-control interactions and post-PTR tuning.",
+      "Draft 0.12, verified 12 September 2026 (hotfixes through 10 September). Biggest change: [Devour] now heals its caster 50% and is stopped by killing its low-health enemy target, not by freeing a trapped player.",
+      "Version note: Midnight Season 2 is live on Patch 12.1.0 as of 10 Sep; Patch 12.1.5 remains on PTR and is not the baseline.",
+      "Requires live verification: Enemy Forces values, the best opening path for each weekly affix, and post-12.1.5 tuning once it leaves PTR.",
     },
   },
   ["trashSegments"] = {
@@ -92,6 +112,66 @@ ns.RegisterDungeon({
           ["displayID"] = 143575,
         },
         {
+          ["name"] = "Enthralled Shaman",
+          ["npcID"] = 241496,
+          ["displayID"] = 130201,
+        },
+        {
+          ["name"] = "Dominated Brawler",
+          ["npcID"] = 238883,
+          ["displayID"] = 130200,
+        },
+        {
+          ["name"] = "Brutal Overseer",
+          ["npcID"] = 252053,
+          ["displayID"] = 137329,
+        },
+        {
+          ["name"] = "Aegyra the Unyielding",
+          ["npcID"] = 267545,
+          ["displayID"] = 147378,
+        },
+      },
+      ["roles"] = {
+        ["TANK"] = {
+          "Raj'kess the Spellstorm — [Orb of Disruption]: Destroy the orbs within 13 seconds.",
+          "Raj'kess the Spellstorm — [Thundering Storm]: Avoid the targeted lightning strikes; hold the pack steady and leave room for strikes.",
+          "Enthralled Shaman — [Magma Totem]: Kill the totem immediately.",
+          "Dominated Brawler — [Bloodsurge]: Soothe, crowd-control or kite at high stacks.",
+          "Brutal Overseer — [Brutal Slams]: Break the shield to stop the channel.",
+          "Aegyra the Unyielding — [Champion's Spear]: Destroy the spear quickly; its health is 15% lower.",
+          "Opening path choice: Aegyra grants Proof of Endurance, Raj'kess grants Proof of Mastery — both are buffs now. Method favours the left path, Icy Veins the right; still live-unverified, so choose by composition and weekly affix.",
+        },
+        ["HEALER"] = {
+          "Raj'kess the Spellstorm — [Orb of Disruption]: Destroy the orbs within 13 seconds.",
+          "Raj'kess the Spellstorm — [Thundering Storm]: Avoid the targeted lightning strikes; prepare spot healing for hits.",
+          "Enthralled Shaman — [Magma Totem]: Kill the totem immediately.",
+          "Dominated Brawler — [Bloodsurge]: Soothe, crowd-control or kite at high stacks.",
+          "Brutal Overseer — [Brutal Slams]: Break the shield to stop the channel.",
+          "Aegyra the Unyielding — [Champion's Spear]: Destroy the spear quickly; its health is 15% lower.",
+          "Opening path choice: Aegyra grants Proof of Endurance, Raj'kess grants Proof of Mastery — both are buffs now. Method favours the left path, Icy Veins the right; still live-unverified, so choose by composition and weekly affix.",
+        },
+        ["DPS"] = {
+          "Raj'kess the Spellstorm — [Orb of Disruption]: Destroy the orbs within 13 seconds.",
+          "Raj'kess the Spellstorm — [Thundering Storm]: Avoid the targeted lightning strikes.",
+          "Enthralled Shaman — [Magma Totem]: Kill the totem immediately.",
+          "Dominated Brawler — [Bloodsurge]: Soothe, crowd-control or kite at high stacks.",
+          "Brutal Overseer — [Brutal Slams]: Use a personal if other damage overlaps.",
+          "Aegyra the Unyielding — [Champion's Spear]: Destroy the spear quickly; its health is 15% lower.",
+          "Opening path choice: Aegyra grants Proof of Endurance, Raj'kess grants Proof of Mastery — both are buffs now. Method favours the left path, Icy Veins the right; still live-unverified, so choose by composition and weekly affix.",
+        },
+      },
+    },
+    {
+      ["name"] = "Trash between Taz'Rah and Atroxus",
+      ["after"] = "Taz'Rah",
+      ["npcs"] = {
+        {
+          ["name"] = "Savage Shredclaw",
+          ["npcID"] = 243835,
+          ["displayID"] = 141810,
+        },
+        {
           ["name"] = "Agitated Voidscythe",
           ["npcID"] = 263228,
           ["displayID"] = 138723,
@@ -99,27 +179,22 @@ ns.RegisterDungeon({
       },
       ["roles"] = {
         ["TANK"] = {
-          "Raj'kess the Spellstorm — [Orb of Disruption]: Destroy the orb immediately before [Disrupting Blast]; face the pack cleanly and call the kill.",
-          "Raj'kess the Spellstorm — [Thundering Storm]: Avoid the targeted lightning strikes; hold the pack steady and leave room for strikes.",
-          "Agitated Voidscythe — [Corrosive Essence]: Separate from other targeted players.",
-          "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification.",
+          "Savage Shredclaw — [Shred Defense]: Use mitigation for the hit and follow-up damage.",
+          "Agitated Voidscythe — [Corrosive Essence]: Three poison debuffs — spread, dispel poisons and use defensives.",
+          "Agitated Voidscythe — [Rip And Slice]: Mitigate; remove the bleed when available.",
         },
         ["HEALER"] = {
-          "Raj'kess the Spellstorm — [Orb of Disruption]: Support the immediate orb kill before [Disrupting Blast].",
-          "Raj'kess the Spellstorm — [Thundering Storm]: Avoid the targeted lightning strikes; prepare spot healing for hits.",
-          "Agitated Voidscythe — [Corrosive Essence]: Separate targeted players and triage quickly.",
-          "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification.",
+          "Savage Shredclaw — [Shred Defense]: Keep the tank topped and cover the hit; remove the bleed when available.",
+          "Agitated Voidscythe — [Corrosive Essence]: Three poison debuffs — spread, dispel poisons and use defensives.",
+          "Agitated Voidscythe — [Rip And Slice]: Keep the tank topped and cover the hit; remove the bleed when available.",
         },
         ["DPS"] = {
-          "Raj'kess the Spellstorm — [Orb of Disruption]: Kill immediately before [Disrupting Blast].",
-          "Raj'kess the Spellstorm — [Thundering Storm]: Avoid the targeted lightning strikes.",
-          "Agitated Voidscythe — [Corrosive Essence]: Separate from other targeted players.",
-          "Opening miniboss buffs: Choose the melee- or caster-focused side deliberately; exact buff values require live verification.",
+          "Agitated Voidscythe — [Corrosive Essence]: Three poison debuffs — spread, dispel poisons and use defensives.",
         },
       },
     },
     {
-      ["name"] = "Watchful Harrower trash — Taz'Rah to Atroxus",
+      ["name"] = "Lieutenant choice before Atroxus — Watchful Harrower",
       ["after"] = "Taz'Rah",
       ["npcs"] = {
         {
@@ -130,21 +205,23 @@ ns.RegisterDungeon({
       },
       ["roles"] = {
         ["TANK"] = {
-          "Watchful Harrower — Requires Live Verification: Use a conservative pull size; this is a high-health true-sight miniboss; confirm its final live ability package.",
+          "Watchful Harrower — [Sky Strike]: Stack in the target, then leave the follow-up area.",
+          "Watchful Harrower — [Void Beam]: Hold the pack still and use a group stop if the target is in danger.",
           "Position: Avoid adding nearby packs; Watchful Harrowers have true sight.",
         },
         ["HEALER"] = {
-          "Watchful Harrower — Requires Live Verification: Expect a long, high-pressure miniboss pull; confirm its final live ability package.",
+          "Watchful Harrower — [Sky Strike]: Stack in the target, then leave the follow-up area.",
+          "Watchful Harrower — [Void Beam]: Heal the target; combat drops can cancel it.",
           "Position: Avoid adding nearby packs; Watchful Harrowers have true sight.",
         },
         ["DPS"] = {
-          "Watchful Harrower — Requires Live Verification: Commit priority damage to shorten the pull; confirm its final live ability package.",
+          "Watchful Harrower — [Sky Strike]: Stack in the target, then leave the follow-up area.",
           "Position: Avoid adding nearby packs; Watchful Harrowers have true sight.",
         },
       },
     },
     {
-      ["name"] = "Domanaar lieutenants trash — Atroxus to Charonus",
+      ["name"] = "Trash between Atroxus and Charonus",
       ["after"] = "Atroxus",
       ["npcs"] = {
         {
@@ -153,26 +230,30 @@ ns.RegisterDungeon({
           ["displayID"] = 142611,
         },
         {
-          ["name"] = "Brutal Overseer",
-          ["npcID"] = 252053,
-          ["displayID"] = 137329,
+          ["name"] = "Voidminder",
+          ["npcID"] = 244708,
+          ["displayID"] = 147460,
         },
       },
       ["roles"] = {
         ["TANK"] = {
-          "Devouring Brutalizer — [Devour]: Protect and help free the target before the cast completes; keep the trapped player reachable for the swap.",
-          "Brutal Overseer — [Brutal Slam]: Mitigate the tank hit and DoT; keep the impact away from allies.",
-          "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification.",
+          "Devouring Brutalizer — [Dreadbellow]: Use group defensives and avoid nearby pulls.",
+          "Devouring Brutalizer — [Brutalize]: Use active mitigation and a defensive.",
+          "Devouring Brutalizer — [Devour]: Kill its low-health enemy target before the cast ends.",
+          "Voidminder — [Dimensional Shred]: Use a personal and focused healing.",
+          "Lieutenants are required before Charonus.",
         },
         ["HEALER"] = {
-          "Devouring Brutalizer — [Devour]: Keep the target stable while the group breaks it free; pre-heal the trapped target.",
-          "Brutal Overseer — [Brutal Slam]: Prepare focused tank healing for the hit and DoT.",
-          "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification.",
+          "Devouring Brutalizer — [Dreadbellow]: Use group defensives and avoid nearby pulls.",
+          "Devouring Brutalizer — [Brutalize]: Use active mitigation and a defensive.",
+          "Devouring Brutalizer — [Devour]: Kill its low-health enemy target before the cast ends.",
+          "Voidminder — [Dimensional Shred]: Use a personal and focused healing.",
+          "Lieutenants are required before Charonus.",
         },
         ["DPS"] = {
-          "Devouring Brutalizer — [Devour]: Swap immediately and free the target.",
-          "Brutal Overseer — [Brutal Slam]: Use a personal if other damage overlaps.",
-          "Domanaar lieutenants: Required before Charonus. Exact packs, casts and crowd-control interactions require live verification.",
+          "Devouring Brutalizer — [Devour]: Kill its low-health enemy target before the cast ends.",
+          "Voidminder — [Dimensional Shred]: Use a personal and focused healing.",
+          "Lieutenants are required before Charonus.",
         },
       },
     },
@@ -261,25 +342,26 @@ ns.RegisterDungeon({
             "Make the Toxic Creeper easy to reach.",
           },
           ["avoid"] = {
-            "[Noxious Breath] — now a 4-sec cast; use the longer warning to sidestep without spinning the boss.",
+            "[Noxious Breath] — random-target frontal, 4-sec cast; stay close enough to sidestep without dragging the boss.",
             "[Poison Splash] and Poison Pools.",
           },
           ["defensive"] = {
-            "Use a defensive for [Hulking Claw] or a dangerous [Sickening Roar] overlap.",
+            "Use a defensive for [Hulking Claw] or a dangerous [Monstrous Roar] overlap.",
+            "Use a major defensive if Toxic Creeper — [Sickening Bite] stacks remain.",
           },
           ["reminder"] = "Face away > 4-sec Breath dodge > Creeper first.",
         },
         ["HEALER"] = {
           ["job"] = {
-            "Cover [Sickening Roar] and the tank's [Hulking Claw] damage.",
+            "Cover [Monstrous Roar] and the tank's [Hulking Claw] damage.",
             "Prioritise the tank and the Toxic Creeper's fixated target.",
           },
           ["avoid"] = {
-            "[Noxious Breath] — now a 4-sec cast; reposition during the longer window.",
+            "[Noxious Breath] — random-target frontal, 4-sec cast; reposition during the longer window without dragging the boss.",
             "[Poison Splash] and the Creeper's close aura.",
           },
           ["cooldowns"] = {
-            "Use group healing for [Sickening Roar]; save throughput after repositioning for the 4-sec Breath.",
+            "Use group healing for [Monstrous Roar]; save throughput after repositioning for the 4-sec Breath.",
           },
           ["reminder"] = "4-sec Breath move > Roar cooldown > Creeper pressure.",
         },
@@ -291,10 +373,10 @@ ns.RegisterDungeon({
             "Return to Atroxus only after it dies.",
           },
           ["avoid"] = {
-            "[Noxious Breath], poison impacts, pools and the Creeper aura.",
+            "[Noxious Breath] — random-target frontal, 4-sec cast; poison impacts, pools and the Creeper aura.",
           },
           ["defensive"] = {
-            "[Noxious Breath] now casts for 4 sec — move early, and use a personal for [Sickening Roar].",
+            "[Noxious Breath] — random-target frontal, 4-sec cast: move early, and use a personal for [Monstrous Roar].",
           },
           ["reminder"] = "Creeper first > 4-sec Breath dodge > avoid pools.",
         },

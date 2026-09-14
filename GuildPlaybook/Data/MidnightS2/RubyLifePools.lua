@@ -7,7 +7,7 @@ ns.RegisterDungeon({
   ["slug"] = "ruby-life-pools",
   ["season"] = "midnight-s2",
   ["patch"] = "12.1.0",
-  ["sourceVersion"] = "0.6",
+  ["sourceVersion"] = "0.8",
   ["instanceID"] = nil,
   ["mdtRoutes"] = {
     {
@@ -17,8 +17,8 @@ ns.RegisterDungeon({
   },
   ["quicksheet"] = {
     ["trash"] = {
-      ["TANK"] = "Primal Juggernaut — [Crushing Smash]: Mitigate, face away and sidestep [Excavating Blast].; Deepstone Earthshaper — [Tectonic Strike]: Call a hard stop; avoid overlapping dangerous casters.; Blazebound Destroyer — [Inferno]: Keep the pack stable and leave before [Burnout] finishes.",
-      ["HEALER"] = "Primal Juggernaut — [Crushing Smash]: Watch the tank and keep moving for [Excavating Blast].; Deepstone Earthshaper — [Tectonic Strike]: Help stop it; prepare group healing if it completes.; Blazebound Destroyer — [Inferno]: Prepare group healing for the hit and follow-up damage.",
+      ["TANK"] = "Primal Juggernaut — [Crushing Smash]: Mitigate, face away and sidestep [Excavating Blast] (a heavy frontal).; Deepstone Earthshaper — [Tectonic Strike]: Call a hard stop; avoid overlapping dangerous casters.; Blazebound Destroyer — [Inferno]: Keep the pack stable and leave before [Burnout] finishes, and interrupt [Fiery Blast].",
+      ["HEALER"] = "Primal Juggernaut — [Crushing Smash]: Watch the tank and keep moving for [Excavating Blast] (a heavy frontal).; Deepstone Earthshaper — [Tectonic Strike]: Help stop it; prepare group healing if it completes.; Blazebound Destroyer — [Inferno]: Prepare group healing for the hit and follow-up damage, and interrupt [Fiery Blast] if assigned.",
       ["DPS"] = "Flashfrost Chillweaver — [Ice Shield]: Interrupt first or purge; kill the Chillweaver quickly.; Deepstone Earthshaper — [Tectonic Strike]: Use a stun or other hard stop.; Primalist Cinderweaver — [Cinderbolt]: Interrupt; purge or control [Burning Ambition].",
     },
   },
@@ -41,12 +41,20 @@ ns.RegisterDungeon({
         ["note"] = "Primalist Cinderweaver — interrupt; purge or control [Burning Ambition].",
       },
       {
-        ["spell"] = "Blaze Volley",
-        ["note"] = "Blazebound Firestorm — kick; kill the add before Kokia.",
+        ["spell"] = "Fiery Blast",
+        ["note"] = "Blazebound Destroyer — interrupt it, or prepare a fast single-target heal.",
       },
       {
-        ["spell"] = "Flame Dance",
-        ["note"] = "Primalist Flamedancer — hard stop it; leave [Blaze of Glory] on death.",
+        ["spell"] = "Blaze Volley",
+        ["note"] = "Blazebound Firestorm — kick every cast; kill the add before Kokia.",
+      },
+      {
+        ["spell"] = "Blaze of Glory",
+        ["note"] = "Ashseer Flamelasher — buffs enemies; purge or dispel it, and move out of it on death.",
+      },
+      {
+        ["spell"] = "Storm Bolt",
+        ["note"] = "Ruinous Stormbringer — interrupt it (final approach trash).",
       },
     },
     ["killPriority"] = {
@@ -58,42 +66,48 @@ ns.RegisterDungeon({
     },
     ["tank"] = {
       ["damage"] = {
-        "[Crushing Smash] (Primal Juggernaut) — mitigate, face away and sidestep [Excavating Blast].",
+        "[Crushing Smash] (Primal Juggernaut) — mitigate, face away and sidestep [Excavating Blast] (a heavy frontal).",
         "[Steel Barrage] (Defier Draghar) — mitigate the channel; bait [Blazing Rush] toward a wall.",
         "[Thunder Jaw] (Thunderhead) — mitigate and preserve a safe knockback lane.",
         "[Fire Maw] (Flamegullet) — mitigate and face away; its damage-ramp stacks are now capped.",
         "[Searing Blows] (Kokia Blazehoof) — always cover; request help if the bleed becomes unsafe.",
+        "[Stormslam] (Erkhart Stormvein) — heavy tank damage; mitigate, and the healer dispels the debuff after.",
       },
       ["pullWarnings"] = {
         "Plan controlled pulls around eggs and grounded dragon patrols.",
         "Face frontals away; protect knockback lanes.",
         "The first miniboss must die to open Melidrussa's door.",
         "Call a hard stop for [Tectonic Strike]; avoid overlapping dangerous casters.",
-        "PTR route, count and the final-trash package require live verification.",
+        "Final-approach trash is populated (Storm Warrior, Ruinous Stormbringer, High Channeler Ryvati, Primal Thundercloud); route and count are live-verified, not PTR.",
       },
     },
     ["healer"] = {
       ["dispels"] = {
         "[Rolling Thunder] (Thunderhead) — stagger dispels; heal the second target before expiration.",
+        "[Cold Claws] (Infused Whelp) — freezes at high stacks; dispel the tank before it becomes unsafe.",
+        "[Stormslam] (Erkhart Stormvein) — dispel the tank's debuff promptly and safely after the hit.",
       },
       ["pressure"] = {
         "[Inferno] (Blazebound Destroyer / Kokia Blazehoof) — prepare group healing for the hit and follow-up damage.",
+        "[Fiery Blast] (Blazebound Destroyer) — interrupt it, or prepare a fast single-target heal.",
         "[Molten Blood] (Flamegullet) — prepare sustained group healing below 50%; the ramp is capped.",
         "[Frost Overload] (Melidrussa Chillworn) — [Chillstorm] ticks more slowly but lasts longer; recover after [Frost Overload].",
         "[Inferno Spit] (Kyrakka and Erkhart Stormvein) — top targets before expiration; prioritise marked players and anyone trapped by fire.",
       },
       ["pullWarnings"] = {
-        "Plan for [Inferno], [Molten Blood], [Frost Overload] and [Inferno Spit].",
+        "Plan for [Inferno], [Fiery Blast], [Molten Blood], [Frost Overload] and [Inferno Spit].",
         "Tank damage overlaps group pressure on Kokia.",
         "The first miniboss must die to open Melidrussa's door.",
         "Help stop [Tectonic Strike]; prepare group healing if it completes.",
-        "PTR dispels and the final-trash damage events require live verification.",
+        "Final-approach trash now has named casts (Thunder Stomper, Storm Bolt, Lightning Torrent, Stormcloud Barrier); dispels are live-verified, not PTR.",
       },
     },
     ["dps"] = {
       ["purges"] = {
         "[Burning Ambition] (Primalist Cinderweaver) — purge or control it after kicking [Cinderbolt].",
         "[Ice Shield] (Flashfrost Chillweaver) — interrupt first, or purge the shield if the kick is missed.",
+        "[Blaze of Glory] (Ashseer Flamelasher) — buffs enemies; purge or spellsteal it.",
+        "[Stormcloud Barrier] (Primal Thundercloud) — buffs enemies; purge or spellsteal it (final approach trash).",
       },
       ["defensives"] = {
         "Use a personal for [Chillstorm] or [Frost Overload] (Melidrussa Chillworn).",
@@ -102,19 +116,20 @@ ns.RegisterDungeon({
         "Use a personal for [Rolling Thunder] if needed (Thunderhead, trash).",
       },
       ["pullWarnings"] = {
-        "Prioritise [Ice Shield], [Tectonic Strike] and [Blaze Volley].",
+        "Prioritise [Ice Shield], [Tectonic Strike], [Blaze Volley] and [Storm Bolt].",
         "Switch immediately to boss adds and shields.",
         "Hard stops matter as much as interrupts.",
-        "Primal Juggernaut — [Excavating Blast]: sidestep the impact and puddle.",
+        "Primal Juggernaut — [Excavating Blast]: heavy frontal damage; stay outside its path.",
         "Blazebound Destroyer — [Burnout]: run out before the death explosion.",
         "Thunderhead — [Storm Breath]: sidestep the frontal and personal [Rolling Thunder] if needed.",
-        "PTR route and the final-trash priority list require live verification.",
+        "Final-trash priority is Thunder Stomper, Storm Bolt, Tempest Stormshield and Stormcloud Barrier; route is live-verified, not PTR.",
       },
     },
     ["tip"] = {
-      "Version 0.6, verified 9 August 2026 against Blizzard PTR/launch notes, Wowhead, Method and Icy Veins. No gameplay change found after 27 July.",
-      "Pre-season: Patch 12.1 launches 11 August; Mythic+ Season 2 launches 18 August. Recheck live hotfixes.",
-      "Requires live verification: the 29:00 PTR timer, enemy forces, route, final-trash spawns and launch hotfixes.",
+      "Version 0.8, verified 12 September 2026 against Blizzard notes/hotfixes, Wowhead, Method and Keystone.guru; next review 22 September. Biggest change: final-approach trash and Erkhart Stormvein's kit are now fully modelled.",
+      "28-minute timer, live Patch 12.1.",
+      "Live: Ruby Life Pools is in the active Midnight Season 2 Mythic+ pool, not PTR.",
+      "The officer's v0.7 role files were missing when v0.8 was written (reconstructed); treat anything v0.6 had that v0.8 omits as unconfirmed, not necessarily removed.",
     },
   },
   ["trashSegments"] = {
@@ -145,13 +160,13 @@ ns.RegisterDungeon({
       },
       ["roles"] = {
         ["TANK"] = {
-          "Primal Juggernaut — [Crushing Smash]: Mitigate, face away and sidestep [Excavating Blast].",
+          "Primal Juggernaut — [Crushing Smash]: Mitigate, face away and sidestep [Excavating Blast] (a heavy frontal).",
           "Deepstone Earthshaper — [Tectonic Strike]: Call a hard stop; avoid overlapping dangerous casters.",
           "Flashfrost Chillweaver — [Ice Shield]: Assign an interrupt or purge; keep the pack controlled.",
           "Defier Draghar — [Steel Barrage]: Mitigate the channel. This miniboss must die to open Melidrussa's door.",
         },
         ["HEALER"] = {
-          "Primal Juggernaut — [Crushing Smash]: Watch the tank and keep moving for [Excavating Blast].",
+          "Primal Juggernaut — [Crushing Smash]: Watch the tank and keep moving for [Excavating Blast] (a heavy frontal).",
           "Deepstone Earthshaper — [Tectonic Strike]: Help stop it; prepare group healing if it completes.",
           "Flashfrost Chillweaver — [Ice Shield]: Call the interrupt or purge before the shield grows.",
           "Defier Draghar — [Steel Barrage]: Focus the tank through the channel; the miniboss opens Melidrussa's door.",
@@ -159,7 +174,7 @@ ns.RegisterDungeon({
         ["DPS"] = {
           "Flashfrost Chillweaver — [Ice Shield]: Interrupt first or purge; kill the Chillweaver quickly.",
           "Deepstone Earthshaper — [Tectonic Strike]: Use a stun or other hard stop.",
-          "Primal Juggernaut — [Excavating Blast]: Sidestep the impact and puddle.",
+          "Primal Juggernaut — [Excavating Blast]: Heavy frontal damage. Sidestep the impact and puddle; stay outside its path.",
           "Defier Draghar — [Blazing Rush]: Bait toward a wall, dodge, then kill him to open the boss door.",
         },
       },
@@ -179,9 +194,9 @@ ns.RegisterDungeon({
           ["displayID"] = 102886,
         },
         {
-          ["name"] = "Primalist Flamedancer",
-          ["npcID"] = nil,
-          ["displayID"] = nil,
+          ["name"] = "Ashseer Flamelasher",
+          ["npcID"] = 190206,
+          ["displayID"] = 102969,
         },
         {
           ["name"] = "Thunderhead",
@@ -196,20 +211,25 @@ ns.RegisterDungeon({
       },
       ["roles"] = {
         ["TANK"] = {
-          "Blazebound Destroyer — [Inferno]: Keep the pack stable and leave before [Burnout] finishes.",
-          "Primalist Flamedancer — [Flame Dance]: Call a hard stop; move out of [Blaze of Glory] on death.",
+          "Blazebound Destroyer — [Inferno]: Keep the pack stable and leave before [Burnout] finishes. Interrupt [Fiery Blast] if it's cast.",
+          "Ashseer Flamelasher — [Blaze of Glory]: Buffs enemies. Purge or dispel it, and move out of it on death.",
           "Thunderhead — [Thunder Jaw]: Mitigate and preserve a safe knockback lane.",
+          "Thunderhead — [Storm Breath]: Lethal frontal. Aim away and do not turn late.",
+          "Thunderhead — [Rolling Thunder]: Heavy group damage. Give players room to spread.",
           "Flamegullet — [Fire Maw]: Mitigate and face away; its damage-ramp stacks are now capped.",
         },
         ["HEALER"] = {
           "Blazebound Destroyer — [Inferno]: Prepare group healing for the hit and follow-up damage.",
+          "Blazebound Destroyer — [Fiery Blast]: Heavy targeted damage. Interrupt it, or prepare a fast single-target heal.",
           "Blazebound Destroyer — [Living Bomb]: Track the target and leave before [Burnout].",
           "Thunderhead — [Rolling Thunder]: Stagger dispels; heal the second target before expiration.",
+          "Thunderhead — [Storm Breath]: Do not stand in it, or in Flamegullet's frontal lanes.",
           "Flamegullet — [Molten Blood]: Prepare sustained group healing below 50%; the ramp is capped.",
         },
         ["DPS"] = {
           "Primalist Cinderweaver — [Cinderbolt]: Interrupt; purge or control [Burning Ambition].",
-          "Primalist Flamedancer — [Flame Dance]: Hard stop it; leave [Blaze of Glory] on death.",
+          "Ashseer Flamelasher — [Blaze of Glory]: Buffs enemies. Purge or spellsteal it, and move out of it on death.",
+          "Blazebound Destroyer — [Fiery Blast]: Heavy targeted damage. Interrupt it.",
           "Blazebound Destroyer — [Burnout]: Run out before the death explosion.",
           "Thunderhead — [Storm Breath]: Sidestep the frontal and personal [Rolling Thunder] if needed.",
         },
@@ -218,18 +238,46 @@ ns.RegisterDungeon({
     {
       ["name"] = "Final approach — between bosses 2 & 3",
       ["after"] = "Kokia Blazehoof",
+      ["npcs"] = {
+        {
+          ["name"] = "Storm Warrior",
+          ["npcID"] = 197982,
+          ["displayID"] = 110964,
+        },
+        {
+          ["name"] = "Ruinous Stormbringer",
+          ["npcID"] = 195119,
+          ["displayID"] = 108753,
+        },
+        {
+          ["name"] = "High Channeler Ryvati",
+          ["npcID"] = 197535,
+          ["displayID"] = 110966,
+        },
+        {
+          ["name"] = "Primal Thundercloud",
+          ["npcID"] = 197509,
+          ["displayID"] = 102516,
+        },
+      },
       ["roles"] = {
         ["TANK"] = {
-          "Simplified trash: The Season 2 package is substantially reduced; no retained must-kick cast is confirmed. Use normal stops and avoid visible hazards.",
-          "Requires live verification: Confirm final spawns, count and any launch-day ability package.",
+          "Storm Warrior — [Thunder Stomper]: Heavy group damage. Use a stop or defensive plan.",
+          "Primal Thundercloud — [Stormcloud Barrier]: Buffs enemies. Call for a purge.",
+          "High Channeler Ryvati — [Tempest Stormshield]: Absorbs damage. Break or purge the shield promptly.",
+          "Ruinous Stormbringer — [Storm Bolt]: Heavy targeted damage. Interrupt it.",
         },
         ["HEALER"] = {
-          "Simplified trash: The Season 2 package is substantially reduced; no retained must-kick cast is confirmed. Use normal stops and avoid visible hazards.",
-          "Requires live verification: Confirm final spawns, count and any launch-day ability package.",
+          "Storm Warrior — [Thunder Stomper]: Heavy group damage. Pre-heal and use a cooldown if pulls overlap.",
+          "Ruinous Stormbringer — [Storm Bolt]: Heavy targeted damage. Interrupt it, or spot-heal.",
+          "High Channeler Ryvati — [Lightning Torrent]: Heavy targeted channel. Use externals if it cannot be stopped.",
+          "Primal Thundercloud — [Stormcloud Barrier]: Buffs enemies. Purge it if your toolkit allows.",
         },
         ["DPS"] = {
-          "Simplified trash: The Season 2 package is substantially reduced; no retained must-kick cast is confirmed. Use normal stops and avoid visible hazards.",
-          "Requires live verification: Confirm final spawns, count and any launch-day ability package.",
+          "Primal Thundercloud — [Stormcloud Barrier]: Buffs enemies. Purge or spellsteal it.",
+          "Ruinous Stormbringer — [Storm Bolt]: Heavy targeted damage. Interrupt it.",
+          "High Channeler Ryvati — [Tempest Stormshield]: Absorbs damage. Swap and break it.",
+          "Storm Warrior — [Thunder Stomper]: (Ranged) stay out of it; use long-range stops on priority casters.",
         },
       },
     },
@@ -250,6 +298,7 @@ ns.RegisterDungeon({
         "Loose whelps or slow [Ice Bulwark] damage overwhelms the group.",
         "Entering a shield phase unstable while whelps remain loose.",
         "Slow shield damage or loose whelps during the intermission.",
+        "No healing cooldown ready for [Frost Overload].",
       },
       ["roles"] = {
         ["TANK"] = {
@@ -258,11 +307,12 @@ ns.RegisterDungeon({
             "Collect whelps at 66% and 33%, then help break [Ice Bulwark].",
           },
           ["avoid"] = {
-            "Keep a clear path through Hailbombs during the longer, weaker [Chillstorm] pull.",
+            "Keep a clear path through Hailbombs ([Hailburst]) during the longer, weaker [Chillstorm] pull.",
             "Do not step on extra eggs before the encounter.",
           },
           ["defensive"] = {
             "Cover whelp pickup and any missed [Frigid Shard].",
+            "Hold whelps tightly at [Frost Overload]; use a defensive if [Cold Claws] stacks run high.",
           },
           ["reminder"] = "Kick. Gather whelps. Break the shield.",
         },
@@ -271,25 +321,29 @@ ns.RegisterDungeon({
             "Top before [Chillstorm] and the 66%/33% shield phases.",
             "Help damage [Ice Bulwark] when safe.",
             "[Chillstorm] ticks more slowly but lasts longer; recover after [Frost Overload].",
+            "Dispel [Cold Claws] on the tank before stacks become unsafe.",
           },
           ["avoid"] = {
             "Hailbomb contact now deals little damage but applies a 50% Haste penalty.",
             "Keep an escape route during [Chillstorm].",
+            "[Hailburst] spawns Hailbomb hazards; keep a safe healing lane clear of them.",
           },
           ["cooldowns"] = {
-            "Cover [Frost Overload] or a shield phase entered with players low.",
+            "Cover [Frost Overload] promptly — a missed cooldown here is a wipe risk — or a shield phase entered with players low.",
           },
           ["reminder"] = "Top first. Keep the escape lane clear.",
         },
         ["DPS"] = {
           ["job"] = {
-            "Place Hailbombs together.",
+            "Place [Hailburst] hazards around the outside; retain a clear movement lane.",
             "Swap immediately to whelps and [Ice Bulwark].",
+            "Ranged: Use ranged stops on Infused Whelps.",
             "Kick [Frigid Shard]; whelps and [Ice Bulwark] before boss damage.",
           },
           ["avoid"] = {
             "Hailbomb contact applies a 50% Haste penalty.",
-            "Move early for [Chillstorm].",
+            "Move early for [Chillstorm]; use instant casts while moving.",
+            "Help finish whelps during [Frost Overload].",
           },
           ["defensive"] = {
             "Use a personal for [Chillstorm] or [Frost Overload].",
@@ -320,6 +374,7 @@ ns.RegisterDungeon({
         "An early Boulder collision or holding the boss in [Burnout].",
         "Falling behind on group and tank damage together.",
         "Ignoring the add or detonating Boulder into nearby terrain.",
+        "Missing an interrupt on [Blaze Volley] (Blazebound Firestorm) — every cast must be kicked.",
       },
       ["roles"] = {
         ["TANK"] = {
@@ -358,6 +413,7 @@ ns.RegisterDungeon({
           ["avoid"] = {
             "Follow the displayed Boulder endpoint and leave before [Burnout].",
             "Do not stand in permanent fire.",
+            "Ranged: Use range to preserve safe space while avoiding Molten Boulder.",
           },
           ["defensive"] = {
             "Use a personal for [Inferno], especially after a missed cast.",
@@ -381,15 +437,19 @@ ns.RegisterDungeon({
         "Breath through the group or no safe route through fire.",
         "Low players at [Inferno Spit] expiration or standing in breath.",
         "Fire through the centre or greed inside breath.",
+        "Missing the stop on [Interrupting Cloudburst] (Erkhart Stormvein) — a completed cast is a wipe.",
       },
       ["roles"] = {
         ["TANK"] = {
           ["job"] = {
             "Keep Kyrakka hittable.",
             "Use the longer landing delay to position before the final phase.",
+            "Mitigate [Stormslam] (Erkhart Stormvein); the healer dispels the debuff after.",
+            "Regroup quickly after Kyrakka lands; keep both enemies controlled while preserving safe space.",
           },
           ["avoid"] = {
             "Face [Roaring Firebreath] away and do not let wind push you into fire.",
+            "Hold position through [Winds of Change] (Erkhart Stormvein) without standing in fire.",
           },
           ["defensive"] = {
             "Cover heavy hits and dangerous [Inferno Spit] overlaps.",
@@ -401,9 +461,12 @@ ns.RegisterDungeon({
             "Top [Inferno Spit] targets.",
             "Use the landing delay to stabilise before the final phase.",
             "Prioritise marked players and anyone trapped by fire.",
+            "Dispel [Stormslam] (Erkhart Stormvein) promptly after the hit.",
+            "Stop casting before [Interrupting Cloudburst] (Erkhart Stormvein) completes — wipe risk.",
           },
           ["avoid"] = {
             "Reduced winds move fire more slowly, but keep the centre and safe paths clear.",
+            "Use movement tools during [Winds of Change] (Erkhart Stormvein); keep line of sight while avoiding [Roaring Firebreath].",
           },
           ["cooldowns"] = {
             "Cover overlapping expirations or restricted space.",
@@ -414,9 +477,12 @@ ns.RegisterDungeon({
           ["job"] = {
             "Prioritise Kyrakka; use the longer landing delay to reset positioning.",
             "No routine boss kick; Kyrakka remains the damage priority.",
+            "Place [Inferno Spit] targets away from the group and existing fire.",
+            "Stop casting before [Interrupting Cloudburst] (Erkhart Stormvein) completes — wipe risk.",
+            "Keep damage uptime while moving with [Winds of Change] (Erkhart Stormvein).",
           },
           ["avoid"] = {
-            "Reduced winds move fire more slowly; still move early for [Roaring Firebreath].",
+            "Reduced winds move fire more slowly; still move early for [Roaring Firebreath], and do not cross the tank's lane.",
           },
           ["defensive"] = {
             "Use a personal for [Inferno Spit] expiration or a bad overlap.",
