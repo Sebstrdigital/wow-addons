@@ -338,3 +338,123 @@ per row instead of the old Monday-only "(offline)" suffix, a `Now` /
 flow (no EditBox, no dropdowns — both are unsafe in a raid-scoped addon; see
 the constraints above), and the leader line appending `FormatWhen(g.when)`
 when set.
+
+# Addendum v1.8.0 — Groups tab and OMKC board (2026-09-14)
+
+A third sign-up board, `omkc`, alongside `monday` and `open`, plus a new
+top-level tab, **Groups**, that holds all three. Where Monday and Open are
+gated on guild membership, OMKC is gated on membership in the Blizzard
+cross-realm Character community "Oceanic Mythic Keys Club" alone — guild
+membership neither grants nor is required for access. The Guild tab loses
+its two board entries, which move to Groups; Guild itself is unchanged
+otherwise. Phase 1 still sends the omkc board's sync traffic over the GUILD
+channel — there is no other transport yet — so a guildie who is also an OMKC
+member shares the board like any other guild board, while a non-guild OMKC
+member gets no sync but a fully working *local* board: sign up to lead with
+a key and a time, see their own group rendered, preview the chat line, and
+post a real LFM straight into the community via `C_Club.SendMessage`. Phase 2
+(a real Community-channel transport, so non-guild members sync too) is gated
+on the `/playbook clubtest` probe this addendum adds.
+
+## Protocol — still `GPMM2`
+
+No prefix bump. The wire key `"omkc"` simply joins `"open"` as a second
+literal (non-dated) key; a client older than this addendum has never heard of
+it, so `EventFromWire` drops it exactly like any other unrecognised key
+always was — the same rule that already covered a future version's invented
+key.
+
+One new command, diagnostic only and unrelated to board state:
+
+| Msg | Meaning |
+|---|---|
+| `P omkc` | clubtest ping (CHANNEL); any receiver prints who it came from |
+
+## Board config
+
+Every board-specific branch in `Monday.lua` (`ev == "open"` / `ev ==
+"monday"`) is replaced by a per-board config table:
+
+```lua
+BOARDS = {
+  monday = { title, schedule = false, heartbeat = false, dateHeader = true,  slash = "monday", post = "GUILD", gate = "guild" },
+  open   = { title, schedule = true,  heartbeat = true,  dateHeader = false, slash = "now",    post = "GUILD", gate = "guild" },
+  omkc   = { title, schedule = true,  heartbeat = true,  dateHeader = false, slash = "omkc",   post = "CLUB",  gate = "club"  },
+}
+```
+
+`schedule` and `heartbeat` drive exactly what they did for the open board
+before this addendum — the leader-set `when` field, `PruneOwnSchedule`, the
+presence-proving ticker, `OPEN_STALE` ageing — now keyed on the flag instead
+of a literal board id, and the open-board heartbeat ticker itself became one
+ticker per heartbeat-capable board (`heartbeats[ev]`, was a single upvalue)
+so open and omkc can each hold a heartbeat independently. `post` picks the
+transport `M.Post` sends over; `gate` is what `M.IsBoardVisible` checks.
+
+## Contract additions
+
+```lua
+ns.Monday.BoardConfig(ev)     -- -> { title, schedule, heartbeat, dateHeader, slash, post, gate } or nil
+ns.Monday.IsBoardVisible(ev)  -- guild-gated boards -> ns.isGuildMember; omkc -> IsClubMember()
+ns.Monday.ClubInfo()          -- -> { clubId, name, streamId } or nil; cached, event-invalidated
+ns.Monday.IsClubMember()      -- ClubInfo() ~= nil
+ns.Monday.OMKC_CLUB_NAME      -- "Oceanic Mythic Keys Club"
+ns.Monday.Post(ev)            -- renamed from PostToGuild; CLUB boards send via C_Club.SendMessage
+ns.Monday.PostToGuild(ev)     -- alias for Post, kept one release
+ns.Monday.ClubTest()          -- /playbook clubtest probe (phase-2 groundwork, diagnostic only)
+```
+
+`Ready(ev)`, the check every public entry point (`SignUp`, `Post`, `ChatLine`,
+`Groups`, `Withdraw`, ...) runs first, now branches on `BOARDS[ev].gate`
+instead of checking guild membership unconditionally: a `"guild"`-gated board
+still requires `IsInGuild()`, but a `"club"`-gated board requires
+`IsClubMember()` and does not care about guild membership at all, in either
+direction. `Send()` keeps its own unconditional `IsInGuild()` gate below
+that, so a non-guild club member's `SignUp`/heartbeat/etc. run their full
+local logic — own entry, own group, `Fire(ev)` — and only the actual GUILD
+addon-message send silently no-ops.
+
+`ClubInfo` walks `C_Club.GetSubscribedClubs()` for a `Character`-type club
+whose name matches `OMKC_CLUB_NAME` case-insensitively and trimmed, then
+`C_Club.GetStreams(clubId)` for the stream whose `streamType` is `General`.
+Every call is wrapped in the file's existing `IsSecret`/`pcall` pattern —
+a Secret Value or a missing API yields nil, never a throw. The result is
+cached and only requeried on `INITIAL_CLUBS_LOADED`, `CLUB_ADDED`,
+`CLUB_REMOVED`, or `CLUB_STREAMS_LOADED`, and `Fire("omkc")` runs only when
+the membership boolean actually flips, so the UI rebuilds its nav exactly
+when the Groups tab or the OMKC entry needs to appear or disappear.
+
+`M.Post(ev)` for a `post == "CLUB"` board refuses with `"noclub"` if
+`ClubInfo()` is nil or its `streamId` has not loaded, otherwise calls
+`C_Club.SendMessage(clubId, streamId, text)` inside a `pcall`. Same 60-second
+per-board throttle as a guild post; a `"noclub"` refusal does not consume it.
+`M.ChatLine(ev)` closes a CLUB board's line with `"Whisper " .. MyName()`
+instead of `"Sign up: /playbook <slash>"` — a Community member has no addon,
+so nothing there could act on a slash command anyway.
+
+`/playbook clubtest` calls `M.ClubTest()`: prints `ClubInfo()`, attempts
+`C_Club.AddClubStreamChatChannel`, then scans `GetChannelList()` for a
+channel whose name contains both "Community" and the club id, printing every
+channel name it sees along the way — the point is to learn the real naming,
+which the client API does not document for this shape. If found, it sends `P
+omkc` on that channel index; the `P` handler prints `"ping from <sender> via
+<distribution>"` for anyone who receives it, self included, and never touches
+board state.
+
+## SavedVariables
+
+`boards.omkc` joins `boards.monday` / `boards.open` under
+`GuildPlaybookDB.monday.boards`, same shape as `open`. No migration — a
+client that predates this addendum has no `omkc` key and gets a fresh board,
+same as `open` would if the same client had never seen v1.4.0.
+
+## UI
+
+Covered by the UI half of this change (see `UI.lua`): a new "Groups" tab
+next to "Dungeons" and "Guild", shown iff at least one of `ns.Monday.EVENTS`
+reports `IsBoardVisible`; the Guild tab's two board nav entries move there.
+The OMKC page's subtitle names the community instead of the guild. The post
+button reads "Post to guild" or "Post to OMKC" depending on `BoardConfig(ev)
+.post`, and reports a `"noclub"` refusal in a one-line error. Everything
+else — rows, schedule steppers, online dots — is unchanged and shared by all
+three boards.

@@ -295,7 +295,9 @@ local function Usage()
     print("  /playbook minimap     show/hide the minimap button")
     print("  /playbook monday      open the Mythic Monday sign-up board")
     print("  /playbook now         open the board for groups running right now")
-    print("  /playbook monday refresh|dump   re-pull both boards / print their state")
+    print("  /playbook omkc        open the Oceanic Mythic Keys Club sign-up board")
+    print("  /playbook monday refresh|dump   re-pull every board / print their state")
+    print("  /playbook clubtest    probe the OMKC community channel (diagnostic)")
     print("  /playbook commtest    check the self-whisper the MDT import relies on")
 end
 
@@ -357,6 +359,8 @@ SlashCmdList.GUILDPLAYBOOK = function(msg)
         end
     elseif msg == "now" then
         ShowBoard("open")
+    elseif msg == "omkc" then
+        ShowBoard("omkc")
     elseif msg == "monday" or msg:match("^monday%s") then
         local sub = msg:match("^monday%s+(%S+)") or ""
         if not ns.Monday then
@@ -376,6 +380,12 @@ SlashCmdList.GUILDPLAYBOOK = function(msg)
             ShowBoard("monday")
         else
             print("|cff69ccf0Guild Playbook:|r unknown — /playbook monday [refresh|dump]")
+        end
+    elseif msg == "clubtest" then
+        if not ns.Monday or not ns.Monday.ClubTest then
+            print("|cff69ccf0Guild Playbook:|r the sign-up boards failed to load.")
+        else
+            ns.safecall(ns.Monday.ClubTest)
         end
     elseif msg == "commtest" then
         StartCommTest()

@@ -492,7 +492,8 @@ local tabButtons = {}
 
 local lastTabBtn
 for _, tab in ipairs({ { key = "dungeons", label = "Dungeons" },
-                       { key = "guild",    label = "Guild" } }) do
+                       { key = "guild",    label = "Guild" },
+                       { key = "groups",   label = "Groups" } }) do
     local btn = CreateChromeButton(frame, TAB_W, TAB_H)
     if lastTabBtn then
         btn:SetPoint("LEFT", lastTabBtn, "RIGHT", 4, 0)
@@ -821,11 +822,19 @@ local guildSelected = { kind = "guild", section = ns.GUILD_PAGES and ns.GUILD_PA
                                                   and ns.GUILD_PAGES[1].id or nil,
                         expanded = nil }
 
+-- The Groups tab (sign-up boards) gets the same treatment as the Guild tab's
+-- own selection above: its own table, sharing the navButtons pool but never
+-- the dungeon or guild-handbook selection. `section` holds a ns.Monday.EVENTS
+-- id ("monday" | "open" | "omkc") rather than a handbook page id.
+local groupsSelected = { kind = "groups", section = nil, expanded = nil }
+
 -- Whichever selection the visible nav is currently describing. Everything that
 -- reads the nav (highlighting, scroll-into-view) goes through this rather than
--- naming one of the two tables, so neither tab has to know about the other.
+-- naming one of the three tables, so no tab has to know about the others.
 local function ActiveSelection()
-    return activeTab == "guild" and guildSelected or selected
+    if activeTab == "guild" then return guildSelected end
+    if activeTab == "groups" then return groupsSelected end
+    return selected
 end
 
 local function SortedDungeons()
@@ -911,36 +920,11 @@ local function UpdateNavHighlight()
     end
 end
 
--- Synthetic nav rows for the ns.Monday boards: not one of Data/Guild.lua's
--- pages (nothing there to add - each board is generated from ns.Monday, not
--- authored prose), so they're appended here rather than folded into
--- ns.GUILD_PAGES. Each still needs a `page` table of its own: the click
--- handler below reads `entry.page.children` for every "guild" row, and
--- neither of these has any. Order matches the nav: Mythic Monday first,
--- Open groups second, both after every real handbook page (Discord is last
--- in ns.GUILD_PAGES, so the boards sit below it). `title` is a static
--- fallback for the nav label itself (used before ns.Monday has loaded); the
--- page header inside SetMondayBody always asks ns.Monday.EventTitle(ev)
--- instead, so the two can't drift.
-local MONDAY_BOARD_PAGES = {
-    { id = "monday", title = "Mythic Monday" },
-    { id = "open",   title = "Open groups" },
-}
-local MONDAY_BOARD_IDS = {}
-for _, p in ipairs(MONDAY_BOARD_PAGES) do
-    MONDAY_BOARD_IDS[p.id] = true
-end
-
--- True for a synthetic ns.Monday board page id, as opposed to a real
--- Data/Guild.lua handbook page. Used everywhere a "guild" section id has to
--- be routed to SetMondayBody instead of GuildPage()/SetGuildBody.
-local function IsBoardPage(id)
-    return MONDAY_BOARD_IDS[id] == true
-end
-
 -- Guild handbook rows: one per top-level page, with a page's children folded
 -- in behind the same accordion the trash segments use. A parent row is still
--- a page in its own right, so it selects as well as expands.
+-- a page in its own right, so it selects as well as expands. The ns.Monday
+-- sign-up boards used to be appended here too; as of v1.8.0 they live on
+-- their own Groups tab (see GroupsNavEntries below) so this is handbook-only.
 local function GuildNavEntries()
     local entries = {}
     for _, page in ipairs(ns.GUILD_PAGES or {}) do
@@ -960,22 +944,60 @@ local function GuildNavEntries()
             end
         end
     end
-    for _, p in ipairs(MONDAY_BOARD_PAGES) do
-        local label = (ns.Monday and ns.Monday.EventTitle and ns.Monday.EventTitle(p.id)) or p.title
-        entries[#entries + 1] = { kind = "guild", section = p.id, page = p, label = label }
+    return entries
+end
+
+-- Static fallback title for a ns.Monday board, used only when the module (or
+-- BoardConfig itself) isn't there to ask - e.g. SetMondayBody's "module not
+-- loaded" early-out, where ns.Monday is nil by definition. Once ns.Monday is
+-- up, BoardConfig(ev).title is authoritative and this table is never
+-- consulted for it; keeping both in sync only matters for that narrow gap.
+local BOARD_FALLBACK_TITLE = { monday = "Mythic Monday", open = "Open groups", omkc = "OMKC" }
+local function BoardFallbackTitle(ev)
+    local cfg = ns.Monday and ns.Monday.BoardConfig and ns.Monday.BoardConfig(ev)
+    return (cfg and cfg.title) or BOARD_FALLBACK_TITLE[ev] or "Mythic Monday"
+end
+
+-- Sign-up board rows for the Groups tab: one per ns.Monday.EVENTS id that
+-- passes IsBoardVisible (guild membership gates Mythic Monday/Open groups,
+-- OMKC club membership gates the OMKC board), in EVENTS' own display order.
+-- No accordion here - every row is a leaf, so unlike GuildNavEntries there's
+-- no `page`/`parent`/`inset` to carry.
+local function GroupsNavEntries()
+    local entries = {}
+    if not (ns.Monday and ns.Monday.EVENTS and ns.Monday.IsBoardVisible) then
+        return entries
+    end
+    for _, ev in ipairs(ns.Monday.EVENTS) do
+        if ns.Monday.IsBoardVisible(ev) then
+            local cfg = ns.Monday.BoardConfig and ns.Monday.BoardConfig(ev)
+            local label = (cfg and cfg.title) or BoardFallbackTitle(ev)
+            entries[#entries + 1] = { kind = "groups", section = ev, label = label }
+        end
     end
     return entries
 end
 
--- `d` is the dungeon whose nav to build, and is ignored on the Guild tab: the
--- two navs share the button pool and the scroll frame but nothing else, so the
--- entry list forks here and the rest of the function stays common.
+-- Whether the Groups tab has anything to show at all - reuses
+-- GroupsNavEntries rather than re-walking EVENTS/IsBoardVisible a second way,
+-- so the tab's own visibility can never drift from its nav's.
+local function GroupsTabVisible()
+    return #GroupsNavEntries() > 0
+end
+
+-- `d` is the dungeon whose nav to build, and is ignored on the Guild and
+-- Groups tabs: all three navs share the button pool and the scroll frame but
+-- nothing else, so the entry list forks here and the rest of the function
+-- stays common.
 local function BuildNav(d)
     for _, btn in ipairs(navButtons) do btn:Hide() end
     for _, btn in ipairs(mdtRouteButtons) do btn:Hide() end
     local entries = {}
     if activeTab == "guild" then
         entries = GuildNavEntries()
+        d = nil
+    elseif activeTab == "groups" then
+        entries = GroupsNavEntries()
         d = nil
     elseif not d then
         for _, dungeon in ipairs(SortedDungeons()) do
@@ -1100,6 +1122,10 @@ local function BuildNav(d)
                 end
                 guildSelected = { kind = "guild", section = entry.section,
                                   expanded = expanded }
+                ns.safecall(ns.UI_Refresh)
+            elseif entry.kind == "groups" then
+                -- No accordion here - every Groups row is a leaf board.
+                groupsSelected = { kind = "groups", section = entry.section, expanded = nil }
                 ns.safecall(ns.UI_Refresh)
             elseif entry.kind == "dungeon" then
                 ns.safecall(ns.UI_SetDungeon, entry.dungeon)
@@ -1634,7 +1660,7 @@ local MONDAY_SKIP_REASON = { inparty = "in party", offline = "offline", self = "
 -- the Monday page shouldn't light up on Open groups and vice versa). Only
 -- affects the join action, not what's already signed up. Not persisted -
 -- both start at "any" each session, matching the contract's stated default.
-local mondaySelectedBracket = { monday = "any", open = "any" }
+local mondaySelectedBracket = { monday = "any", open = "any", omkc = "any" }
 
 local MONDAY_BTN_H, MONDAY_BTN_GAP = 22, 6
 
@@ -1921,7 +1947,10 @@ end)
 -- ShowMondayNameMenu's own fallback). State lives here rather than in
 -- GuildPlaybookDB: it's scratch for composing the next SignUp/SetWhen call,
 -- not something worth remembering across sessions. Not keyed by `ev` like
--- mondaySelectedBracket - only the open board ever reads it.
+-- mondaySelectedBracket - every board with BoardConfig(ev).schedule true
+-- (Open groups, OMKC) reads and writes the same composer state, so swapping
+-- between two schedule-capable boards mid-compose carries the draft across;
+-- only Mythic Monday (schedule = false) never touches it at all.
 local openWhenMode = "now"          -- "now" | "scheduled"
 local openWhenDay, openWhenHour, openWhenMinute
 local openWhenSeeded = false
@@ -1991,8 +2020,7 @@ local function SetMondayBody(ev)
     local anyScheduled = false
 
     if not ns.Monday then
-        local staticTitle = (ev == "open") and "Open groups" or "Mythic Monday"
-        local y = SetBodyText(C.DIM .. staticTitle .. " module not loaded." .. C.R)
+        local y = SetBodyText(C.DIM .. BoardFallbackTitle(ev) .. " module not loaded." .. C.R)
         HideUnusedMondayButtons()
         return y, anyScheduled
     end
@@ -2022,21 +2050,26 @@ local function SetMondayBody(ev)
     for _, g in ipairs(groups) do
         if g.when then anyScheduled = true break end
     end
+    -- Board flags (schedule/dateHeader/post/gate/title) come from
+    -- Monday.lua's BoardConfig(ev) rather than an `ev == "open"` check per
+    -- branch below, so a fourth board only ever needs a BOARDS[] entry
+    -- there, not a new special case scattered through this renderer.
+    local boardCfg = (ns.Monday.BoardConfig and ns.Monday.BoardConfig(ev)) or {}
 
     -- Header -----------------------------------------------------------
-    -- "monday" carries a target date in its header; "open" is a standing
-    -- board with no single date to show. EventTitle(ev) gives the board
-    -- name either way. Refresh isn't routed through ns.safecall: Refresh(ev)
-    -- returns false, "throttled" on its cooldown, and safecall discards a
-    -- wrapped call's return values, which would silently swallow that.
-    -- pcall here instead, so a throttled click still says something rather
-    -- than doing nothing.
-    local title = ns.Monday.EventTitle(ev) or (ev == "open" and "Open groups" or "Mythic Monday")
+    -- "monday" carries a target date in its header (dateHeader); "open" and
+    -- "omkc" are standing boards with no single date to show. EventTitle(ev)
+    -- gives the board name either way. Refresh isn't routed through
+    -- ns.safecall: Refresh(ev) returns false, "throttled" on its cooldown,
+    -- and safecall discards a wrapped call's return values, which would
+    -- silently swallow that. pcall here instead, so a throttled click still
+    -- says something rather than doing nothing.
+    local title = ns.Monday.EventTitle(ev) or BoardFallbackTitle(ev)
     local headerTail
-    if ev == "open" then
-        headerTail = anyScheduled and "now & scheduled" or "right now"
-    else
+    if boardCfg.dateHeader then
         headerTail = FormatMondayDate(ns.Monday.TargetDate())
+    else
+        headerTail = anyScheduled and "now & scheduled" or "right now"
     end
     line(C.HEAD .. title .. " — " .. headerTail .. C.R, {
         { label = "Refresh", width = 70, align = "right",
@@ -2065,7 +2098,7 @@ local function SetMondayBody(ev)
             filled = 5 - (missing.T and 1 or 0) - (missing.H and 1 or 0) - (missing.D or 0)
         end
         status = "You: leading " .. FormatMondayKey(myKey and myKey.level, myKey and myKey.name)
-        if ev == "open" and mine and mine.when then
+        if boardCfg.schedule and mine and mine.when then
             status = status .. ", " .. ns.Monday.FormatWhen(mine.when, GetServerTime(), true)
         end
         status = status .. " (" .. filled .. "/5)"
@@ -2076,7 +2109,7 @@ local function SetMondayBody(ev)
     end
     line(C.BODY .. status .. C.R)
 
-    -- Post to guild ----------------------------------------------------
+    -- Post to guild / OMKC -----------------------------------------------
     -- ChatLine(ev) itself is the "signed up" gate: it comes back nil (with
     -- a reason - "notsignedup", or "full" once my own group fills up) until
     -- there's something postable, so the button disables off the same nil
@@ -2096,11 +2129,15 @@ local function SetMondayBody(ev)
     elseif chatReason == "full" then
         line(C.DIM .. "Group is full - nothing to post." .. C.R)
     end
+    -- Label and transport both come off boardCfg.post: "GUILD" boards keep
+    -- the guild-chat wording, "CLUB" (OMKC) gets its own label so nobody
+    -- mistakes it for a guild-wide post.
+    local postLabel = (boardCfg.post == "CLUB") and "Post to OMKC" or "Post to guild"
     line(" ", {
-        { label = "Post to guild", width = 120, disabled = (chatLine == nil),
+        { label = postLabel, width = 120, disabled = (chatLine == nil),
           onClick = function() ns.safecall(function()
-              if not ns.Monday.PostToGuild then return end
-              local ok, reason = ns.Monday.PostToGuild(ev)
+              if not ns.Monday.Post then return end
+              local ok, reason = ns.Monday.Post(ev)
               if ok == false then
                   if reason == "full" then
                       print("|cffff4040Mythic Monday:|r Your group is full.")
@@ -2111,6 +2148,7 @@ local function SetMondayBody(ev)
                   elseif reason == "throttled" then msg = "rate-limited, try again in a minute"
                   elseif reason == "inkey" then msg = "can't post from inside a key"
                   elseif reason == "noguild" then msg = "not in a guild"
+                  elseif reason == "noclub" then msg = "not in the OMKC club"
                   end
                   print("|cffff4040Mythic Monday:|r " .. msg)
               end
@@ -2126,7 +2164,7 @@ local function SetMondayBody(ev)
         { label = "Lead with my key", width = 130, disabled = (myKey == nil),
           onClick = function() ns.safecall(function()
               local opts = { intent = "lead" }
-              if ev == "open" and openWhenMode == "scheduled" then
+              if boardCfg.schedule and openWhenMode == "scheduled" then
                   opts.when = ns.Monday.BuildWhen(openWhenDay, openWhenHour, openWhenMinute)
               end
               local ok, reason = ns.Monday.SignUp(ev, opts)
@@ -2148,12 +2186,12 @@ local function SetMondayBody(ev)
     end
     line(" ", signupButtons)
 
-    -- When: (Open board only) -------------------------------------------
+    -- When: (schedule-capable boards only - Open groups, OMKC) ------------
     -- Feeds "Lead with my key" above via opts.when, and - once already
     -- leading - lets the leader push a change out live through SetWhen. Not
     -- shown on the Monday board: that board's key IS the date, it never
     -- carries a `when` of its own.
-    if ev == "open" then
+    if boardCfg.schedule then
         EnsureOpenWhenSeeded()
         local leadingNow = me and me.intent == "lead"
         local toggleButtons = {
@@ -2437,14 +2475,14 @@ local function SetMondayBody(ev)
     return y - LINE_GAP, anyScheduled
 end
 
--- Open board repaint ticker + board-page-shown tracking ----------------
+-- Board repaint ticker (Open groups, OMKC) + board-page-shown tracking ----
 -- FormatWhen's "(in 2h 15m)" / "(started 12m ago)" relative suffix ages on
--- its own even with nothing else on the page changing, so the open board
+-- its own even with nothing else on the page changing, so a heartbeat board
 -- needs a periodic repaint that neither a callback nor a click provides.
--- Only runs while the open board is actually on screen, and only while at
--- least one group there carries a `when` - a board with only right-now
--- groups never changes between callback-driven repaints, so a ticker there
--- would be wasted work.
+-- Only runs while a heartbeat board (BoardConfig(ev).heartbeat - Open
+-- groups, OMKC) is actually on screen, and only while at least one group
+-- there carries a `when` - a board with only right-now groups never changes
+-- between callback-driven repaints, so a ticker there would be wasted work.
 local openRepaintTicker
 
 local function StopOpenRepaintTicker()
@@ -2461,7 +2499,9 @@ local function EnsureOpenRepaintTicker(anyScheduled)
     end
     if openRepaintTicker then return end
     openRepaintTicker = C_Timer.NewTicker(60, function()
-        if frame:IsShown() and activeTab == "guild" and guildSelected.section == "open" then
+        local ev = activeTab == "groups" and groupsSelected.section or nil
+        local cfg = ev and ns.Monday and ns.Monday.BoardConfig and ns.Monday.BoardConfig(ev)
+        if frame:IsShown() and cfg and cfg.heartbeat then
             ns.safecall(ns.UI_Refresh)
         else
             StopOpenRepaintTicker()
@@ -2553,17 +2593,41 @@ end
 -- redraws also re-settles the geometry.
 
 local function ApplyTabLayout()
-    -- Membership can drop while the guild page is open - a /gquit, or a
-    -- reload on an alt outside the guild - so fall back before drawing
-    -- anything the player is no longer entitled to.
+    -- Membership/visibility can drop while the tab is open - a /gquit, a
+    -- reload on an alt outside the guild, leaving the OMKC club - so fall
+    -- back before drawing anything the player is no longer entitled to.
     if activeTab == "guild" and not ns.isGuildMember then
         activeTab = "dungeons"
     end
-    -- One tab is no tab: for a non-member there is nothing to switch to, so
-    -- the strip is dead chrome and the rows below reclaim its band.
-    local strip = ns.isGuildMember
+    if activeTab == "groups" and not GroupsTabVisible() then
+        activeTab = "dungeons"
+    end
+    -- Landing on the Groups tab - fresh, or bounced back after the
+    -- previously-shown board's visibility dropped (e.g. an OMKC member
+    -- leaving the club while its page is open) - picks the first board still
+    -- on offer rather than showing a blank nav.
+    if activeTab == "groups" then
+        local entries = GroupsNavEntries()
+        local stillVisible = groupsSelected.section
+                              and ns.Monday and ns.Monday.IsBoardVisible
+                              and ns.Monday.IsBoardVisible(groupsSelected.section)
+        if not stillVisible then
+            groupsSelected = { kind = "groups", section = entries[1] and entries[1].section,
+                                expanded = nil }
+        end
+    end
+    -- One tab is no tab: for a player with neither guild membership nor a
+    -- visible board there is nothing to switch to, so the strip is dead
+    -- chrome and the rows below reclaim its band. Otherwise each of Guild
+    -- and Groups shows or hides independently off its own gate.
+    local groupsVisible = GroupsTabVisible()
+    local strip = ns.isGuildMember or groupsVisible
     for key, btn in pairs(tabButtons) do
-        btn:SetShown(strip)
+        local shown = strip
+        if key == "guild" then shown = strip and ns.isGuildMember
+        elseif key == "groups" then shown = strip and groupsVisible
+        end
+        btn:SetShown(shown)
         btn:SetAlpha(key == activeTab and 1 or 0.55)
     end
     local drop = strip and HEADER_ROW_STEP or 0
@@ -2573,30 +2637,32 @@ local function ApplyTabLayout()
     navScroll:SetPoint("TOPLEFT", 14, NAV_TOP_Y - drop)
     navScroll:SetPoint("BOTTOMLEFT", 14, 14)
 
-    local guild = (activeTab == "guild")
     -- The role filter and the model side-cart are about a dungeon; neither
-    -- means anything on a handbook page. The nav column stays: both tabs fill
-    -- it, one with bosses and one with handbook sections.
-    for _, btn in pairs(roleButtons) do btn:SetShown(not guild) end
-    autoOpenCheck:SetShown(not guild)
-    if guild then
+    -- means anything on a handbook page or a sign-up board. The nav column
+    -- stays: all three tabs fill it, one with bosses, one with handbook
+    -- sections, one with boards.
+    local nonDungeon = (activeTab == "guild") or (activeTab == "groups")
+    for _, btn in pairs(roleButtons) do btn:SetShown(not nonDungeon) end
+    autoOpenCheck:SetShown(not nonDungeon)
+    if nonDungeon then
         sidecar:Hide()
     else
-        -- All owned by SetGuildBody while the guild tab is up. Nothing on the
-        -- dungeon side ever draws them, so nothing else would hide them either,
-        -- and a stale hero would sit on top of the playbook text.
+        -- All owned by SetGuildBody/SetMondayBody while a non-dungeon tab is
+        -- up. Nothing on the dungeon side ever draws them, so nothing else
+        -- would hide them either, and a stale hero would sit on top of the
+        -- playbook text.
         hero:Hide()
         HideInvite()
     end
 
     -- The board buttons are pooled and only ever repainted by SetMondayBody
     -- itself, so any render path that ISN'T a board page has to hide them
-    -- here - otherwise a Lead/Join/Disband button from Monday or Open groups
-    -- keeps floating over a handbook page or a dungeon playbook after
-    -- navigating away (including navigating from one board straight to the
-    -- other). SetMondayBody resets the same counter and re-hides on its own
-    -- turn, so this only has to cover every path that skips it.
-    if not (guild and IsBoardPage(guildSelected.section)) then
+    -- here - otherwise a Lead/Join/Disband button from any board keeps
+    -- floating over a handbook page or a dungeon playbook after navigating
+    -- away (including navigating from one board straight to another).
+    -- SetMondayBody resets the same counter and re-hides on its own turn, so
+    -- this only has to cover every path that skips it.
+    if not (activeTab == "groups" and groupsSelected.section) then
         mondayButtonCount = 0
         HideUnusedMondayButtons()
     end
@@ -2617,19 +2683,20 @@ function ns.UI_Refresh()
     ApplyTabLayout()
 
     -- Board-page transition bookkeeping - shared by every exit this function
-    -- can take, since guild handbook pages, dungeon pages and both boards all
+    -- can take, since guild handbook pages, dungeon pages and every board all
     -- funnel back through here on every navigation. RequestRoster() fires
-    -- once on entry to a board page; the repaint ticker only ever runs for
-    -- the open board and is torn down the moment it isn't the page showing.
-    local currentBoard = (activeTab == "guild" and IsBoardPage(guildSelected.section))
-                          and guildSelected.section or nil
+    -- once on entry to a board page; the repaint ticker only ever runs for a
+    -- heartbeat board (Open groups, OMKC) and is torn down the moment it
+    -- isn't the page showing. Boards live on the Groups tab as of v1.8.0.
+    local currentBoard = (activeTab == "groups") and groupsSelected.section or nil
     if currentBoard ~= lastShownBoard then
         lastShownBoard = currentBoard
         if currentBoard and ns.Monday and ns.Monday.RequestRoster then
             ns.safecall(ns.Monday.RequestRoster)
         end
     end
-    if currentBoard ~= "open" then
+    if not (currentBoard and ns.Monday and ns.Monday.BoardConfig
+            and ns.Monday.BoardConfig(currentBoard).heartbeat) then
         StopOpenRepaintTicker()
     end
 
@@ -2640,24 +2707,28 @@ function ns.UI_Refresh()
         BuildNav(nil)
         UpdateNavHighlight()
         subtitle:SetText(ns.GUILD_NAME .. C.DIM .. "  —  guild only" .. C.R)
-        -- A ns.Monday board is generated from ns.Monday, not a Data/Guild.lua
-        -- page, so it takes its own exit here rather than going through
-        -- GuildPage()/SetGuildBody (GuildPage() would just fall back to the
-        -- first real page for an id it doesn't recognise).
-        if IsBoardPage(guildSelected.section) then
-            local ev = guildSelected.section
-            local title = (ns.Monday and ns.Monday.EventTitle(ev))
-                          or (ev == "open" and "Open groups" or "Mythic Monday")
-            sectionTitle:SetText(title)
-            local bodyH, anyScheduled = SetMondayBody(ev)
-            content:SetHeight(bodyH + 20)
-            if ev == "open" then
-                EnsureOpenRepaintTicker(anyScheduled)
-            end
-        else
-            local page = GuildPage()
-            sectionTitle:SetText(page and page.title or "Guild")
-            content:SetHeight(SetGuildBody(page) + 20)
+        local page = GuildPage()
+        sectionTitle:SetText(page and page.title or "Guild")
+        content:SetHeight(SetGuildBody(page) + 20)
+        scroll:SetVerticalScroll(0)
+        return
+    end
+    -- The Groups tab (sign-up boards) shares nothing with a handbook or
+    -- playbook page but the scroll frame either, same reasoning as the guild
+    -- exit just above - its own board is generated from ns.Monday, not a
+    -- Data/Guild.lua page.
+    if activeTab == "groups" then
+        BuildNav(nil)
+        UpdateNavHighlight()
+        local ev = groupsSelected.section
+        local cfg = ev and ns.Monday and ns.Monday.BoardConfig and ns.Monday.BoardConfig(ev)
+        local subtitleText = (cfg and cfg.gate == "club") and "Oceanic Mythic Keys Club" or "Sign-up boards"
+        subtitle:SetText(C.DIM .. subtitleText .. C.R)
+        sectionTitle:SetText(BoardFallbackTitle(ev))
+        local bodyH, anyScheduled = SetMondayBody(ev)
+        content:SetHeight(bodyH + 20)
+        if cfg and cfg.heartbeat then
+            EnsureOpenRepaintTicker(anyScheduled)
         end
         scroll:SetVerticalScroll(0)
         return
@@ -2762,15 +2833,25 @@ function ns.UI_Toggle()
     end
 end
 
--- Entry point for `/gp monday` and `/gp now` (Core.lua). `ev` defaults to
--- "monday" for nil or any id that isn't one of the two known boards, so a
--- stale/misspelled call can't land on a blank page. UI_Show() no-ops on an
--- already-open frame, so the tab/page switch is applied first and the
--- redraw is forced explicitly rather than relying on UI_Show to do it.
+-- Entry point for `/playbook monday`, `/playbook now` and `/playbook omkc`
+-- (Core.lua). `ev` defaults to the first ns.Monday.EVENTS entry for nil or
+-- any id that isn't one of the known boards, so a stale/misspelled call
+-- can't land on a blank page. Boards live on the Groups tab as of v1.8.0.
+-- UI_Show() no-ops on an already-open frame, so the tab/page switch is
+-- applied first and the redraw is forced explicitly rather than relying on
+-- UI_Show to do it.
 function ns.UI_ShowMonday(ev)
-    if not IsBoardPage(ev) then ev = "monday" end
-    activeTab = "guild"
-    guildSelected = { kind = "guild", section = ev, expanded = nil }
+    local valid = false
+    if ns.Monday and ns.Monday.EVENTS then
+        for _, e in ipairs(ns.Monday.EVENTS) do
+            if e == ev then valid = true break end
+        end
+    end
+    if not valid then
+        ev = ns.Monday and ns.Monday.EVENTS and ns.Monday.EVENTS[1] or "monday"
+    end
+    activeTab = "groups"
+    groupsSelected = { kind = "groups", section = ev, expanded = nil }
     if frame:IsShown() then
         ns.safecall(ns.UI_Refresh)
     else
@@ -2780,14 +2861,26 @@ end
 
 -- Monday.lua loads before UI.lua per the TOC, so ns.Monday is normally
 -- present by the time this runs; guarded anyway since a load-order change or
--- a stripped file must not turn into a startup error. RegisterCallback now
--- hands back which board changed; redraw only if that's the board actually
--- on screen - a background change on the open board while Monday is showing
--- (or a hidden panel, or the dungeon tab) has nothing to repaint yet.
+-- a stripped file must not turn into a startup error. RegisterCallback hands
+-- back which board changed. Visibility (guild or OMKC club membership) can
+-- flip independent of which board is on screen, so the tab strip and Groups
+-- nav are re-settled on every fire regardless of which board it names -
+-- otherwise a member gaining or losing OMKC access wouldn't see the Groups
+-- tab/entry move until some unrelated redraw happened to run. The full
+-- UI_Refresh (and the layout/nav rebuild it already includes) only fires
+-- when the change actually hit the board on screen; a background change on
+-- a board that isn't showing has nothing else to repaint.
 if ns.Monday then
     ns.Monday.RegisterCallback(function(ev)
-        if frame:IsShown() and activeTab == "guild" and guildSelected.section == ev then
+        if not frame:IsShown() then return end
+        if activeTab == "groups" and groupsSelected.section == ev then
             ns.safecall(ns.UI_Refresh)
+            return
+        end
+        ns.safecall(ApplyTabLayout)
+        if activeTab == "groups" then
+            ns.safecall(BuildNav, nil)
+            ns.safecall(UpdateNavHighlight)
         end
     end)
 end

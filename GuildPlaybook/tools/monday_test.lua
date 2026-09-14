@@ -41,9 +41,23 @@ local DEFAULT_CAL = { year = 2026, month = 9, monthDay = 8, weekday = 3, hour = 
 local TARGET = "2026-09-14"
 local MON = "M" .. TARGET       -- the Monday board's wire key
 local OPEN = "open"             -- the open board's wire key
+local OMKC = "omkc"             -- the omkc board's wire key
 -- Dashes are pattern quantifiers, so the key needs escaping wherever it is
 -- matched rather than compared.
 local MON_PAT = MON:gsub("%-", "%%-")
+
+-- Sentinel numbers for the C_Club stubs below - not real Blizzard values,
+-- just what newEnv()'s Enum stub hands back, kept as their own constants so
+-- a test building a club table does not depend on load order.
+local CLUB_TYPE_CHARACTER = 1
+local CLUB_STREAM_GENERAL = 1
+
+-- A membership Ready("omkc") accepts - since Ready gates omkc on club
+-- membership alone, any test that signs up or posts on omkc needs this.
+local function omkcClub()
+    return { clubs = { { clubId = 501, name = "Oceanic Mythic Keys Club", clubType = CLUB_TYPE_CHARACTER,
+        streams = { { streamId = 9, streamType = CLUB_STREAM_GENERAL } } } } }
+end
 
 local function newEnv(opts)
     opts = opts or {}
@@ -59,6 +73,7 @@ local function newEnv(opts)
         printed = {},
         timers = {},
         tickers = {},
+        channelSent = {},
     }
 
     _G.GuildPlaybookDB = opts.db or {}
@@ -148,11 +163,51 @@ local function newEnv(opts)
     }
     _G.C_ChatInfo = {
         RegisterAddonMessagePrefix = function() return 0 end,
-        SendAddonMessage = function() end,
+        SendAddonMessage = function(prefix, text, chattype, target)
+            env.channelSent[#env.channelSent + 1] = {
+                prefix = prefix, text = text, chattype = chattype, target = target,
+            }
+        end,
         SendChatMessage = function(text, chattype)
             env.chat[#env.chat + 1] = { text = text, chattype = chattype, via = "C_ChatInfo" }
         end,
     }
+
+    -- OMKC (Oceanic Mythic Keys Club): env.clubs is the list GetSubscribedClubs
+    -- hands back, or SECRET to model an active-key lockdown. Each club may
+    -- carry its own `streams` list (or SECRET) for GetStreams. clubSent and
+    -- clubChannelAdds record what M.ClubTest / M.Post actually did, so tests
+    -- can assert on the call rather than just its result.
+    env.clubs = opts.clubs or {}
+    env.clubSent = {}
+    env.clubChannelAdds = {}
+    _G.Enum = _G.Enum or {}
+    _G.Enum.ClubType = { Guild = 0, Character = 1, BattleNet = 2, Other = 3 }
+    _G.Enum.ClubStreamType = { General = 1, Officer = 2, GuildAchievement = 3, GuildRecruitment = 4 }
+    _G.C_Club = {
+        GetSubscribedClubs = function() return env.clubs end,
+        GetStreams = function(clubId)
+            for _, c in ipairs(type(env.clubs) == "table" and env.clubs or {}) do
+                if c.clubId == clubId then return c.streams or {} end
+            end
+            return {}
+        end,
+        SendMessage = function(clubId, streamId, text)
+            env.clubSent[#env.clubSent + 1] = { clubId = clubId, streamId = streamId, text = text }
+        end,
+        AddClubStreamChatChannel = function(clubId, streamId)
+            env.clubChannelAdds[#env.clubChannelAdds + 1] = { clubId = clubId, streamId = streamId }
+        end,
+    }
+    -- A flat id1, name1, id2, name2, ... list, exactly GetChannelList's shape.
+    _G.GetChannelList = function()
+        local out = {}
+        for _, ch in ipairs(env.channels or {}) do
+            out[#out + 1] = ch.id
+            out[#out + 1] = ch.name
+        end
+        return table.unpack(out)
+    end
     _G.C_Timer = {
         After = function(delay, fn)
             env.timers[#env.timers + 1] = { at = env.now + (delay or 0), fn = fn }
@@ -319,21 +374,25 @@ end
 do
     local env = newEnv().load()
 
-    eq(#env.M.EVENTS, 2, "there are two boards")
+    eq(#env.M.EVENTS, 3, "there are three boards")
     eq(env.M.EVENTS[1], "monday", "monday is the first")
     eq(env.M.EVENTS[2], "open", "open is the second")
+    eq(env.M.EVENTS[3], "omkc", "omkc is the third")
     eq(env.M.EventTitle("monday"), "Mythic Monday", "the monday board has a title")
     eq(env.M.EventTitle("open"), "Open groups", "so does the open board")
+    eq(env.M.EventTitle("omkc"), "OMKC", "and so does the omkc board")
     eq(env.M.EventTitle("nope"), nil, "and an unknown id has none")
 
     -- Event id -> wire key.
     eq(env.M.WireKey("monday"), MON, "the monday wire key carries its date")
     eq(env.M.WireKey("open"), OPEN, "the open wire key is a literal")
+    eq(env.M.WireKey("omkc"), "omkc", "so is the omkc wire key")
     eq(env.M.WireKey("nope"), nil, "an unknown event has no wire key")
 
     -- Wire key -> event id.
     eq(env.M.EventFromWire(MON), "monday", "the monday key maps back")
     eq(env.M.EventFromWire(OPEN), "open", "the open key maps back")
+    eq(env.M.EventFromWire("omkc"), "omkc", "and the omkc key maps back")
     eq(env.M.EventFromWire("M2026-09-07"), nil, "last week's monday key is stale")
     eq(env.M.EventFromWire("M2026-09-21"), nil, "next week's is not ours either")
     eq(env.M.EventFromWire("raid"), nil, "an invented key is unknown")
@@ -733,17 +792,30 @@ do
         "Mythic Monday (Mon 14 Sep): 0 groups, 0 in pool. Right now: 0 groups, 1 in pool. You: in the pool, D, low (right now). /playbook monday",
         "an open-only sign-up names the board")
 
-    -- The login path asks both boards and prints the summary five seconds on.
+    -- The login path asks every board it can. Not an OMKC member, so omkc's
+    -- Ready fails on "noclub" and only the two guild boards get an R.
     local login = newEnv().load()
     login.fire("PLAYER_ENTERING_WORLD", true, false)
     check(login.last("R", MON) ~= nil, "login broadcasts an R for monday")
     check(login.last("R", OPEN) ~= nil, "and one for the open board")
-    eq(login.count("R"), 2, "two requests, one per board")
+    check(login.last("R", "omkc") == nil, "but not for omkc - not a club member")
+    eq(login.count("R"), 2, "two requests, one per accessible board")
     local before = #login.printed
     login.tick(5)
     check(#login.printed > before, "and prints the summary afterwards")
     check(login.printed[#login.printed]:find("Right now:", 1, true) ~= nil,
         "which covers both boards", login.printed[#login.printed])
+end
+
+do
+    -- An OMKC member's login also asks omkc - a separate env/do block, since
+    -- newEnv() swaps the shared stub globals (print, C_Timer, ...) to close
+    -- over its own env, and the previous block's `login.tick` must run
+    -- against the globals still pointed at it.
+    local clubLogin = newEnv(omkcClub()).load()
+    clubLogin.fire("PLAYER_ENTERING_WORLD", true, false)
+    check(clubLogin.last("R", "omkc") ~= nil, "a club member's login also asks omkc")
+    eq(clubLogin.count("R"), 3, "three requests, one per board")
 end
 
 -- ------------------------------------------------------------------
@@ -2333,6 +2405,11 @@ do
     _G.C_GuildInfo = { GuildRoster = function() error("boom") end }
     local ok2 = pcall(env.M.RequestRoster)
     check(ok2, "or if the call itself throws")
+
+    -- newEnv() deliberately never touches C_GuildInfo (see section 23), so
+    -- this throwing stub would otherwise leak into every test that runs
+    -- after this one and hits the login summary's own GuildRoster() call.
+    _G.C_GuildInfo = nil
 end
 
 do
@@ -2421,6 +2498,408 @@ do
     check(env.last("D", OPEN) == nil, "no D for an unscheduled group")
     eq(env.board("open").me.leader, "Vizzo-" .. REALM, "still leading")
     eq(#env.M.Groups("open"), 1, "and still shown")
+end
+
+-- ------------------------------------------------------------------
+-- 33. M.BoardConfig, and omkc mirrors open's heartbeat/schedule mechanics
+-- ------------------------------------------------------------------
+
+do
+    local env = newEnv().load()
+
+    local mon = env.M.BoardConfig("monday")
+    eq(mon.title, "Mythic Monday", "monday's config title")
+    eq(mon.schedule, false, "monday has no schedule")
+    eq(mon.heartbeat, false, "and no heartbeat")
+    eq(mon.dateHeader, true, "but does carry a date header")
+    eq(mon.slash, "monday", "its slash keyword")
+    eq(mon.post, "GUILD", "posts to guild chat")
+    eq(mon.gate, "guild", "and is guild-gated")
+
+    local open = env.M.BoardConfig("open")
+    eq(open.schedule, true, "open is schedule-capable")
+    eq(open.heartbeat, true, "and heartbeat-capable")
+    eq(open.dateHeader, false, "with no date header")
+    eq(open.slash, "now", "its slash keyword")
+    eq(open.post, "GUILD", "posts to guild chat")
+    eq(open.gate, "guild", "and is guild-gated")
+
+    local omkc = env.M.BoardConfig("omkc")
+    eq(omkc.title, "OMKC", "omkc's title")
+    eq(omkc.schedule, true, "omkc is schedule-capable, same as open")
+    eq(omkc.heartbeat, true, "and heartbeat-capable, same as open")
+    eq(omkc.dateHeader, false, "with no date header")
+    eq(omkc.slash, "omkc", "its slash keyword")
+    eq(omkc.post, "CLUB", "but posts to the club instead of guild chat")
+    eq(omkc.gate, "club", "and is club-gated, not guild-gated")
+
+    eq(env.M.BoardConfig("nope"), nil, "an unknown board has no config")
+
+    -- A fresh table every call, so a caller cannot corrupt shared state.
+    local a = env.M.BoardConfig("open")
+    local b = env.M.BoardConfig("open")
+    check(a ~= b, "BoardConfig returns a new table each time")
+    a.slash = "mutated"
+    eq(env.M.BoardConfig("open").slash, "now", "mutating one copy leaves the config alone")
+end
+
+do
+    -- Open and omkc share every heartbeat/schedule mechanic; run the same
+    -- checks parametrised over both rather than duplicating sections 15/27/32.
+    for _, ev in ipairs({ "open", "omkc" }) do
+        local baseOpts = ev == "omkc" and omkcClub() or {}
+        local env = newEnv(baseOpts).load()
+        env.fire("PLAYER_ENTERING_WORLD", false, false)
+        eq(env.liveTickers(), 0, ("no heartbeat before signing up (%s)"):format(ev))
+
+        env.M.SignUp(ev, { intent = "join", bracket = "any" })
+        eq(env.liveTickers(), 1, ("signing up starts a heartbeat (%s)"):format(ev))
+        env.clearSent()
+
+        env.tick(5 * 60)
+        check(env.last("E", ev) ~= nil, ("the heartbeat re-sends the entry (%s)"):format(ev))
+
+        env.M.Withdraw(ev)
+        eq(env.liveTickers(), 0, ("withdrawing stops the heartbeat (%s)"):format(ev))
+
+        -- SetWhen and the schedule's grace window work the same way too.
+        local schedOpts = ev == "omkc" and omkcClub() or {}
+        schedOpts.key = { mapID = 501, level = 12 }
+        local sched = newEnv(schedOpts).load()
+        sched.fire("PLAYER_ENTERING_WORLD", false, false)
+        local when = sched.now + 3600
+        sched.M.SignUp(ev, { intent = "lead", when = when })
+        eq(sched.M.Groups(ev)[1].when, when, ("the group carries its when (%s)"):format(ev))
+        sched.clearSent()
+        sched.now = when + 2 * 60 * 60 + 60
+        sched.fire("PLAYER_ENTERING_WORLD", true, false)
+        check(sched.last("D", ev) ~= nil, ("an overdue schedule self-disbands (%s)"):format(ev))
+    end
+
+    -- The monday board needs none of this: no heartbeat, no `when`.
+    local mon = newEnv({ key = { mapID = 501, level = 12 } }).load()
+    mon.fire("PLAYER_ENTERING_WORLD", false, false)
+    local ok, why = mon.M.SetWhen("monday", mon.now + 3600)
+    eq(ok, false, "SetWhen refuses the monday board")
+    eq(why, "badevent", "with badevent as the reason")
+end
+
+-- ------------------------------------------------------------------
+-- 34. M.ClubInfo / M.IsClubMember
+-- ------------------------------------------------------------------
+
+do
+    local env = newEnv().load()
+    eq(env.M.ClubInfo(), nil, "not in any club: no club info")
+    eq(env.M.IsClubMember(), false, "and not a member")
+end
+
+do
+    local env = newEnv({ clubs = {
+        { clubId = 501, name = "  oceanic mythic keys club  ", clubType = CLUB_TYPE_CHARACTER,
+          streams = { { streamId = 9, streamType = CLUB_STREAM_GENERAL } } },
+    } }).load()
+    local info = env.M.ClubInfo()
+    check(info ~= nil, "a matching Character club, padded and differently cased, is still found")
+    eq(info.clubId, 501, "with its clubId")
+    eq(info.streamId, 9, "and its General stream id")
+    eq(env.M.IsClubMember(), true, "IsClubMember agrees")
+end
+
+do
+    -- A club of the same name but the wrong type does not count.
+    local env = newEnv({ clubs = {
+        { clubId = 9, name = "Oceanic Mythic Keys Club", clubType = 0 },
+    } }).load()
+    eq(env.M.ClubInfo(), nil, "a same-named club of the wrong type is not OMKC")
+end
+
+do
+    -- A member whose General stream has not loaded yet: still a member (the
+    -- tab shows), just with no streamId (Post refuses it separately).
+    local env = newEnv({ clubs = {
+        { clubId = 501, name = "Oceanic Mythic Keys Club", clubType = CLUB_TYPE_CHARACTER, streams = {} },
+    } }).load()
+    local info = env.M.ClubInfo()
+    check(info ~= nil, "membership does not wait on the stream list")
+    eq(info.streamId, nil, "but the stream id is unknown until it loads")
+end
+
+do
+    -- A Secret Value from GetSubscribedClubs fails closed, never throws.
+    local env = newEnv().load()
+    local secret = {}
+    _G.issecretvalue = function(v) return v == secret end
+    _G.C_Club.GetSubscribedClubs = function() return secret end
+    eq(env.M.ClubInfo(), nil, "a secret club list yields nil, not a throw")
+    eq(env.error, nil, "and raises nothing")
+end
+
+do
+    local env = newEnv({ clubs = {
+        { clubId = 501, name = "Oceanic Mythic Keys Club", clubType = CLUB_TYPE_CHARACTER,
+          streams = { { streamId = 9, streamType = CLUB_STREAM_GENERAL } } },
+    } }).load()
+    eq(env.M.IsClubMember(), true, "starts a member")
+
+    local seen = {}
+    env.M.RegisterCallback(function(ev) seen[#seen + 1] = ev end)
+
+    env.clubs = {}
+    env.fire("CLUB_REMOVED")
+    eq(env.M.IsClubMember(), false, "CLUB_REMOVED invalidates the cache")
+    eq(seen[#seen], "omkc", "and fires the omkc callback since membership flipped")
+
+    -- Firing again with nothing changed must not re-fire.
+    seen = {}
+    env.fire("CLUB_REMOVED")
+    eq(#seen, 0, "no callback when membership did not actually change")
+
+    -- INITIAL_CLUBS_LOADED / CLUB_ADDED / CLUB_STREAMS_LOADED invalidate too.
+    env.clubs = {
+        { clubId = 501, name = "Oceanic Mythic Keys Club", clubType = CLUB_TYPE_CHARACTER,
+          streams = { { streamId = 9, streamType = CLUB_STREAM_GENERAL } } },
+    }
+    env.fire("CLUB_ADDED")
+    eq(env.M.IsClubMember(), true, "CLUB_ADDED picks up the new membership")
+    env.fire("INITIAL_CLUBS_LOADED")
+    eq(env.M.IsClubMember(), true, "INITIAL_CLUBS_LOADED re-confirms it")
+    env.fire("CLUB_STREAMS_LOADED")
+    eq(env.M.ClubInfo().streamId, 9, "CLUB_STREAMS_LOADED re-reads the stream")
+end
+
+-- ------------------------------------------------------------------
+-- 35. M.IsBoardVisible across guild/club membership
+-- ------------------------------------------------------------------
+
+do
+    local env = newEnv().load()
+    env.ns.isGuildMember = true
+    eq(env.M.IsBoardVisible("monday"), true, "monday shows to a guild member")
+    eq(env.M.IsBoardVisible("open"), true, "so does open")
+    eq(env.M.IsBoardVisible("omkc"), false, "but omkc needs club membership, not guild")
+end
+
+do
+    local env = newEnv({ clubs = {
+        { clubId = 501, name = "Oceanic Mythic Keys Club", clubType = CLUB_TYPE_CHARACTER,
+          streams = { { streamId = 9, streamType = CLUB_STREAM_GENERAL } } },
+    } }).load()
+    env.ns.isGuildMember = true
+    eq(env.M.IsBoardVisible("omkc"), true, "omkc shows once we are a club member too")
+
+    env.ns.isGuildMember = false
+    eq(env.M.IsBoardVisible("monday"), false, "monday hides without the guild")
+    eq(env.M.IsBoardVisible("open"), false, "so does open")
+    eq(env.M.IsBoardVisible("omkc"), true, "but omkc still shows - it cares nothing for guild membership")
+end
+
+do
+    local env = newEnv().load()
+    env.ns.isGuildMember = false
+    eq(env.M.IsBoardVisible("monday"), false, "neither guild nor club: monday hidden")
+    eq(env.M.IsBoardVisible("open"), false, "open hidden")
+    eq(env.M.IsBoardVisible("omkc"), false, "omkc hidden")
+    eq(env.M.IsBoardVisible("nope"), false, "and an unknown board is never visible")
+end
+
+-- ------------------------------------------------------------------
+-- 36. Posting to the OMKC club channel
+-- ------------------------------------------------------------------
+
+do
+    -- Not an OMKC member at all: Ready refuses before ChatLine ever runs,
+    -- guild membership notwithstanding.
+    local env = leaderEnv()
+    eq(select(2, env.M.SignUp("omkc", { intent = "lead" })), "noclub",
+        "SignUp on omkc without club membership is refused")
+    eq(select(2, env.M.Post("omkc")), "noclub", "so is posting")
+end
+
+do
+    local opts = omkcClub()
+    opts.key = { mapID = 501, level = 12 }
+    local env = newEnv(opts).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+
+    eq(select(2, env.M.Post("omkc")), "notsignedup",
+        "nothing to post before signing up, even as a club member")
+
+    env.M.SignUp("omkc", { intent = "lead" })
+    eq(env.M.Post("omkc"), true, "a club member can post")
+    eq(#env.clubSent, 1, "one message went to the club")
+    eq(env.clubSent[1].clubId, 501, "the right club")
+    eq(env.clubSent[1].streamId, 9, "and the right (General) stream")
+    eq(env.clubSent[1].text, env.M.ChatLine("omkc"), "carrying exactly the chat line")
+    eq(#env.chat, 0, "nothing went to guild chat")
+
+    eq(env.M.Post("omkc"), false, "a second post inside the window is refused")
+    eq(select(2, env.M.Post("omkc")), "throttled", "and says why")
+    eq(#env.clubSent, 1, "with nothing more sent")
+
+    env.now = env.now + 61
+    eq(env.M.Post("omkc"), true, "and reopens after a minute")
+    eq(#env.clubSent, 2, "a second message went to the club")
+
+    -- A member whose stream has not (yet) loaded cannot be posted to either.
+    env.clubs = {
+        { clubId = 501, name = "Oceanic Mythic Keys Club", clubType = CLUB_TYPE_CHARACTER, streams = {} },
+    }
+    env.fire("CLUB_STREAMS_LOADED")
+    env.now = env.now + 61
+    eq(select(2, env.M.Post("omkc")), "noclub", "no General stream means no post")
+end
+
+do
+    -- A non-guild OMKC member gets a fully working LOCAL board: sign up,
+    -- own group, a chat-line preview, and a real post to the club - all with
+    -- no guild and therefore no GUILD-channel traffic at all.
+    local opts = omkcClub()
+    opts.key = { mapID = 501, level = 12 }
+    opts.noGuild = true
+    local env = newEnv(opts).load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+
+    local ok = env.M.SignUp("omkc", { intent = "lead", when = env.now + 3600 })
+    eq(ok, true, "a non-guild club member can sign up to lead on omkc")
+    eq(select(2, env.M.SignUp("open", { intent = "join", bracket = "any" })), "noguild",
+        "but the guild-gated open board still refuses them")
+
+    local groups = env.M.Groups("omkc")
+    eq(#groups, 1, "their own group renders locally")
+    eq(groups[1].isMine, true, "and is flagged as their own")
+
+    check(env.M.ChatLine("omkc") ~= nil, "a chat-line preview is available")
+    eq(env.M.Post("omkc"), true, "Post reaches the club")
+    eq(#env.clubSent, 1, "one message went to C_Club.SendMessage")
+    eq(#env.sent, 0, "and no GUILD addon message was ever sent")
+    eq(#env.chat, 0, "nor a guild chat message")
+    eq(env.error, nil, "none of it raised an error")
+
+    -- The heartbeat still runs locally; its GUILD send is a silent no-op.
+    env.clearSent()
+    env.tick(5 * 60)
+    eq(#env.sent, 0, "the heartbeat's own send is a no-op without a guild")
+    eq(env.error, nil, "and still raises nothing")
+end
+
+do
+    -- A guildy who is not an OMKC member: Ready("omkc") is false regardless.
+    local env = leaderEnv()
+    eq(select(2, env.M.SignUp("omkc", { intent = "lead" })), "noclub",
+        "guild membership alone does not unlock omkc")
+end
+
+do
+    -- M.PostToGuild survives as an alias for one release.
+    local env = leaderEnv()
+    env.M.SignUp("open", { intent = "lead" })
+    eq(env.M.PostToGuild, env.M.Post, "PostToGuild is the same function as Post")
+    eq(env.M.PostToGuild("open"), true, "and still works")
+end
+
+-- ------------------------------------------------------------------
+-- 37. Chat line tails: guild boards keep the slash command, omkc whispers
+-- ------------------------------------------------------------------
+
+do
+    local env = leaderEnv()
+    env.M.SignUp("open", { intent = "lead" })
+    eq(env.M.ChatLine("open"),
+        "LFM +12 Map501 - need Tank, Healer, 2 DPS. Sign up: /playbook now",
+        "the open board's tail is unchanged: a slash command")
+
+    local opts = omkcClub()
+    opts.key = { mapID = 501, level = 12 }
+    local club = newEnv(opts).load()
+    club.fire("PLAYER_ENTERING_WORLD", false, false)
+    club.M.SignUp("omkc", { intent = "lead" })
+    eq(club.M.ChatLine("omkc"),
+        "LFM +12 Map501 - need Tank, Healer, 2 DPS. Whisper Vizzo-" .. REALM,
+        "the omkc board's tail whispers the poster instead of naming a slash command")
+end
+
+-- ------------------------------------------------------------------
+-- 38. The clubtest ping handler
+-- ------------------------------------------------------------------
+
+do
+    local env = newEnv().load()
+    env.fire("PLAYER_ENTERING_WORLD", false, false)
+    local before = env.board("omkc")
+    local function counts(b)
+        local e, g = 0, 0
+        for _ in pairs(b.entries) do e = e + 1 end
+        for _ in pairs(b.groups) do g = g + 1 end
+        return e, g
+    end
+    local entriesBefore, groupsBefore = counts(before)
+
+    env.recv("P " .. OMKC, "Anna-" .. REALM, "CHANNEL")
+    check(env.printed[#env.printed]:find("clubtest: ping from Anna%-" .. REALM .. " via CHANNEL") ~= nil,
+        "the ping prints who it came from and how", env.printed[#env.printed])
+
+    -- It fires for our own echo too - the loopback proof depends on that,
+    -- unlike every other handler which ignores its own echo.
+    env.recv("P " .. OMKC, "Vizzo-" .. REALM, "CHANNEL")
+    check(env.printed[#env.printed]:find("clubtest: ping from Vizzo%-" .. REALM .. " via CHANNEL") ~= nil,
+        "even our own echo prints", env.printed[#env.printed])
+
+    local entriesAfter, groupsAfter = counts(env.board("omkc"))
+    eq(entriesAfter, entriesBefore, "no entries were added by the ping")
+    eq(groupsAfter, groupsBefore, "no groups were added by the ping")
+    eq(env.error, nil, "and nothing raised an error")
+end
+
+-- ------------------------------------------------------------------
+-- 39. Heartbeat restart on relog is gated per board, not on guild alone
+-- ------------------------------------------------------------------
+
+do
+    -- A non-guild OMKC member's saved omkc lead entry restarts its heartbeat
+    -- on relog too: Ready("omkc") only needs club membership, and the
+    -- heartbeat-restart loop no longer sits behind the blanket guild return.
+    local opts = omkcClub()
+    opts.noGuild = true
+    opts.db = { monday = { boards = {
+        omkc = {
+            key = "omkc",
+            me = { role = "D", intent = "lead", leader = "Vizzo-" .. REALM, ts = 1, seen = 1757332800 },
+            entries = {},
+            groups = { ["Vizzo-" .. REALM] = {
+                members = { ["Vizzo-" .. REALM] = "D" }, ts = 1, seen = 1757332800,
+            } },
+        },
+    } } }
+    local relog = newEnv(opts).load()
+    relog.fire("PLAYER_ENTERING_WORLD", true, false)
+    eq(relog.liveTickers(), 1, "a non-guild club member's saved omkc heartbeat restarts")
+    eq(#relog.sent, 0, "with nothing sent over GUILD, since there is no guild")
+    eq(relog.error, nil, "and nothing raised an error")
+end
+
+do
+    -- A guild member who is not an OMKC member: the saved open entry's
+    -- heartbeat restarts as always, but the saved omkc entry's does not -
+    -- Ready("omkc") refuses without club membership.
+    local relogDb = { monday = { boards = {
+        open = {
+            key = OPEN,
+            me = { role = "D", intent = "join", bracket = "any", ts = 1, seen = 1757332800 },
+            entries = {}, groups = {},
+        },
+        omkc = {
+            key = "omkc",
+            me = { role = "D", intent = "join", bracket = "any", ts = 1, seen = 1757332800 },
+            entries = {}, groups = {},
+        },
+    } } }
+    local relog = newEnv({ db = relogDb }).load()
+    relog.fire("PLAYER_ENTERING_WORLD", true, false)
+    eq(relog.liveTickers(), 1, "only one heartbeat restarts")
+    check(relog.last("E", OPEN) ~= nil, "the open entry is re-announced")
+
+    check(relog.last("E", "omkc") == nil, "the omkc entry is not - not a club member")
 end
 
 -- ------------------------------------------------------------------

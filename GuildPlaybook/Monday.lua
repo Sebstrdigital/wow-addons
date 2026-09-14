@@ -3,14 +3,24 @@ local ADDON, ns = ...
 -- ------------------------------------------------------------------
 -- Sign-up boards
 -- ------------------------------------------------------------------
--- Two guild sign-up boards with identical mechanics and different scope:
+-- Three sign-up boards, sharing mechanics and differing in scope and gate:
 --
---   "monday"  the next Mythic Monday, scoped to one date
---   "open"    "I am online and want to run keys right now"
+--   "monday"  the next Mythic Monday, scoped to one date, guild-gated
+--   "open"    "I am online and want to run keys right now", guild-gated
+--   "omkc"    same as "open", gated on membership in the Blizzard Community
+--             "Oceanic Mythic Keys Club" instead of the guild
 --
 -- They are fully independent - you can hold a slot in a Monday group and an
 -- open group at the same time - so everything below is keyed by event id. The
 -- module keeps the Monday.lua / ns.Monday name from v1.3.0 to limit churn.
+--
+-- Phase 1 still sends the omkc board's sync traffic over the GUILD channel:
+-- a guildie who is also an OMKC member shares it like any other guild board.
+-- A non-guild OMKC member gets no wire sync at all - GUILD is the only
+-- transport there is - but a fully working *local* board: sign up, see your
+-- own group, post an LFM straight into the community via C_Club.SendMessage.
+-- Phase 2 (a real community-channel transport, so non-guild members sync
+-- too) is gated on the /playbook clubtest probe below.
 --
 -- There is no server. Two rules keep the guild's clients converging:
 --
@@ -77,9 +87,28 @@ local ROLE_ORDER = { T = 1, H = 2, D = 3 }
 local ROLE_WORD = { T = "Tank", H = "Healer", D = "DPS" }
 local BRACKET_ORDER = { low = 1, mid = 2, high = 3, any = 4 }
 
-local EVENTS = { "monday", "open" }
-local EVENT_TITLE = { monday = "Mythic Monday", open = "Open groups" }
+-- One row per board. `wireKey` is the literal wire key for a board whose key
+-- never changes; the Monday board's is dynamic (it carries the date), so
+-- WireKey() below special-cases it instead of reading this field.
+-- `schedule` gates the leader-set `when` field and PruneOwnSchedule; heartbeat
+-- gates the presence-proving ticker and OPEN_STALE ageing. `post` is the
+-- transport M.Post sends over; `gate` is what M.IsBoardVisible checks.
+local BOARDS = {
+    monday = { title = "Mythic Monday", schedule = false, heartbeat = false,
+        dateHeader = true, slash = "monday", post = "GUILD", gate = "guild" },
+    open   = { title = "Open groups", wireKey = "open", schedule = true, heartbeat = true,
+        dateHeader = false, slash = "now", post = "GUILD", gate = "guild" },
+    omkc   = { title = "OMKC", wireKey = "omkc", schedule = true, heartbeat = true,
+        dateHeader = false, slash = "omkc", post = "CLUB", gate = "club" },
+}
+local EVENTS = { "monday", "open", "omkc" }
 M.EVENTS = EVENTS
+
+-- The Blizzard cross-realm Character community the omkc board is gated on.
+-- Matched case-insensitively and trimmed in QueryClubInfo below, the same way
+-- ns.IsGuildMember folds the guild name.
+local OMKC_CLUB_NAME = "Oceanic Mythic Keys Club"
+M.OMKC_CLUB_NAME = OMKC_CLUB_NAME
 
 local WEEKDAY_ABBR = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" }
 local MONTH_ABBR = { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -94,11 +123,28 @@ local function Warn(line)
 end
 
 function M.EventTitle(ev)
-    return EVENT_TITLE[ev]
+    return BOARDS[ev] and BOARDS[ev].title
 end
 
 local function IsEvent(ev)
-    return EVENT_TITLE[ev] ~= nil
+    return BOARDS[ev] ~= nil
+end
+
+-- Read-only copy of a board's config for the UI: title, schedule, heartbeat,
+-- dateHeader, slash, post, gate. A fresh table each call, so a caller
+-- mutating it cannot corrupt what every other board consults.
+function M.BoardConfig(ev)
+    local cfg = BOARDS[ev]
+    if not cfg then return nil end
+    return {
+        title = cfg.title,
+        schedule = cfg.schedule,
+        heartbeat = cfg.heartbeat,
+        dateHeader = cfg.dateHeader,
+        slash = cfg.slash,
+        post = cfg.post,
+        gate = cfg.gate,
+    }
 end
 
 -- ------------------------------------------------------------------
@@ -120,7 +166,7 @@ local lastRefresh = {}          -- ev -> when we last broadcast an R
 local lastPost = {}             -- ev -> when we last posted to guild chat
 local myKey = nil               -- { mapID, level, name } or nil
 local keyTimer = nil            -- debounce guard for BAG_UPDATE_DELAYED
-local heartbeat = nil           -- C_Timer ticker for the open board
+local heartbeats = {}           -- ev -> C_Timer ticker, one per heartbeat board
 local rosterOnline, rosterAt = nil, 0
 local onlineCache = {}          -- fullName -> true/false; absent = never scanned
 local lastRosterFire = 0        -- Now() of the last throttled GUILD_ROSTER_UPDATE repaint
@@ -371,17 +417,21 @@ end
 
 local function WireKey(ev)
     if ev == "monday" then return "M" .. M.TargetDate() end
-    if ev == "open" then return "open" end
-    return nil
+    local cfg = BOARDS[ev]
+    return cfg and cfg.wireKey or nil
 end
 M.WireKey = WireKey
 
 -- Wire key -> event id. Returns nil for last week's Monday, for a key a newer
--- version invented, and for anything malformed. Callers drop the message.
+-- version invented, and for anything malformed. Callers drop the message. A
+-- board a client predates - "omkc" landing on a v1.7.x install - simply
+-- matches nothing here and is dropped the same way, so adding a board needs
+-- no prefix bump.
 local function EventFromWire(key)
     if not key then return nil end
-    if key == "open" then return "open" end
-    if key == WireKey("monday") then return "monday" end
+    for _, ev in ipairs(EVENTS) do
+        if key == WireKey(ev) then return ev end
+    end
     return nil
 end
 M.EventFromWire = EventFromWire
@@ -410,7 +460,8 @@ end
 -- assumed logged out. Our own record is exempt: we plainly are here, and the
 -- heartbeat that would refresh it may not have ticked yet.
 local function IsStale(ev, seen, name, me)
-    if ev ~= "open" then return false end
+    local cfg = BOARDS[ev]
+    if not cfg or not cfg.heartbeat then return false end
     if name and me and name == me then return false end
     return not seen or (Now() - seen) > OPEN_STALE
 end
@@ -423,9 +474,10 @@ end
 -- exactly as it is from OPEN_STALE, for the same reason: nothing here may
 -- prune the group out from under the leader looking at it.
 local function IsGroupStale(ev, g, leader, me)
-    if ev ~= "open" then return false end
+    local cfg = BOARDS[ev]
+    if not cfg or not cfg.heartbeat then return false end
     if leader and me and leader == me then return false end
-    if g and g.when then
+    if cfg.schedule and g and g.when then
         return Now() > g.when + OPEN_SCHEDULED_GRACE
     end
     return IsStale(ev, g and g.seen, leader, me)
@@ -433,20 +485,22 @@ end
 
 -- Returns changed, rosterChanged. The second flag means our *own* roster lost
 -- a member, which peers have to be told about; PruneOpen cannot send anything
--- itself because it is defined above the senders.
-local function PruneOpen()
-    local b = boards.open
+-- itself because it is defined above the senders. Any heartbeat board can
+-- call this - "open" and "omkc" today - a board without heartbeat=true never
+-- has a stale entry to begin with, since IsStale/IsGroupStale gate on it.
+local function PruneOpen(ev)
+    local b = boards[ev]
     if not b then return false, false end
     local me = MyName()
     local changed, rosterChanged = false, false
     for name, e in pairs(b.entries) do
-        if IsStale("open", e.seen, name, me) then
+        if IsStale(ev, e.seen, name, me) then
             b.entries[name] = nil
             changed = true
         end
     end
     for leader, g in pairs(b.groups) do
-        if IsGroupStale("open", g, leader, me) then
+        if IsGroupStale(ev, g, leader, me) then
             b.groups[leader] = nil
             changed = true
         end
@@ -462,7 +516,7 @@ local function PruneOpen()
             local e = b.entries[name]
             -- No entry left means the loop above just pruned it. Accepting a
             -- join always files one, so a member without an entry is stale too.
-            if name ~= me and (not e or IsStale("open", e.seen, name, me)) then
+            if name ~= me and (not e or IsStale(ev, e.seen, name, me)) then
                 own.members[name] = nil
                 changed, rosterChanged = true, true
             end
@@ -522,7 +576,9 @@ local function LoadSaved()
             boards[ev] = FreshBoard(ev)
         end
     end
-    PruneOpen()
+    for _, ev in ipairs(EVENTS) do
+        if BOARDS[ev] and BOARDS[ev].heartbeat then PruneOpen(ev) end
+    end
     Persist()
 end
 
@@ -682,15 +738,15 @@ local function SendDeny(ev, target, reason)
     Send("N " .. WireKey(ev) .. " " .. reason, "WHISPER", target)
 end
 
--- Prune the open board and tell the guild if our own roster changed. Every
+-- Prune a heartbeat board and tell the guild if our own roster changed. Every
 -- caller that is allowed to talk to the guild goes through this; LoadSaved
 -- calls PruneOpen directly, because nothing may be sent that early.
-local function PruneOpenAndSync()
-    local changed, rosterChanged = PruneOpen()
+local function PruneOpenAndSync(ev)
+    local changed, rosterChanged = PruneOpen(ev)
     if not changed then return false end
     Persist()
-    if rosterChanged then SendGroup("open") end
-    Fire("open")
+    if rosterChanged then SendGroup(ev) end
+    Fire(ev)
     return true
 end
 
@@ -701,10 +757,11 @@ end
 -- assumed: while signed up we re-announce every five minutes, and everyone
 -- else drops records they have not heard from in fifteen.
 
-local function StopHeartbeat()
-    if not heartbeat then return end
-    if heartbeat.Cancel then heartbeat:Cancel() end
-    heartbeat = nil
+local function StopHeartbeat(ev)
+    local t = heartbeats[ev]
+    if not t then return end
+    if t.Cancel then t:Cancel() end
+    heartbeats[ev] = nil
 end
 
 -- Forward-declared: real body assigned below, once DisbandOwnGroup exists to
@@ -717,29 +774,29 @@ end
 -- that called it.
 local PruneOwnSchedule
 
-local function StartHeartbeat()
-    if heartbeat then return end
+local function StartHeartbeat(ev)
+    if heartbeats[ev] then return end
     if not C_Timer or not C_Timer.NewTicker then return end
-    heartbeat = C_Timer.NewTicker(OPEN_HEARTBEAT, function()
+    heartbeats[ev] = C_Timer.NewTicker(OPEN_HEARTBEAT, function()
         ns.safecall(function()
-            local b = boards.open
+            local b = boards[ev]
             if not b or not b.me then
-                StopHeartbeat()
+                StopHeartbeat(ev)
                 return
             end
             -- Skip the beat rather than queue it: a heartbeat delivered after
             -- the dungeon says nothing useful about when we were last here.
             if InChallenge() then return end
-            PruneOwnSchedule("open")
+            PruneOwnSchedule(ev)
             b.me.ts = Now()
             b.me.seen = Now()
             -- Prune before broadcasting, or the roster we send this beat still
             -- carries the ghost and only self-corrects on the next one.
-            local changed = PruneOpen()
-            SendEntry("open")
-            if IsLeading("open") then SendGroup("open") end
+            local changed = PruneOpen(ev)
+            SendEntry(ev)
+            if IsLeading(ev) then SendGroup(ev) end
             if changed then Persist() end
-            Fire("open")
+            Fire(ev)
         end)
     end)
 end
@@ -888,14 +945,15 @@ local function DisbandOwnGroup(ev)
     return true
 end
 
--- Only the open board's own group can be scheduled, so only it is ever
--- checked. An unscheduled own group is untouched, same as ever - this is
+-- Only a schedule-capable board's own group can be scheduled - "open" and
+-- "omkc" today. An unscheduled own group is untouched, same as ever - this is
 -- purely about a `when` nobody showed up for. A key in progress holds off
 -- entirely, same reasoning as the heartbeat's own skip: whatever the club
 -- decided two hours ago, disbanding out from under a live run would be worse
 -- than a stale one.
 PruneOwnSchedule = function(ev)
-    if ev ~= "open" or InChallenge() then return false end
+    local cfg = BOARDS[ev]
+    if not cfg or not cfg.schedule or InChallenge() then return false end
     local b = boards[ev]
     local me = b and MyName()
     if not me or not b or not b.me then return false end
@@ -917,6 +975,136 @@ PruneOwnSchedule = function(ev)
 end
 
 -- ------------------------------------------------------------------
+-- Club membership (OMKC) and board visibility
+-- ------------------------------------------------------------------
+-- Phase 1 gates the omkc board on membership in the Blizzard cross-realm
+-- Character community OMKC_CLUB_NAME, independent of guild membership in
+-- both directions: guild membership alone does not unlock omkc (Ready()
+-- below checks club membership, not IsInGuild, for a club-gated board), and
+-- club membership alone is enough to sign up, see your own group and post -
+-- entirely locally if there is no guild, since Send()'s own guild gate is
+-- the only thing standing between a sign-up and the wire. C_Club's getters
+-- walk every subscribed club and stream on every call, so the answer here is
+-- cached and only requeried when Blizzard says membership or streams may
+-- have changed.
+
+local clubInfo = nil        -- { clubId, name, streamId } or nil
+local clubInfoValid = false -- false until the next M.ClubInfo() call requeries
+
+-- Wrapped in the same IsSecret/pcall pattern as every other C_Club-adjacent
+-- read in this file: a secret or a missing API yields nil, never a throw.
+local function QueryClubInfo()
+    if not C_Club or not C_Club.GetSubscribedClubs then return nil end
+    local ok, clubs = pcall(C_Club.GetSubscribedClubs)
+    if not ok or IsSecret(clubs) or type(clubs) ~= "table" then return nil end
+    local wantName = OMKC_CLUB_NAME:lower():gsub("^%s+", ""):gsub("%s+$", "")
+    for _, club in ipairs(clubs) do
+        if IsSecret(club) then return nil end
+        if club.clubType == Enum.ClubType.Character and type(club.name) == "string" then
+            local name = club.name:lower():gsub("^%s+", ""):gsub("%s+$", "")
+            if name == wantName then
+                local streamId = nil
+                if C_Club.GetStreams then
+                    local ok2, streams = pcall(C_Club.GetStreams, club.clubId)
+                    if ok2 and not IsSecret(streams) and type(streams) == "table" then
+                        for _, s in ipairs(streams) do
+                            if IsSecret(s) then return nil end
+                            if s.streamType == Enum.ClubStreamType.General then
+                                streamId = s.streamId
+                                break
+                            end
+                        end
+                    end
+                end
+                return { clubId = club.clubId, name = club.name, streamId = streamId }
+            end
+        end
+    end
+    return nil
+end
+
+-- { clubId, name, streamId } while we belong to OMKC and its General stream
+-- has loaded, nil otherwise - not a member, streams not loaded yet, a Secret
+-- Value, or a client without C_Club at all. Cached; the club-related events
+-- registered below invalidate it.
+function M.ClubInfo()
+    if not clubInfoValid then
+        clubInfo = QueryClubInfo()
+        clubInfoValid = true
+    end
+    return clubInfo
+end
+
+function M.IsClubMember()
+    return M.ClubInfo() ~= nil
+end
+
+-- Requeries on the next M.ClubInfo() call, and Fires "omkc" only if the
+-- membership boolean actually flipped, so the UI rebuilds its nav exactly
+-- when the Groups tab or the OMKC entry needs to appear or disappear.
+local function InvalidateClubInfo()
+    local was = M.IsClubMember()
+    clubInfoValid = false
+    local now = M.IsClubMember()
+    if was ~= now then Fire("omkc") end
+end
+
+-- monday/open are guild-gated exactly as the guild tab always was; omkc is
+-- club-gated and cares nothing for guild membership.
+function M.IsBoardVisible(ev)
+    local cfg = BOARDS[ev]
+    if not cfg then return false end
+    if cfg.gate == "club" then return M.IsClubMember() end
+    return ns.isGuildMember == true
+end
+
+-- Phase-2 groundwork, diagnostic only, never touches board state: /playbook
+-- clubtest is the only caller. The real naming of a Community's own chat
+-- channel is undocumented for this API shape, so rather than guess, this
+-- prints every channel it sees - whichever run first shows a name containing
+-- "Community" and the club id tells us the pattern phase 2 can rely on.
+function M.ClubTest()
+    local info = M.ClubInfo()
+    if not info then
+        Say("clubtest: not a member of " .. OMKC_CLUB_NAME .. ".")
+        return
+    end
+    Say(("clubtest: clubId=%s streamId=%s"):format(
+        tostring(info.clubId), tostring(info.streamId or "not a member")))
+
+    if C_Club and C_Club.AddClubStreamChatChannel and info.streamId then
+        pcall(C_Club.AddClubStreamChatChannel, info.clubId, info.streamId)
+    end
+
+    local index, foundName
+    local function Seen(id, name)
+        if not id or not name then return end
+        Say(("clubtest: channel %d %q"):format(id, tostring(name)))
+        if not index and name:find("Community", 1, true)
+            and name:find(tostring(info.clubId), 1, true) then
+            index, foundName = id, name
+        end
+    end
+    if GetChannelList then
+        local list = { GetChannelList() }
+        for i = 1, #list, 2 do
+            Seen(list[i], list[i + 1])
+        end
+    elseif C_ChatInfo and C_ChatInfo.GetNumActiveChannels and C_ChatInfo.GetChannelName then
+        for i = 1, C_ChatInfo.GetNumActiveChannels() do
+            Seen(i, (C_ChatInfo.GetChannelName(i)))
+        end
+    end
+
+    if index and C_ChatInfo and C_ChatInfo.SendAddonMessage then
+        C_ChatInfo.SendAddonMessage(PREFIX, "P omkc", "CHANNEL", tostring(index))
+        Say(("clubtest: sent ping on channel %d %s"):format(index, tostring(foundName)))
+    else
+        Say("clubtest: no matching community channel found.")
+    end
+end
+
+-- ------------------------------------------------------------------
 -- Public API
 -- ------------------------------------------------------------------
 
@@ -926,10 +1114,21 @@ end
 
 -- Every board-specific entry point runs this first. An unknown event id is a
 -- caller bug, but the UI is the caller and a thrown error there takes the
--- whole panel down, so it is reported as a value instead.
+-- whole panel down, so it is reported as a value instead. Gated on the
+-- board's own gate, not guild membership blanket-wide: a club-gated board
+-- (omkc) works entirely locally for a non-guild member - own sign-up, own
+-- group, Post to the club - guild membership only matters for the boards
+-- that actually sync over it. Send()'s own IsInGuild check still silently
+-- drops any GUILD-targeted traffic a club-only member's actions would try to
+-- emit, so nothing here needs to duplicate that.
 local function Ready(ev)
     if not IsEvent(ev) then return false, "badevent" end
-    if NoGuild() then return false, "noguild" end
+    local cfg = BOARDS[ev]
+    if cfg.gate == "club" then
+        if not M.IsClubMember() then return false, "noclub" end
+    elseif NoGuild() then
+        return false, "noguild"
+    end
     EnsureCurrent(ev)
     return true
 end
@@ -984,10 +1183,10 @@ function M.SignUp(ev, opts)
     if intent == "lead" then
         entry.leader = me
     end
-    -- `when` is an open-board, leader-only concept: the Monday board's key IS
-    -- the date, so it has nothing to schedule, and a joiner has no group to
+    -- `when` is a schedule-board, leader-only concept: the Monday board's key
+    -- IS the date, so it has nothing to schedule, and a joiner has no group to
     -- carry the field. Set here at creation; M.SetWhen edits it afterwards.
-    if ev == "open" and intent == "lead" then
+    if BOARDS[ev] and BOARDS[ev].schedule and intent == "lead" then
         local w = tonumber(opts.when)
         if not w or w <= 0 then w = nil end
         entry.when = w
@@ -1006,7 +1205,7 @@ function M.SignUp(ev, opts)
         g.specs[me] = entry.spec
         g.mapID = entry.mapID
         g.level = entry.level
-        if ev == "open" then g.when = entry.when end
+        if BOARDS[ev] and BOARDS[ev].schedule then g.when = entry.when end
         g.ts = Now()
         g.seen = Now()
         b.groups[me] = g
@@ -1015,17 +1214,18 @@ function M.SignUp(ev, opts)
     Persist()
     SendEntry(ev)
     if intent == "lead" then SendGroup(ev) end
-    if ev == "open" then StartHeartbeat() end
+    if BOARDS[ev] and BOARDS[ev].heartbeat then StartHeartbeat(ev) end
     Fire(ev)
     return true
 end
 
--- Leader-only: (re)schedules the open board's own group. `when` is a server
--- epoch, or nil for "right now". A no-op for anyone not currently leading the
--- open board - the Monday board has nothing to schedule, and a non-leader has
--- no group to carry the field.
+-- Leader-only: (re)schedules a schedule-capable board's own group ("open",
+-- "omkc"). `when` is a server epoch, or nil for "right now". A no-op for
+-- anyone not currently leading that board - the Monday board has nothing to
+-- schedule, and a non-leader has no group to carry the field.
 function M.SetWhen(ev, when)
-    if ev ~= "open" then return false, "badevent" end
+    local cfg = BOARDS[ev]
+    if not cfg or not cfg.schedule then return false, "badevent" end
     local ok, why = Ready(ev)
     if not ok then return false, why end
     local me = EnsureSelf(ev)
@@ -1066,7 +1266,7 @@ function M.Withdraw(ev)
     Persist()
     SendWithdraw(ev)
     -- Nothing left to prove presence for.
-    if ev == "open" then StopHeartbeat() end
+    if BOARDS[ev] and BOARDS[ev].heartbeat then StopHeartbeat(ev) end
     Fire(ev)
     return true
 end
@@ -1443,14 +1643,16 @@ local function Clamp(s, limit)
 end
 
 local function EventClause(ev)
-    if ev == "monday" then
-        return (" for %s (%s)"):format(EVENT_TITLE.monday, M.TargetLabel())
+    local cfg = BOARDS[ev]
+    if cfg and cfg.dateHeader then
+        return (" for %s (%s)"):format(cfg.title, M.TargetLabel())
     end
     return ""
 end
 
 local function SlashFor(ev)
-    return ev == "monday" and "/playbook monday" or "/playbook now"
+    local cfg = BOARDS[ev]
+    return "/playbook " .. (cfg and cfg.slash or "?")
 end
 
 -- What a group still needs, counted the way Groups() counts it so the chat
@@ -1479,6 +1681,13 @@ function M.ChatLine(ev)
     if not e then return nil, "notsignedup" end
 
     local clause, slash = EventClause(ev), SlashFor(ev)
+    local cfg = BOARDS[ev]
+    -- A guild board closes with its slash command; the club board closes with
+    -- a whisper target instead, because a Community member without the addon
+    -- has nothing for a slash command to reach.
+    local tail = (cfg and cfg.post == "CLUB")
+        and ("Whisper " .. (MyName() or "?"))
+        or ("Sign up: " .. slash)
     local g = e.leader and b.groups[e.leader]
 
     local build
@@ -1493,8 +1702,8 @@ function M.ChatLine(ev)
         -- stale by the time someone reads it in guild chat.
         local whenClause = g.when and (" " .. M.FormatWhen(g.when, nil, true)) or ""
         build = function(whose)
-            return ("LFM %s%s%s - need %s%s. Sign up: %s"):format(
-                key, whenClause, whose, need, clause, slash)
+            return ("LFM %s%s%s - need %s%s. %s"):format(
+                key, whenClause, whose, need, clause, tail)
         end
     else
         local parts = { ROLE_WORD[e.role] or "DPS", BracketPhrase(e.bracket) }
@@ -1502,7 +1711,7 @@ function M.ChatLine(ev)
         if key then parts[#parts + 1] = "have " .. key end
         local body = table.concat(parts, ", ")
         build = function()
-            return ("LF key group - %s%s. Sign up: %s"):format(body, clause, slash)
+            return ("LF key group - %s%s. %s"):format(body, clause, tail)
         end
     end
 
@@ -1517,17 +1726,38 @@ function M.ChatLine(ev)
     return Clamp(line, MAX_CHAT)
 end
 
-function M.PostToGuild(ev)
+-- Renamed from PostToGuild in v1.8.0, once a board's post target stopped
+-- always being guild chat. Kept under the old name as an alias for one
+-- release so a caller still using it does not break underfoot.
+function M.Post(ev)
     if not IsEvent(ev) then return false, "badevent" end
-    if NoGuild() then return false, "noguild" end
+    local cfg = BOARDS[ev]
+    -- A club-gated board's post target is the club, not guild chat, so
+    -- guild membership is irrelevant to it - only a GUILD-posting board
+    -- needs a guild to post into.
+    if cfg.gate ~= "club" and NoGuild() then return false, "noguild" end
     -- Secret Values put chat under lockdown inside an active key.
     if InChallenge() then return false, "inkey" end
     local text, why = M.ChatLine(ev)
     if not text then return false, why or "notsignedup" end
+
+    local info
+    if cfg and cfg.post == "CLUB" then
+        info = M.ClubInfo()
+        if not info or not info.streamId then return false, "noclub" end
+    end
+
     local now = Now()
     -- Checked last, so a refusal above never burns the window.
     if now - (lastPost[ev] or 0) < POST_THROTTLE then return false, "throttled" end
     lastPost[ev] = now
+
+    if info then
+        local ok = pcall(C_Club.SendMessage, info.clubId, info.streamId, text)
+        if not ok then return false, "noclub" end
+        return true
+    end
+
     -- SendChatMessage was deprecated in 11.2 and now survives only as a shim in
     -- Blizzard_DeprecatedChatInfo, so prefer the namespaced call where it is.
     if C_ChatInfo and C_ChatInfo.SendChatMessage then
@@ -1537,6 +1767,7 @@ function M.PostToGuild(ev)
     end
     return true
 end
+M.PostToGuild = M.Post
 
 -- UnitInParty and UnitInRaid take a *unit*, and a same-realm group member is
 -- indexed under their bare name - "Bob-OurRealm" simply misses. Try both forms.
@@ -1636,10 +1867,13 @@ end
 -- With no argument, dumps every board - which is what /gp monday dump wants.
 function M.Dump(ev)
     local me = MyName()
+    local beats = {}
+    for id in pairs(heartbeats) do beats[#beats + 1] = id end
+    table.sort(beats)
     Say(("me=%s role=%s key=%s queued=%d heartbeat=%s"):format(
         tostring(me), M.MyRole(),
         myKey and ("+" .. myKey.level .. " " .. tostring(myKey.name)) or "none",
-        #outQueue, heartbeat and "on" or "off"))
+        #outQueue, #beats > 0 and table.concat(beats, ",") or "off"))
     if ev then
         DumpBoard(ev)
         return
@@ -1916,6 +2150,13 @@ function handlers.N(ev, sender, fields, isSelf)
     Fire(ev)
 end
 
+-- P: /playbook clubtest's diagnostic ping. Never touches board state - the
+-- point is only to prove the round trip through whatever channel carried it,
+-- which is why this fires even for our own echo, unlike every other handler.
+function handlers.P(ev, sender, fields, isSelf, channel)
+    Say(("clubtest: ping from %s via %s"):format(tostring(sender), tostring(channel)))
+end
+
 local function OnMessage(prefix, text, channel, rawSender)
     if prefix ~= PREFIX then return end
     -- Inbound is ignored inside a key for the same reason outbound is queued:
@@ -1937,7 +2178,7 @@ local function OnMessage(prefix, text, channel, rawSender)
     if not sender then return end
 
     EnsureCurrent(ev)
-    handler(ev, sender, fields, sender == MyName())
+    handler(ev, sender, fields, sender == MyName(), channel)
 end
 
 -- ------------------------------------------------------------------
@@ -1952,6 +2193,13 @@ ef:RegisterEvent("BAG_UPDATE_DELAYED")
 ef:RegisterEvent("CHALLENGE_MODE_COMPLETED")
 ef:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 ef:RegisterEvent("GUILD_ROSTER_UPDATE")
+-- Club membership can change without a relog - joining, leaving, or simply
+-- the roster finishing its load - so ClubInfo's cache is invalidated on all
+-- four rather than requeried on a timer.
+ef:RegisterEvent("INITIAL_CLUBS_LOADED")
+ef:RegisterEvent("CLUB_ADDED")
+ef:RegisterEvent("CLUB_REMOVED")
+ef:RegisterEvent("CLUB_STREAMS_LOADED")
 
 ef:SetScript("OnEvent", function(_, event, ...)
     local a1, a2, a3, a4 = ...
@@ -1983,17 +2231,32 @@ ef:SetScript("OnEvent", function(_, event, ...)
             FlushQueue()
             -- After the queue, so a correction we make here goes out now
             -- rather than sitting behind messages from before the dungeon.
-            PruneOpenAndSync()
+            for _, ev in ipairs(EVENTS) do
+                if BOARDS[ev] and BOARDS[ev].heartbeat then PruneOpenAndSync(ev) end
+            end
             -- A leader who logs back in days after their own scheduled run
             -- must not re-broadcast it as if it were still on: past grace, it
             -- is disbanded here rather than left for them to notice and
             -- withdraw by hand.
-            PruneOwnSchedule("open")
+            for _, ev in ipairs(EVENTS) do
+                if BOARDS[ev] and BOARDS[ev].schedule then PruneOwnSchedule(ev) end
+            end
             if not IsInInstance or not IsInInstance() then ReadKeystone() end
+            -- A relog should keep us on a heartbeat board, so the saved entry
+            -- is re-announced rather than waiting for the first heartbeat.
+            -- Gated per board through Ready(ev), not the blanket guild check
+            -- below: a non-guild OMKC member's heartbeat has to resume here
+            -- too, since Ready("omkc") only cares about club membership.
+            for _, ev in ipairs(EVENTS) do
+                if BOARDS[ev] and BOARDS[ev].heartbeat and boards[ev] and boards[ev].me
+                    and Ready(ev) then
+                    StartHeartbeat(ev)
+                end
+            end
+            -- Everything past here is guild-only: broadcasting an R, scanning
+            -- the guild roster, and the login summary all mean nothing
+            -- without a guild, whatever club a non-guild player belongs to.
             if not IsInGuild or not IsInGuild() then return end
-            -- A relog should keep us on the open board, so the saved entry is
-            -- re-announced rather than waiting for the first heartbeat.
-            if boards.open and boards.open.me then StartHeartbeat() end
             if isLogin and not summaryPrinted then
                 summaryPrinted = true
                 -- Nudge the client into fetching the roster if nothing else
@@ -2021,9 +2284,17 @@ ef:SetScript("OnEvent", function(_, event, ...)
                             g.specs[myName] = mySpec
                         end
                     end
+                    -- M.Refresh already gates itself on Ready(ev); SendEntry
+                    -- and SendGroup do not, since they are also called from
+                    -- inside the heartbeat/handlers where readiness is
+                    -- already established - so this loop checks it directly,
+                    -- or a stale saved omkc entry from a lapsed club
+                    -- membership would still broadcast over GUILD forever.
                     M.Refresh(ev, true)
-                    SendEntry(ev)
-                    if IsLeading(ev) then SendGroup(ev) end
+                    if Ready(ev) then
+                        SendEntry(ev)
+                        if IsLeading(ev) then SendGroup(ev) end
+                    end
                 end
                 Persist()
                 -- Five seconds is enough for the replies to a login R to land,
@@ -2110,6 +2381,10 @@ ef:SetScript("OnEvent", function(_, event, ...)
             ScanRoster()
             for _, ev in ipairs(EVENTS) do Fire(ev) end
         end)
+
+    elseif event == "INITIAL_CLUBS_LOADED" or event == "CLUB_ADDED"
+        or event == "CLUB_REMOVED" or event == "CLUB_STREAMS_LOADED" then
+        ns.safecall(InvalidateClubInfo)
     end
 end)
 
