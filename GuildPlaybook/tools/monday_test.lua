@@ -1258,6 +1258,24 @@ do
 end
 
 do
+    -- A scheduled group gets the time in its post, short form: no relative
+    -- "(in ...)" suffix, which is stale by the time anyone reads guild chat.
+    local env = leaderEnv()
+    local when = env.M.BuildWhen(0, 15, 0, env.now)
+    env.M.SignUp("open", { intent = "lead", when = when })
+    local expected = "LFM +12 Map501 " .. env.M.FormatWhen(when, env.now, true)
+        .. " - need Tank, Healer, 2 DPS. Sign up: /gp now"
+    eq(env.M.ChatLine("open"), expected, "the post carries the scheduled time")
+    check(not env.M.ChatLine("open"):find("(in ", 1, true),
+        "in short form, with no relative suffix", env.M.ChatLine("open"))
+
+    env.M.SetWhen("open", nil)
+    eq(env.M.ChatLine("open"),
+        "LFM +12 Map501 - need Tank, Healer, 2 DPS. Sign up: /gp now",
+        "and without when the post is unchanged")
+end
+
+do
     -- A member who has gone quiet must free their slot in the advertisement
     -- too, or the leader keeps posting a line that hides a vacancy. The clock
     -- is moved by hand so no prune runs: only the counting rule is under test.

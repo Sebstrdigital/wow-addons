@@ -2007,6 +2007,12 @@ local function SetMondayBody(ev)
     local myKey = ns.Monday.MyKey()
     local myRole = ns.Monday.MyRole()
     local groups = ns.Monday.Groups(ev) or {}
+    -- Computed once here (rather than separately for the header tail below
+    -- and again for the caller's repaint-ticker check) since both just want
+    -- to know whether any group in this same list carries a `when`.
+    for _, g in ipairs(groups) do
+        if g.when then anyScheduled = true break end
+    end
 
     -- Header -----------------------------------------------------------
     -- "monday" carries a target date in its header; "open" is a standing
@@ -2017,7 +2023,12 @@ local function SetMondayBody(ev)
     -- pcall here instead, so a throttled click still says something rather
     -- than doing nothing.
     local title = ns.Monday.EventTitle(ev) or (ev == "open" and "Open groups" or "Mythic Monday")
-    local headerTail = (ev == "open") and "right now" or FormatMondayDate(ns.Monday.TargetDate())
+    local headerTail
+    if ev == "open" then
+        headerTail = anyScheduled and "now & scheduled" or "right now"
+    else
+        headerTail = FormatMondayDate(ns.Monday.TargetDate())
+    end
     line(C.HEAD .. title .. " — " .. headerTail .. C.R, {
         { label = "Refresh", width = 70, align = "right",
           onClick = function()
@@ -2045,7 +2056,10 @@ local function SetMondayBody(ev)
             filled = 5 - (missing.T and 1 or 0) - (missing.H and 1 or 0) - (missing.D or 0)
         end
         status = "You: leading " .. FormatMondayKey(myKey and myKey.level, myKey and myKey.name)
-                  .. " (" .. filled .. "/5)"
+        if ev == "open" and mine and mine.when then
+            status = status .. ", " .. ns.Monday.FormatWhen(mine.when, GetServerTime())
+        end
+        status = status .. " (" .. filled .. "/5)"
     elseif me.leader then
         status = "You: in " .. ShortName(me.leader) .. "'s group"
     else
@@ -2134,7 +2148,7 @@ local function SetMondayBody(ev)
         EnsureOpenWhenSeeded()
         local leadingNow = me and me.intent == "lead"
         local toggleButtons = {
-            { label = (openWhenMode == "scheduled") and "Scheduled" or "Now", width = 90,
+            { label = (openWhenMode == "scheduled") and "When: Scheduled" or "When: Now", width = 120,
               onClick = function()
                   local wasScheduled = (openWhenMode == "scheduled")
                   openWhenMode = wasScheduled and "now" or "scheduled"
@@ -2157,7 +2171,7 @@ local function SetMondayBody(ev)
                     end
                 end) end }
         end
-        line(C.BODY .. "When:" .. C.R, toggleButtons)
+        line(" ", toggleButtons)
         if openWhenMode == "scheduled" then
             local stepNow = GetServerTime()
             line(" ", {
@@ -2201,7 +2215,6 @@ local function SetMondayBody(ev)
         -- the client/server offset is.
         local now = GetServerTime()
         for _, g in ipairs(groups) do
-            if g.when then anyScheduled = true end
             -- One pass for both: the leader's own member row carries the spec
             -- and online status the header needs (to colour by, when the
             -- guild roster has nothing to say, and to mark offline), and the
@@ -2221,11 +2234,6 @@ local function SetMondayBody(ev)
             local leaderLine = MondayOnlineIcon(leaderOnline)
                                 .. MondayClassColoredName(g.leader, leaderSpec, leaderOnline) .. "  "
                                 .. C.BODY .. FormatMondayKey(g.level, g.keyName) .. C.R
-            -- Scheduled open-board groups carry a `when`; Monday groups never
-            -- do (their key IS the date), so this is silently a no-op there.
-            if g.when then
-                leaderLine = leaderLine .. "  " .. C.HEAD .. ns.Monday.FormatWhen(g.when, now) .. C.R
-            end
 
             -- Right-aligned buttons stack from the panel's right edge inward
             -- in the order pushed, so Disband goes first (keeps its original
@@ -2262,6 +2270,15 @@ local function SetMondayBody(ev)
                     end) end }
             end
             line(leaderLine, #rowButtons > 0 and rowButtons or nil)
+            -- Own full-width line, no buttons - the leader row's right-aligned
+            -- Disband/Invite all/Join buttons sit right over the tail of
+            -- leaderLine, so a `when` suffix appended there would render
+            -- underneath them instead of being clipped by them. Scheduled
+            -- open-board groups carry a `when`; Monday groups never do (their
+            -- key IS the date), so this is silently skipped there.
+            if g.when then
+                line("    " .. C.HEAD .. "Runs " .. ns.Monday.FormatWhen(g.when, now) .. C.R)
+            end
 
             local missing = g.missing or {}
             local tankName, healerName

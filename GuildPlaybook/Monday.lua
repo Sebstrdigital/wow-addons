@@ -309,8 +309,10 @@ end
 -- page header). Otherwise a day part - "Today", "Tomorrow", a bare weekday
 -- inside a week, else a full date - plus the clock time, plus a relative
 -- suffix while it still means something: how long until a future start, or
--- how long since a past one that has not yet run out its grace.
-function M.FormatWhen(when, now)
+-- how long since a past one that has not yet run out its grace. `short`
+-- drops that relative suffix, for a guild-chat line where "(in 2h 15m)" ages
+-- badly between when it is typed and when it is read.
+function M.FormatWhen(when, now, short)
     if not when then return "" end
     now = now or Now()
 
@@ -331,6 +333,7 @@ function M.FormatWhen(when, now)
     end
 
     local result = string.format("%s %02d:%02d", dayPart, whenT.hour, whenT.min)
+    if short then return result end
 
     local delta = when - now
     if delta > 0 then
@@ -1486,8 +1489,12 @@ function M.ChatLine(ev)
         -- returning a "we are full" line lets the UI disable the post button
         -- instead of offering to spam guild chat with a non-advertisement.
         if not need then return nil, "full" end
+        -- Short form: no relative "(in 2h 15m)" suffix, which is already
+        -- stale by the time someone reads it in guild chat.
+        local whenClause = g.when and (" " .. M.FormatWhen(g.when, nil, true)) or ""
         build = function(whose)
-            return ("LFM %s%s - need %s%s. Sign up: %s"):format(key, whose, need, clause, slash)
+            return ("LFM %s%s%s - need %s%s. Sign up: %s"):format(
+                key, whenClause, whose, need, clause, slash)
         end
     else
         local parts = { ROLE_WORD[e.role] or "DPS", BracketPhrase(e.bracket) }
