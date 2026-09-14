@@ -1638,6 +1638,15 @@ local mondaySelectedBracket = { monday = "any", open = "any" }
 
 local MONDAY_BTN_H, MONDAY_BTN_GAP = 22, 6
 
+-- Floor under every row's own height, button or not. GetStringHeight() only
+-- ever measures the font's own metrics - it has no idea a line's text carries
+-- an inline |A/|T icon markup (role atlas, spec icon, online status dot, all
+-- 12-14px), so a plain-text-height row sitting right above an icon-bearing
+-- one can measure shorter than the icon actually needs, letting the row
+-- after it start too soon and draw over the icon. A uniform floor sidesteps
+-- having to tag which rows carry icons at all.
+local MONDAY_LINE_MIN_H = 18
+
 -- One flat pool for every button this page uses. They have nothing
 -- structurally different from each other, so one pool beats one per role.
 -- `mondayButtonCount` resets to 0 at the top of each redraw; whatever a
@@ -2057,7 +2066,7 @@ local function SetMondayBody(ev)
         end
         status = "You: leading " .. FormatMondayKey(myKey and myKey.level, myKey and myKey.name)
         if ev == "open" and mine and mine.when then
-            status = status .. ", " .. ns.Monday.FormatWhen(mine.when, GetServerTime())
+            status = status .. ", " .. ns.Monday.FormatWhen(mine.when, GetServerTime(), true)
         end
         status = status .. " (" .. filled .. "/5)"
     elseif me.leader then
@@ -2214,7 +2223,14 @@ local function SetMondayBody(ev)
         -- time() (the client's own clock) would drift from that by whatever
         -- the client/server offset is.
         local now = GetServerTime()
+        local firstGroup = true
         for _, g in ipairs(groups) do
+            -- A blank line between one group's block and the next, so groups
+            -- read as separate blocks the way roleBlock() spaces roles apart
+            -- on a playbook page - none before the first, or it would just
+            -- duplicate headingRow's own spacing above "Groups".
+            if not firstGroup then line(" ") end
+            firstGroup = false
             -- One pass for both: the leader's own member row carries the spec
             -- and online status the header needs (to colour by, when the
             -- guild roster has nothing to say, and to mark offline), and the
@@ -2387,7 +2403,7 @@ local function SetMondayBody(ev)
         fs:ClearAllPoints()
         fs:SetPoint("TOPLEFT", content, "TOPLEFT", TEXT_INSET, -y)
         fs:Show()
-        local rowH = fs:GetStringHeight()
+        local rowH = math.max(fs:GetStringHeight(), MONDAY_LINE_MIN_H)
         if row.buttons then
             rowH = math.max(rowH, MONDAY_BTN_H)
             local bx = TEXT_INSET
