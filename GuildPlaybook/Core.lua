@@ -90,7 +90,7 @@ local function EnterDungeon(d)
         ns.currentDungeon = d
         ns.safecall(ns.UI_SetDungeon, d)
         if d then
-            print("|cff69ccf0Guild Playbook:|r loaded playbook for " .. d.dungeon .. ". /gp to toggle.")
+            print("|cff69ccf0Guild Playbook:|r loaded playbook for " .. d.dungeon .. ". /playbook to toggle.")
             if (GuildPlaybookDB and GuildPlaybookDB.autoOpen) ~= false then
                 ns.safecall(ns.UI_Show)
             end
@@ -177,7 +177,7 @@ f:SetScript("OnEvent", function(_, event, arg1, arg2)
         if GuildPlaybookDB.autoOpen == nil then GuildPlaybookDB.autoOpen = true end
         local n = 0
         for _ in pairs(ns.dungeons) do n = n + 1 end
-        print(("|cff69ccf0Guild Playbook|r v%s loaded — %d dungeon(s), UI %s. /gp to toggle.")
+        print(("|cff69ccf0Guild Playbook|r v%s loaded — %d dungeon(s), UI %s. /playbook to toggle.")
             :format(C_AddOns.GetAddOnMetadata(ADDON, "Version") or "?", n, ns.uiLoaded and "ok" or "|cffff4040FAILED|r"))
     elseif event == "PLAYER_ENTERING_WORLD" or event == "ZONE_CHANGED_NEW_AREA" then
         ns.UpdateRole()
@@ -285,18 +285,18 @@ end
 -- ------------------------------------------------------------------
 
 local function Usage()
-    print("|cff69ccf0Guild Playbook|r — /gp [command]")
-    print("  /gp             toggle the playbook panel")
-    print("  /gp tank|healer|dps   force a role view")
-    print("  /gp auto        follow your assigned role again")
-    print("  /gp ids         toggle ID capture mode (prints instance/encounter IDs)")
-    print("  /gp autoopen    toggle auto-open when you enter a covered dungeon")
-    print("  /gp list        list loaded dungeons")
-    print("  /gp minimap     show/hide the minimap button")
-    print("  /gp monday      open the Mythic Monday sign-up board")
-    print("  /gp now         open the board for groups running right now")
-    print("  /gp monday refresh|dump   re-pull both boards / print their state")
-    print("  /gp commtest    check the self-whisper the MDT import relies on")
+    print("|cff69ccf0Guild Playbook|r — /playbook [command]")
+    print("  /playbook             toggle the playbook panel")
+    print("  /playbook tank|healer|dps   force a role view")
+    print("  /playbook auto        follow your assigned role again")
+    print("  /playbook ids         toggle ID capture mode (prints instance/encounter IDs)")
+    print("  /playbook autoopen    toggle auto-open when you enter a covered dungeon")
+    print("  /playbook list        list loaded dungeons")
+    print("  /playbook minimap     show/hide the minimap button")
+    print("  /playbook monday      open the Mythic Monday sign-up board")
+    print("  /playbook now         open the board for groups running right now")
+    print("  /playbook monday refresh|dump   re-pull both boards / print their state")
+    print("  /playbook commtest    check the self-whisper the MDT import relies on")
 end
 
 -- The UI owns the board pages; the module only holds their state. Both are
@@ -311,7 +311,7 @@ local function ShowBoard(ev)
     end
 end
 
-SLASH_GUILDPLAYBOOK1, SLASH_GUILDPLAYBOOK2 = "/gp", "/guildplaybook"
+SLASH_GUILDPLAYBOOK1, SLASH_GUILDPLAYBOOK2, SLASH_GUILDPLAYBOOK3 = "/playbook", "/pb", "/gp"
 SlashCmdList.GUILDPLAYBOOK = function(msg)
     msg = (msg or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
     if msg == "" then
@@ -321,7 +321,7 @@ SlashCmdList.GUILDPLAYBOOK = function(msg)
                 print("|cffff4040Guild Playbook error:|r " .. tostring(err))
             end
         else
-            print("|cff69ccf0Guild Playbook:|r UI failed to load — run /gp debug and report the output.")
+            print("|cff69ccf0Guild Playbook:|r UI failed to load — run /playbook debug and report the output.")
         end
     elseif msg == "debug" then
         local n = 0
@@ -335,7 +335,7 @@ SlashCmdList.GUILDPLAYBOOK = function(msg)
         ns.roleOverride = msg:upper()
         ns.role = ns.roleOverride
         ns.safecall(ns.UI_Refresh)
-        print("|cff69ccf0Guild Playbook:|r showing " .. msg:upper() .. " view (/gp auto to reset).")
+        print("|cff69ccf0Guild Playbook:|r showing " .. msg:upper() .. " view (/playbook auto to reset).")
     elseif msg == "auto" then
         ns.roleOverride = nil
         ns.UpdateRole()
@@ -375,7 +375,7 @@ SlashCmdList.GUILDPLAYBOOK = function(msg)
         elseif sub == "" then
             ShowBoard("monday")
         else
-            print("|cff69ccf0Guild Playbook:|r unknown — /gp monday [refresh|dump]")
+            print("|cff69ccf0Guild Playbook:|r unknown — /playbook monday [refresh|dump]")
         end
     elseif msg == "commtest" then
         StartCommTest()

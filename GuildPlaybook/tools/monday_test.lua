@@ -711,7 +711,7 @@ do
     local sum = newEnv().load()
     sum.fire("PLAYER_ENTERING_WORLD", false, false)
     eq(sum.M.Summary(),
-        "Mythic Monday (Mon 14 Sep): 0 groups, 0 in pool. Right now: 0 groups, 0 in pool. You: not signed up. /gp monday",
+        "Mythic Monday (Mon 14 Sep): 0 groups, 0 in pool. Right now: 0 groups, 0 in pool. You: not signed up. /playbook monday",
         "the summary covers both boards when empty")
 
     -- Summary, both boards populated, monday status wins.
@@ -722,7 +722,7 @@ do
     sum2.recv("E " .. OPEN .. " 100 T join any - - -", "Anna-" .. REALM)
     sum2.recv("G " .. OPEN .. " 100 501 9 Bob-" .. REALM .. ":T", "Bob-" .. REALM)
     eq(sum2.M.Summary(),
-        "Mythic Monday (Mon 14 Sep): 1 group, 0 in pool. Right now: 1 group, 2 in pool. You: leading +12 Map501, 1/5. /gp monday",
+        "Mythic Monday (Mon 14 Sep): 1 group, 0 in pool. Right now: 1 group, 2 in pool. You: leading +12 Map501, 1/5. /playbook monday",
         "a monday sign-up wins the You: line")
 
     -- Summary, open only: the board is named so it cannot be misread.
@@ -730,7 +730,7 @@ do
     sum3.fire("PLAYER_ENTERING_WORLD", false, false)
     sum3.M.SignUp("open", { intent = "join", bracket = "low" })
     eq(sum3.M.Summary(),
-        "Mythic Monday (Mon 14 Sep): 0 groups, 0 in pool. Right now: 0 groups, 1 in pool. You: in the pool, D, low (right now). /gp monday",
+        "Mythic Monday (Mon 14 Sep): 0 groups, 0 in pool. Right now: 0 groups, 1 in pool. You: in the pool, D, low (right now). /playbook monday",
         "an open-only sign-up names the board")
 
     -- The login path asks both boards and prints the summary five seconds on.
@@ -1230,12 +1230,12 @@ do
     local env = leaderEnv()
     env.M.SignUp("open", { intent = "lead" })
     eq(env.M.ChatLine("open"),
-        "LFM +12 Map501 - need Tank, Healer, 2 DPS. Sign up: /gp now",
+        "LFM +12 Map501 - need Tank, Healer, 2 DPS. Sign up: /playbook now",
         "a leader advertises the slots they still need")
 
     env.M.SignUp("monday", { intent = "lead" })
     eq(env.M.ChatLine("monday"),
-        "LFM +12 Map501 - need Tank, Healer, 2 DPS for Mythic Monday (Mon 14 Sep). Sign up: /gp monday",
+        "LFM +12 Map501 - need Tank, Healer, 2 DPS for Mythic Monday (Mon 14 Sep). Sign up: /playbook monday",
         "the Monday board names the night and its own slash command")
 
     -- Fill it up. "LFM ... (full)" would ask for nobody, so the line changes.
@@ -1253,7 +1253,7 @@ do
     eq(#env.chat, 0, "and nothing was said")
 
     eq(env.M.ChatLine("monday"),
-        "LFM +12 Map501 - need Tank, Healer, 2 DPS for Mythic Monday (Mon 14 Sep). Sign up: /gp monday",
+        "LFM +12 Map501 - need Tank, Healer, 2 DPS for Mythic Monday (Mon 14 Sep). Sign up: /playbook monday",
         "and the other board is unaffected")
 end
 
@@ -1264,14 +1264,14 @@ do
     local when = env.M.BuildWhen(0, 15, 0, env.now)
     env.M.SignUp("open", { intent = "lead", when = when })
     local expected = "LFM +12 Map501 " .. env.M.FormatWhen(when, env.now, true)
-        .. " - need Tank, Healer, 2 DPS. Sign up: /gp now"
+        .. " - need Tank, Healer, 2 DPS. Sign up: /playbook now"
     eq(env.M.ChatLine("open"), expected, "the post carries the scheduled time")
     check(not env.M.ChatLine("open"):find("(in ", 1, true),
         "in short form, with no relative suffix", env.M.ChatLine("open"))
 
     env.M.SetWhen("open", nil)
     eq(env.M.ChatLine("open"),
-        "LFM +12 Map501 - need Tank, Healer, 2 DPS. Sign up: /gp now",
+        "LFM +12 Map501 - need Tank, Healer, 2 DPS. Sign up: /playbook now",
         "and without when the post is unchanged")
 end
 
@@ -1287,7 +1287,7 @@ do
         env.recv("J " .. OPEN, name .. "-" .. REALM, "WHISPER")
     end
     eq(env.M.ChatLine("open"),
-        "LFM +12 Map501 - need Healer, 1 DPS. Sign up: /gp now",
+        "LFM +12 Map501 - need Healer, 1 DPS. Sign up: /playbook now",
         "a full tank slot is not advertised")
 
     local before = env.M.MissingSlots("open", "Vizzo-" .. REALM)
@@ -1301,7 +1301,7 @@ do
         "the ghost is still on the roster, unpruned")
 
     eq(env.M.ChatLine("open"),
-        "LFM +12 Map501 - need Tank, Healer, 1 DPS. Sign up: /gp now",
+        "LFM +12 Map501 - need Tank, Healer, 1 DPS. Sign up: /playbook now",
         "but the ghost's slot is advertised as free again")
     local after = env.M.MissingSlots("open", "Vizzo-" .. REALM)
     eq(after.T, true, "and MissingSlots reports the tank slot as open")
@@ -1314,31 +1314,31 @@ do
     local env = leaderEnv()
     env.M.SignUp("open", { intent = "join", bracket = "mid" })
     eq(env.M.ChatLine("open"),
-        "LF key group - DPS, Mid 6-10, have +12 Map501. Sign up: /gp now",
+        "LF key group - DPS, Mid 6-10, have +12 Map501. Sign up: /playbook now",
         "a pool entry lists role, bracket and key")
 
     env.M.SignUp("monday", { intent = "join", bracket = "mid" })
     eq(env.M.ChatLine("monday"),
-        "LF key group - DPS, Mid 6-10, have +12 Map501 for Mythic Monday (Mon 14 Sep). Sign up: /gp monday",
+        "LF key group - DPS, Mid 6-10, have +12 Map501 for Mythic Monday (Mon 14 Sep). Sign up: /playbook monday",
         "the Monday pool line names the night")
 
     env.M.SignUp("open", { intent = "join", bracket = "any" })
     eq(env.M.ChatLine("open"),
-        "LF key group - DPS, any level, have +12 Map501. Sign up: /gp now",
+        "LF key group - DPS, any level, have +12 Map501. Sign up: /playbook now",
         "the any bracket reads as any level")
 
     local nokey = newEnv().load()
     nokey.fire("PLAYER_ENTERING_WORLD", false, false)
     nokey.M.SignUp("open", { intent = "join", bracket = "high" })
     eq(nokey.M.ChatLine("open"),
-        "LF key group - DPS, High 10-15. Sign up: /gp now",
+        "LF key group - DPS, High 10-15. Sign up: /playbook now",
         "no key means no have clause")
 
     local tank = newEnv({ specRole = "TANK" }).load()
     tank.fire("PLAYER_ENTERING_WORLD", false, false)
     tank.M.SignUp("open", { intent = "join", bracket = "low" })
     eq(tank.M.ChatLine("open"),
-        "LF key group - Tank, Low 2-6. Sign up: /gp now",
+        "LF key group - Tank, Low 2-6. Sign up: /playbook now",
         "the role is spelled out in words")
 end
 
@@ -1351,7 +1351,7 @@ do
         "Anna-" .. REALM)
     eq(env.M.Me("open").leader, "Anna-" .. REALM, "we are in Anna's group")
     eq(env.M.ChatLine("open"),
-        "LFM +8 Map601 (Anna's group) - need Healer, 2 DPS. Sign up: /gp now",
+        "LFM +8 Map601 (Anna's group) - need Healer, 2 DPS. Sign up: /playbook now",
         "a member advertises whose group it is, and its key")
 
     -- A member of a group that is already full has nothing to advertise either.
@@ -1391,7 +1391,7 @@ do
     local line = env.M.ChatLine("open")
     check(#line <= 255, "an absurd leader name still fits the chat limit", #line)
     check(line:find("WWWW") == nil, "because whose group it is gets dropped first", line)
-    eq(line, "LFM +8 Map601 - need Healer, 2 DPS. Sign up: /gp now",
+    eq(line, "LFM +8 Map601 - need Healer, 2 DPS. Sign up: /playbook now",
         "leaving a line that still says something useful")
 
     -- When even that is not enough, the line is cut rather than sent oversized.

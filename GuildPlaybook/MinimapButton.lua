@@ -16,7 +16,7 @@ local broker = ldb:NewDataObject("GuildPlaybook", {
     OnClick = function(_, button)
         if button == "RightButton" then
             -- Cycle role view: auto -> TANK -> HEALER -> DPS -> auto,
-            -- mirroring /gp tank|healer|dps and /gp auto.
+            -- mirroring /playbook tank|healer|dps and /playbook auto.
             if ns.roleOverride == nil then
                 ns.roleOverride = "TANK"
             else
@@ -25,7 +25,7 @@ local broker = ldb:NewDataObject("GuildPlaybook", {
             if ns.roleOverride then
                 ns.role = ns.roleOverride
                 ns.safecall(ns.UI_Refresh)
-                print("|cff69ccf0Guild Playbook:|r showing " .. ns.roleOverride .. " view (/gp auto to reset).")
+                print("|cff69ccf0Guild Playbook:|r showing " .. ns.roleOverride .. " view (/playbook auto to reset).")
             else
                 ns.UpdateRole()
                 ns.safecall(ns.UI_Refresh)
@@ -53,14 +53,14 @@ f:SetScript("OnEvent", function(self, _, name)
     dbicon:Register("GuildPlaybook", broker, GuildPlaybookDB.minimap)
 end)
 
--- /gp minimap toggles the button; state persists in GuildPlaybookDB.minimap.hide
+-- /playbook minimap toggles the button; state persists in GuildPlaybookDB.minimap.hide
 function ns.ToggleMinimapButton()
     local db = GuildPlaybookDB and GuildPlaybookDB.minimap
     if not db then return end
     db.hide = not db.hide
     if db.hide then
         dbicon:Hide("GuildPlaybook")
-        print("|cff69ccf0Guild Playbook:|r minimap button hidden (/gp minimap to restore).")
+        print("|cff69ccf0Guild Playbook:|r minimap button hidden (/playbook minimap to restore).")
     else
         dbicon:Show("GuildPlaybook")
         print("|cff69ccf0Guild Playbook:|r minimap button shown.")

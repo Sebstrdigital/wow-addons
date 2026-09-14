@@ -811,7 +811,7 @@ end
 
 function M.MyRole()
     -- Deliberately the spec role, not ns.role: ns.role follows the group's
-    -- assigned role and can be overridden with /gp tank for reading tactics,
+    -- assigned role and can be overridden with /playbook tank for reading tactics,
     -- neither of which should decide which slot you take.
     local spec = GetSpecialization and GetSpecialization()
     local role = spec and GetSpecializationRole and GetSpecializationRole(spec)
@@ -1380,7 +1380,7 @@ function M.Summary()
         if openYou then you = openYou:gsub("%.$", " (right now).") end
     end
 
-    return ("Mythic Monday (%s): %d group%s, %d in pool. Right now: %d group%s, %d in pool. You: %s /gp monday")
+    return ("Mythic Monday (%s): %d group%s, %d in pool. Right now: %d group%s, %d in pool. You: %s /playbook monday")
         :format(label,
             #mondayGroups, #mondayGroups == 1 and "" or "s", #mondayPool,
             #openGroups, #openGroups == 1 and "" or "s", #openPool,
@@ -1450,7 +1450,7 @@ local function EventClause(ev)
 end
 
 local function SlashFor(ev)
-    return ev == "monday" and "/gp monday" or "/gp now"
+    return ev == "monday" and "/playbook monday" or "/playbook now"
 end
 
 -- What a group still needs, counted the way Groups() counts it so the chat

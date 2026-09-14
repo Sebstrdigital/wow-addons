@@ -21,4 +21,4 @@ Fully compatible with the Midnight addon rules: the addon reads only non-secret 
 
 Content is curated by our guild's playbook author and maintained openly on GitHub; a companion website with an MDT route viewer lives at https://sebstrdigital.github.io/wow-addons/.
 
-`/gp` toggles the panel · `/gp tank|healer|dps` forces a role view · `/gp auto` follows your assigned role.
+`/playbook` toggles the panel · `/playbook tank|healer|dps` forces a role view · `/playbook auto` follows your assigned role.
